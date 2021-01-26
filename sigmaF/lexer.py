@@ -36,6 +36,15 @@ class Lexer:
             token = Token(TokenType.COMMA, self._character)
         elif match(r'^;$', self._character):
             token = Token(TokenType.SEMICOLON, self._character)
+        elif match(r'^::$', self._character):
+            token = Token(TokenType.TYPEASSIGN, self._character)
+        elif match(r'^->$', self._character):
+            token = Token(TokenType.OUTPUTFUNTION, self._character)
+        elif self._is_admitted_symbol(self._character):
+            literal = self._read_symbol(self._character)
+            token_type = lookup_token_type(literal)
+
+            return Token(token_type, literal)
         elif self._is_letter(self._character):
             literal = self._read_identifier()
             token_type = lookup_token_type(literal)
@@ -58,6 +67,17 @@ class Lexer:
     def _is_number(self, character: str) -> bool:
         return bool(match(r'^\d$', character))
 
+    def _is_admitted_symbol(self, character: str) -> bool:
+        return bool(match(r'^([->:])$', character))
+
+    def _read_symbol(self, character: str) -> str:
+        initial_position = self._position
+
+        while self._is_admitted_symbol(self._character):
+            self._read_character()
+
+        return self._source[initial_position:self._position]
+
     def _read_identifier(self) -> str:
         initial_position = self._position
 
@@ -77,7 +97,7 @@ class Lexer:
 
     def _read_number(self) -> str:
         initial_position = self._position
-        
+
         while self._is_number(self._character):
             self._read_character()
 

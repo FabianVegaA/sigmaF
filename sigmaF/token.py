@@ -13,6 +13,7 @@ from typing import (
 class TokenType(Enum):
     ASSIGN = auto()
     COMMA = auto()
+    CLASSNAME = auto()
     EOF = auto()
     FUNCTION = auto()
     IDENT = auto()
@@ -25,6 +26,8 @@ class TokenType(Enum):
     RBRACE = auto()
     RPAREN = auto()
     SEMICOLON = auto()
+    TYPEASSIGN = auto()
+    OUTPUTFUNTION = auto()
 
 
 class Token(NamedTuple):
@@ -37,7 +40,13 @@ class Token(NamedTuple):
 
 def lookup_token_type(literal: str) -> TokenType:
     keywords: Dict[str, TokenType] = {
-        'let': TokenType.LET
+        'let': TokenType.LET,
+        'int':TokenType.CLASSNAME,
+        'str':TokenType.CLASSNAME,
+        'float':TokenType.CLASSNAME,
+        'set':TokenType.CLASSNAME,
+        '->': TokenType.OUTPUTFUNTION,
+        '::': TokenType.TYPEASSIGN,
     }
-    
+
     return keywords.get(literal, TokenType.IDENT)
