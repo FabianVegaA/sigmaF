@@ -143,7 +143,7 @@ class Lexer:
     def _read_identifier(self) -> str:
         initial_position = self._position
 
-        while self._is_letter(self._character):
+        while self._is_letter(self._character) or self._is_number(self._character):
             self._read_character()
 
         return self._source[initial_position:self._position]
