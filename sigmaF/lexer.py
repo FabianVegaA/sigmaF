@@ -19,7 +19,16 @@ class Lexer:
         self._skip_whitespace()
 
         if match(r'^=$', self._character):
-            token = Token(TokenType.ASSIGN, self._character)
+            if self._peek_character() == '=':
+                token = self._make_two_character_token(TokenType.EQ)
+            else:
+                token = Token(TokenType.ASSIGN, self._character)
+        elif match(r'^\"$', self._character):
+            if self._peek_ahead_character('\"'):
+                token = self._make_a_lot_of_character_token(
+                    self._character, TokenType.STRING)
+            else:
+                token = Token(TokenType.ILLEGAL, self._character)
         elif match(r'^\+$', self._character):
             token = Token(TokenType.PLUS, self._character)
         elif match(r'^$', self._character):
@@ -36,15 +45,41 @@ class Lexer:
             token = Token(TokenType.COMMA, self._character)
         elif match(r'^;$', self._character):
             token = Token(TokenType.SEMICOLON, self._character)
-        elif match(r'^::$', self._character):
-            token = Token(TokenType.TYPEASSIGN, self._character)
-        elif match(r'^->$', self._character):
-            token = Token(TokenType.OUTPUTFUNTION, self._character)
-        elif self._is_admitted_symbol(self._character):
-            literal = self._read_symbol(self._character)
-            token_type = lookup_token_type(literal)
-
-            return Token(token_type, literal)
+        elif match(r'^<$', self._character):
+            if self._peek_character() == '=':
+                token = self._make_two_character_token(TokenType.L_OR_EQ_T)
+            else:
+                token = Token(TokenType.LT, self._character)
+        elif match(r'^>$', self._character):
+            if self._peek_character() == '=':
+                token = self._make_two_character_token(TokenType.G_OR_EQ_T)
+            else:
+                token = Token(TokenType.GT, self._character)
+        elif match(r'^-$', self._character):
+            if self._peek_character() == '>':
+                token = self._make_two_character_token(TokenType.OUTPUTFUNTION)
+            else:
+                token = Token(TokenType.MINUS, self._character)
+        elif match(r'^:$', self._character):
+            if self._peek_character() == ':':
+                token = self._make_two_character_token(TokenType.TYPEASSIGN)
+            else:
+                token = Token(TokenType.ILLEGAL, self._character)
+        elif match(r'^/$', self._character):
+            token = Token(TokenType.DIVISION, self._character)
+        elif match(r'^\*$', self._character):
+            if self._peek_character() == '*':
+                token = self._make_two_character_token(
+                    TokenType.EXPONENTIATION)
+            else:
+                token = Token(TokenType.MULTIPLICATION, self._character)
+        elif match(r'^%$', self._character):
+            token = Token(TokenType.MODULUS, self._character)
+        elif match(r'^!$', self._character):
+            if self._peek_character() == '=':
+                token = self._make_two_character_token(TokenType.NOT_EQ)
+            else:
+                token = Token(TokenType.ILLEGAL, self._character)
         elif self._is_letter(self._character):
             literal = self._read_identifier()
             token_type = lookup_token_type(literal)
@@ -52,6 +87,11 @@ class Lexer:
             return Token(token_type, literal)
         elif self._is_number(self._character):
             literal = self._read_number()
+
+            if self._character == '.':
+                self._read_character()
+                sufix = self._read_number()
+                return Token(TokenType.FLOAT, f'{literal}.{sufix}')
 
             return Token(TokenType.INT, literal)
         else:
@@ -67,16 +107,38 @@ class Lexer:
     def _is_number(self, character: str) -> bool:
         return bool(match(r'^\d$', character))
 
-    def _is_admitted_symbol(self, character: str) -> bool:
-        return bool(match(r'^([->:])$', character))
+    def _make_two_character_token(self, token_type: TokenType) -> Token:
+        prefix = self._character
+        self._read_character()
+        suffix = self._character
 
-    def _read_symbol(self, character: str) -> str:
+        return Token(token_type, f'{prefix}{suffix}')
+
+    def _make_a_lot_of_character_token(self, character: str, token_type: TokenType) -> Token:
         initial_position = self._position
 
-        while self._is_admitted_symbol(self._character):
+        self._read_character()
+
+        while (self._character != character):
             self._read_character()
 
-        return self._source[initial_position:self._position]
+        self._read_character()
+
+        return Token(token_type, self._source[initial_position:self._position])
+
+    def _peek_character(self) -> str:
+        if self._read_position >= len(self._source):
+            return ''
+        return self._source[self._read_position]
+
+    def _peek_ahead_character(self, character: str) -> bool:
+        while (self._character != character or self._read_position >= len(self._source)):
+            self._read_character()
+
+        if (self._character == character):
+            return True
+        else:
+            return False
 
     def _read_identifier(self) -> str:
         initial_position = self._position

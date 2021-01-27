@@ -26,7 +26,7 @@ class LexerTest(TestCase):
         self.assertEqual(tokens, expected_token)
 
     def test_one_character_operator(self) -> None:
-        source: str = '=+'
+        source: str = '=+-/*<>%'
         lexer: Lexer = Lexer(source)
 
         tokens: List[Token] = []
@@ -35,7 +35,14 @@ class LexerTest(TestCase):
 
         expected_tokens: List[Token] = [
             Token(TokenType.ASSIGN, '='),
-            Token(TokenType.PLUS, '+')
+            Token(TokenType.PLUS, '+'),
+            Token(TokenType.MINUS, '-'),
+            Token(TokenType.DIVISION, '/'),
+            Token(TokenType.MULTIPLICATION, '*'),
+            Token(TokenType.LT, '<'),
+            Token(TokenType.GT, '>'),
+            Token(TokenType.MODULUS, '%'),
+
         ]
 
         self.assertEquals(tokens, expected_tokens)
@@ -74,11 +81,15 @@ class LexerTest(TestCase):
         self.assertEquals(tokens, expected_tokens)
 
     def test_assignment(self) -> None:
-        source: str = 'let cinco = 5'
+        source: str = '''
+            let cinco = 5
+            let cinco = "cinco"
+            let cinco = 5.0
+        '''
         lexer: Lexer = Lexer(source)
 
         tokens: List[Token] = []
-        for i in range(4):
+        for i in range(12):
             tokens.append(lexer.next_token())
 
         expected_tokens: List[Token] = [
@@ -86,6 +97,14 @@ class LexerTest(TestCase):
             Token(TokenType.IDENT, 'cinco'),
             Token(TokenType.ASSIGN, '='),
             Token(TokenType.INT, '5'),
+            Token(TokenType.LET, 'let'),
+            Token(TokenType.IDENT, 'cinco'),
+            Token(TokenType.ASSIGN, '='),
+            Token(TokenType.STRING, '"cinco"'),
+            Token(TokenType.LET, 'let'),
+            Token(TokenType.IDENT, 'cinco'),
+            Token(TokenType.ASSIGN, '='),
+            Token(TokenType.FLOAT, '5.0'),
         ]
         self.assertEquals(tokens, expected_tokens)
 
@@ -143,5 +162,61 @@ class LexerTest(TestCase):
             Token(TokenType.COMMA, ','),
             Token(TokenType.INT, '3'),
             Token(TokenType.RPAREN, ')')
+        ]
+        self.assertEquals(tokens, expected_tokens)
+
+    def test_control_statements(self) -> None:
+        source: str = '''
+            if 5 < 10 then true else false
+        '''
+        lexer: Lexer = Lexer(source)
+
+        tokens: List[Token] = []
+        for i in range(8):
+            tokens.append(lexer.next_token())
+
+        expected_tokens: List[Token] = [
+            Token(TokenType.IF, 'if'),
+            Token(TokenType.INT, '5'),
+            Token(TokenType.LT, '<'),
+            Token(TokenType.INT, '10'),
+            Token(TokenType.THEN, 'then'),
+            Token(TokenType.TRUE, 'true'),
+            Token(TokenType.ELSE, 'else'),
+            Token(TokenType.FALSE, 'false')
+        ]
+        self.assertEquals(tokens, expected_tokens)
+    
+    def test_two_character_operator(self) -> None:
+
+        source: str = '''
+            10 == 10
+            10 != 10
+            10 >= 10
+            10 <= 10
+            10 ** 10
+        '''
+        lexer: Lexer = Lexer(source)
+
+        tokens: List[Token] = []
+        for i in range(15):
+            tokens.append(lexer.next_token())
+
+        expected_tokens: List[Token] = [
+            Token(TokenType.INT, '10'),
+            Token(TokenType.EQ, '=='),
+            Token(TokenType.INT, '10'),
+            Token(TokenType.INT, '10'),
+            Token(TokenType.NOT_EQ, '!='),
+            Token(TokenType.INT, '10'),
+            Token(TokenType.INT, '10'),
+            Token(TokenType.G_OR_EQ_T, '>='),
+            Token(TokenType.INT, '10'),
+            Token(TokenType.INT, '10'),
+            Token(TokenType.L_OR_EQ_T, '<='),
+            Token(TokenType.INT, '10'),
+            Token(TokenType.INT, '10'),
+            Token(TokenType.EXPONENTIATION, '**'),
+            Token(TokenType.INT, '10'),
         ]
         self.assertEquals(tokens, expected_tokens)
