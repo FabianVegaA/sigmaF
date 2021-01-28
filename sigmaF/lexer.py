@@ -122,9 +122,8 @@ class Lexer:
         while (self._character != character):
             self._read_character()
 
-        self._read_character()
 
-        return Token(token_type, self._source[initial_position:self._position])
+        return Token(token_type, self._source[initial_position:self._position+1])
 
     def _peek_character(self) -> str:
         if self._read_position >= len(self._source):

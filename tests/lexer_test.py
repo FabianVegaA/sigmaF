@@ -82,29 +82,32 @@ class LexerTest(TestCase):
 
     def test_assignment(self) -> None:
         source: str = '''
-            let cinco = 5
-            let cinco = "cinco"
-            let cinco = 5.0
+            let x = 5;
+            let y = "cinco";
+            let foo = 5.0;
         '''
         lexer: Lexer = Lexer(source)
 
         tokens: List[Token] = []
-        for i in range(12):
+        for i in range(15):
             tokens.append(lexer.next_token())
 
         expected_tokens: List[Token] = [
             Token(TokenType.LET, 'let'),
-            Token(TokenType.IDENT, 'cinco'),
+            Token(TokenType.IDENT, 'x'),
             Token(TokenType.ASSIGN, '='),
             Token(TokenType.INT, '5'),
+            Token(TokenType.SEMICOLON, ';'),
             Token(TokenType.LET, 'let'),
-            Token(TokenType.IDENT, 'cinco'),
+            Token(TokenType.IDENT, 'y'),
             Token(TokenType.ASSIGN, '='),
             Token(TokenType.STRING, '"cinco"'),
+            Token(TokenType.SEMICOLON, ';'),
             Token(TokenType.LET, 'let'),
-            Token(TokenType.IDENT, 'cinco'),
+            Token(TokenType.IDENT, 'foo'),
             Token(TokenType.ASSIGN, '='),
             Token(TokenType.FLOAT, '5.0'),
+            Token(TokenType.SEMICOLON, ';'),
         ]
         self.assertEquals(tokens, expected_tokens)
 
