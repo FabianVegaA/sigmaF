@@ -21,6 +21,8 @@ class Lexer:
         if match(r'^=$', self._character):
             if self._peek_character() == '=':
                 token = self._make_two_character_token(TokenType.EQ)
+            elif self._peek_character() == '>':
+                token = self._make_two_character_token(TokenType.RETURN)
             else:
                 token = Token(TokenType.ASSIGN, self._character)
         elif match(r'^\"$', self._character):
@@ -121,7 +123,6 @@ class Lexer:
 
         while (self._character != character):
             self._read_character()
-
 
         return Token(token_type, self._source[initial_position:self._position+1])
 

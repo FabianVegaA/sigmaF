@@ -113,14 +113,14 @@ class LexerTest(TestCase):
 
     def test_funtion_declaration(self) -> None:
         source: str = '''
-            let sum = x::int, y::int -> z::int {
-                z = x + y
+            let sum = x::int, y::int -> int {
+                => x + y
             }
         '''
         lexer: Lexer = Lexer(source)
 
         tokens: List[Token] = []
-        for i in range(21):
+        for i in range(18):
             tokens.append(lexer.next_token())
 
         expected_tokens: List[Token] = [
@@ -135,12 +135,9 @@ class LexerTest(TestCase):
             Token(TokenType.TYPEASSIGN, '::'),
             Token(TokenType.CLASSNAME, 'int'),
             Token(TokenType.OUTPUTFUNTION, '->'),
-            Token(TokenType.IDENT, 'z'),
-            Token(TokenType.TYPEASSIGN, '::'),
             Token(TokenType.CLASSNAME, 'int'),
             Token(TokenType.LBRACE, '{'),
-            Token(TokenType.IDENT, 'z'),
-            Token(TokenType.ASSIGN, '='),
+            Token(TokenType.RETURN, '=>'),
             Token(TokenType.IDENT, 'x'),
             Token(TokenType.PLUS, '+'),
             Token(TokenType.IDENT, 'y'),

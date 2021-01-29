@@ -5,7 +5,8 @@ from typing import (
 )
 from sigmaF.ast import (
     Program,
-    LetStatement
+    LetStatement,
+    ReturnStatement
 )
 from sigmaF.lexer import Lexer
 from sigmaF.parser import Parser
@@ -69,3 +70,18 @@ class ParserTest(TestCase):
         program: Program = parser.parse_program()
 
         self.assertEquals(len(parser.errors), 1)
+
+    def test_return_statement(self) -> None:
+        source: str = '''
+            => 5;
+            => "Hello, World";
+        '''
+        lexer: Lexer = Lexer(source)
+        parser: Parser = Parser(lexer)
+
+        program: Program = parser.parse_program()
+
+        self.assertEquals(len(program.statements), 2)
+        for statement in program.statements:
+            self.assertEquals(statement.token_literal(), '=>')
+            self.assertIsInstance(statement, ReturnStatement)

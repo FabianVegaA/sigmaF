@@ -38,6 +38,7 @@ class TokenType(Enum):
     MULTIPLICATION = auto()
     NOT_EQ = auto()
     PLUS = auto()
+    RETURN = auto()
     RBRACE = auto()
     RPAREN = auto()
     SEMICOLON = auto()
