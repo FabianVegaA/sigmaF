@@ -8,12 +8,14 @@ from typing import (
 )
 
 from sigmaF.ast import (
+    Boolean,
     ExpressionStatement,
     Expression,
     Identifier,
     Integer,
     LetStatement,
     Prefix,
+    Infix,
     Program,
     Statement,
     ReturnStatement,
@@ -38,6 +40,21 @@ class Precedence(IntEnum):
     PRODUCT = 5
     PREFIX = 6
     CALL = 7
+
+
+PRECEDENCE: Dict[TokenType, Precedence] = {
+    TokenType.EQ: Precedence.EQUALS,
+    TokenType.NOT_EQ: Precedence.EQUALS,
+    TokenType.LT: Precedence.LESSGREATER,
+    TokenType.GT: Precedence.LESSGREATER,
+    TokenType.L_OR_EQ_T: Precedence.LESSGREATER,
+    TokenType.G_OR_EQ_T: Precedence.LESSGREATER,
+    TokenType.PLUS: Precedence.SUM,
+    TokenType.MINUS: Precedence.SUM,
+    TokenType.DIVISION: Precedence.PRODUCT,
+    TokenType.MODULUS: Precedence.PRODUCT,
+    TokenType.MULTIPLICATION: Precedence.PRODUCT,
+}
 
 
 class Parser:
@@ -104,6 +121,18 @@ class Parser:
 
         left_expression = prefix_parse_fn()
 
+        assert self._peek_token is not None
+        while not self._peek_token.token_type == TokenType.SEMICOLON and precedence < self._peek_precedence():
+            try:
+                infix_parse_fn = self._infix_parse_fns[self._peek_token.token_type]
+
+                self._advance_tokens()
+
+                assert left_expression is not None
+                left_expression = infix_parse_fn(left_expression)
+            except KeyError:
+                return left_expression
+
         return left_expression
 
     def _parse_identifier(self) -> Identifier:
@@ -125,6 +154,12 @@ class Parser:
             self._errors.append(message)
             return None
         return integer
+
+    def _parse_boolean(self) -> Boolean:
+        assert self._current_token is not None
+
+        return Boolean(token=self._current_token,
+                       value=self._current_token.token_type == TokenType.TRUE)
 
     def _parse_expression_statements(self) -> Optional[ExpressionStatement]:
         assert self._current_token is not None
@@ -188,11 +223,52 @@ class Parser:
 
         return prefix_expression
 
+    def _current_precedence(self) -> Precedence:
+        assert self._current_token is not None
+        try:
+            return PRECEDENCE[self._current_token.token_type]
+        except KeyError:
+            return Precedence.LOWEST
+
+    def _peek_precedence(self) -> Precedence:
+        assert self._peek_token is not None
+        try:
+            return PRECEDENCE[self._peek_token.token_type]
+        except KeyError:
+            return Precedence.LOWEST
+
+    def _parse_infix_expression(self, left: Expression) -> Infix:
+        assert self._current_token is not None
+        infix = Infix(token=self._current_token,
+                      operator=self._current_token.literal,
+                      left=left)
+        precedence = self._current_precedence()
+
+        self._advance_tokens()
+
+        infix.right = self._parse_expression(precedence)
+        return infix
+
     def _register_infix_fns(self) -> IndixParseFns:
-        return {}
+        return {
+            TokenType.PLUS: self._parse_infix_expression,
+            TokenType.MINUS: self._parse_infix_expression,
+            TokenType.DIVISION: self._parse_infix_expression,
+            TokenType.MULTIPLICATION: self._parse_infix_expression,
+            TokenType.MODULUS: self._parse_infix_expression,
+            TokenType.EQ: self._parse_infix_expression,
+            TokenType.NOT_EQ: self._parse_infix_expression,
+            TokenType.LT: self._parse_infix_expression,
+            TokenType.GT: self._parse_infix_expression,
+            TokenType.L_OR_EQ_T: self._parse_infix_expression,
+            TokenType.G_OR_EQ_T: self._parse_infix_expression,
+
+        }
 
     def _register_prefix_fns(self) -> PrefixParseFns:
         return {
+            TokenType.FALSE: self._parse_boolean,
+            TokenType.TRUE: self._parse_boolean,
             TokenType.IDENT: self._parse_identifier,
             TokenType.INT: self._parse_interger,
             TokenType.MINUS: self._parse_prefix_expression,

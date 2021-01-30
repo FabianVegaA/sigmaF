@@ -132,3 +132,33 @@ class Prefix(Expression):
 
     def __str__(self):
         return f'({self.operator}{str(self.right)})'
+
+
+class Infix(Expression):
+
+    def __init__(self,
+                 token: Token,
+                 left: Expression,
+                 operator: str,
+                 right: Optional[Expression] = None
+                 ) -> None:
+        super().__init__(token)
+        self.left = left
+        self.operator = operator
+        self.right = right
+
+    def __str__(self) -> str:
+        return f'({str(self.left)} {self.operator} {str(self.right)})'
+
+
+class Boolean(Expression):
+
+    def __init__(self,
+                 token: Token,
+                 value: Optional[bool] = None
+                 ) -> None:
+        super().__init__(token)
+        self.value = value
+
+    def __str__(self):
+        return self.token_literal()
