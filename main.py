@@ -17,10 +17,10 @@ SIGMAF: str = """
 
 def main() -> None:
     global SIGMAF
-    print('-'*100)
+    print('-'*106)
     print(
         f'\n\nWelcome to SigmaF, the Program Language of the future for the Programming Functional and a lot more\n\n{SIGMAF}')
-    print('-'*100)
+    print('-'*106)
     start_repl()
 
 

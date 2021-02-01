@@ -9,6 +9,7 @@ from typing import (
 from sigmaF.ast import (
     Block,
     Boolean,
+    Call,
     Function,
     Infix,
     If,
@@ -312,6 +313,11 @@ class ParserTest(TestCase):
             ('3 ** (4 % 7) + 23 * -21', '((3 ** (4 % 7)) + (23 * (-21)))', 1),
             ('5 >= 34 == 4 < 2 == (a == a)',
              '(((5 >= 34) == (4 < 2)) == (a == a))', 1),
+            ('a + sum(b * c) + d;', '((a + sum((b * c))) + d)', 1),
+            ('sum(a, b, 1, 2 * 3, 4 + 5, sum(6, 7 * 8));',
+             'sum(a, b, 1, (2 * 3), (4 + 5), sum(6, (7 * 8)))', 1),
+            ('-function(-something, other_thing ** 23) ** (-34 % 90);',
+             '((-function((-something), (other_thing ** 23))) ** ((-34) % 90))', 1),
         ]
 
         for source, expected_result, expected_statement_count in test_sources:
@@ -323,6 +329,28 @@ class ParserTest(TestCase):
             self._test_program_statements(
                 parser, program, expected_statement_count)
             self.assertEquals(str(program), expected_result)
+
+    def test_call_expression(self) -> None:
+        source: str = 'sum(1, 2 * 3, 4 + 5);'
+        lexer: Lexer = Lexer(source)
+        parser: Parser = Parser(lexer)
+
+        program: Program = parser.parse_program()
+
+        self._test_program_statements(parser, program)
+
+        call = cast(Call, cast(ExpressionStatement,
+                               program.statements[0]).expression)
+
+        self.assertIsInstance(call, Call)
+        self._test_identifier(call.function, 'sum')
+
+        # Test arguments
+        assert call.arguments is not None
+        self.assertEquals(len(call.arguments), 3)
+        self._test_literal_expression(call.arguments[0], 1)
+        self._test_infix_expression(call.arguments[1], 2, '*', 3)
+        self._test_infix_expression(call.arguments[2], 4, '+', 5)
 
     def test_if_expression(self) -> None:
         source: str = 'if x > y then {z}'

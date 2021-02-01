@@ -11,6 +11,7 @@ from typing import (
 from sigmaF.ast import (
     Block,
     Boolean,
+    Call,
     Function,
     ExpressionStatement,
     Expression,
@@ -44,8 +45,7 @@ class Precedence(IntEnum):
     PRODUCT = 5
     POW = 6
     PREFIX = 7
-    GROUPING = 8
-    CALL = 9
+    CALL = 8
 
 
 PRECEDENCE: Dict[TokenType, Precedence] = {
@@ -61,6 +61,7 @@ PRECEDENCE: Dict[TokenType, Precedence] = {
     TokenType.DIVISION: Precedence.PRODUCT,
     TokenType.MODULUS: Precedence.PRODUCT,
     TokenType.MULTIPLICATION: Precedence.PRODUCT,
+    TokenType.LPAREN: Precedence.CALL,
 }
 
 
@@ -192,8 +193,12 @@ class Parser:
         if not self._expected_token(TokenType.ASSIGN):
             return None
 
-        # TODO terminar cuando sepamos parsear expresiones
-        while self._current_token.token_type != TokenType.SEMICOLON:
+        self._advance_tokens()
+
+        let_statement.value = self._parse_expression(Precedence.LOWEST)
+
+        assert self._peek_token is not None
+        if self._peek_token.token_type == TokenType.SEMICOLON:
             self._advance_tokens()
 
         return let_statement
@@ -204,8 +209,10 @@ class Parser:
 
         self._advance_tokens()
 
-        # TODO finish when I know parser expressions
-        while self._current_token.token_type != TokenType.SEMICOLON:
+        return_statement.return_value = self._parse_expression(
+            Precedence.LOWEST)
+        assert self._peek_token is not None
+        if self._peek_token.token_type == TokenType.SEMICOLON:
             self._advance_tokens()
 
         return return_statement
@@ -283,6 +290,37 @@ class Parser:
 
         return block_statements
 
+    def _parse_call(self, function: Expression) -> Call:
+        assert self._current_token is not None
+        call = Call(self._current_token, function)
+        call.arguments = self._parse_call_arguments()
+
+        return call
+
+    def _parse_call_arguments(self) -> Optional[List[Expression]]:
+        arguments: List[Expression] = []
+
+        assert self._peek_token is not None
+        if self._peek_token.token_type == TokenType.RPAREN:
+            self._advance_tokens()
+
+            return None
+
+        self._advance_tokens()
+        if expression := self._parse_expression(Precedence.LOWEST):
+            arguments.append(expression)
+
+        while self._peek_token.token_type == TokenType.COMMA:
+            self._advance_tokens()
+            self._advance_tokens()
+
+            if expression := self._parse_expression(Precedence.LOWEST):
+                arguments.append(expression)
+        if not self._expected_token(TokenType.RPAREN):
+            return None
+
+        return arguments
+
     def _parse_if(self) -> Optional[If]:
         assert self._current_token is not None
         if_expression = If(token=self._current_token)
@@ -299,14 +337,13 @@ class Parser:
 
         if_expression.consequence = self._parse_block()
 
-        if self._peek_token is not None:
-            if self._peek_token.token_type == TokenType.ELSE:
-                self._advance_tokens()
+        if self._peek_token is not None and self._peek_token.token_type == TokenType.ELSE:
+            self._advance_tokens()
 
-                if not self._expected_token(TokenType.LBRACE):
-                    return None
+            if not self._expected_token(TokenType.LBRACE):
+                return None
 
-                if_expression.alternative = self._parse_block()
+            if_expression.alternative = self._parse_block()
 
         return if_expression
 
@@ -383,6 +420,7 @@ class Parser:
             TokenType.GT: self._parse_infix_expression,
             TokenType.L_OR_EQ_T: self._parse_infix_expression,
             TokenType.G_OR_EQ_T: self._parse_infix_expression,
+            TokenType.LPAREN: self._parse_call,
 
         }
 
@@ -396,5 +434,7 @@ class Parser:
             TokenType.TRUE: self._parse_boolean,
             TokenType.IDENT: self._parse_identifier,
             TokenType.INT: self._parse_interger,
+            # TokenType.FLOAT: self._parse_float,
+            # TokenType.STRING: self._parse_string,
             TokenType.MINUS: self._parse_prefix_expression,
         }
