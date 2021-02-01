@@ -30,7 +30,7 @@ class Lexer:
                 token = self._make_a_lot_of_character_token(
                     self._character, TokenType.STRING)
             else:
-                token = Token(TokenType.ILLEGAL, self._character)
+                token = Token(TokenType.ILLEGAL, "\"")
         elif match(r'^\+$', self._character):
             token = Token(TokenType.PLUS, self._character)
         elif match(r'^$', self._character):
@@ -117,14 +117,14 @@ class Lexer:
         return Token(token_type, f'{prefix}{suffix}')
 
     def _make_a_lot_of_character_token(self, character: str, token_type: TokenType) -> Token:
-        initial_position = self._position
+        initial_position = self._read_position
 
         self._read_character()
 
         while (self._character != character):
             self._read_character()
 
-        return Token(token_type, self._source[initial_position:self._position+1])
+        return Token(token_type, self._source[initial_position - 1:self._read_position])
 
     def _peek_character(self) -> str:
         if self._read_position >= len(self._source):
@@ -132,12 +132,18 @@ class Lexer:
         return self._source[self._read_position]
 
     def _peek_ahead_character(self, character: str) -> bool:
-        while (self._character != character or self._read_position >= len(self._source)):
+        initial_position = self._read_position
+
+        self._read_character()
+
+        while self._character != character and self._read_position <= len(self._source):
             self._read_character()
 
-        if (self._character == character):
+        if (self._character == character and initial_position != self._read_position):
+            self._read_position = initial_position
             return True
         else:
+            self._read_position = initial_position
             return False
 
     def _read_identifier(self) -> str:

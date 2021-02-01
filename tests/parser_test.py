@@ -7,8 +7,11 @@ from typing import (
     List,
 )
 from sigmaF.ast import (
+    Block,
     Boolean,
+    Function,
     Infix,
+    If,
     Prefix,
     Expression,
     Identifier,
@@ -116,6 +119,8 @@ class ParserTest(TestCase):
                                  program: Program,
                                  expected_statement_count: int = 1
                                  ) -> None:
+        if len(parser.errors) > 0:
+            print(parser.errors)
         self.assertEquals(len(parser.errors), 0)
         self.assertEquals(len(program.statements), expected_statement_count)
         self.assertIsInstance(program.statements[0], ExpressionStatement)
@@ -213,6 +218,8 @@ class ParserTest(TestCase):
             5 <= 5;
             5 == 5;
             5 != 5;
+            true == true;
+            true != false;
         '''
         lexer = Lexer(source)
         parser: Parser = Parser(lexer)
@@ -220,7 +227,7 @@ class ParserTest(TestCase):
         program: Program = parser.parse_program()
 
         self._test_program_statements(
-            parser, program, expected_statement_count=11)
+            parser, program, expected_statement_count=13)
 
         expected_operators_and_values: List[Tuple[Any, str, Any]] = [
             (5, '+', 5),
@@ -234,6 +241,8 @@ class ParserTest(TestCase):
             (5, '<=', 5),
             (5, '==', 5),
             (5, '!=', 5),
+            (True, '==', True),
+            (True, '!=', False),
         ]
 
         for statement, (expected_left, expected_operator, expected_right) in zip(
@@ -283,3 +292,179 @@ class ParserTest(TestCase):
             assert expression_statement.expression is not None
             self._test_literal_expression(expression_statement.expression,
                                           expected_value)
+
+    def test_operator_precedence(self) -> None:
+        test_sources: List[Tuple[str, str, int]] = [
+            ('-a * b;', '((-a) * b)', 1),
+            ('a + b / c;', '(a + (b / c))', 1),
+            ('3 + 4; -5 * 5;', '(3 + 4)((-5) * 5)', 2),
+            ('2 * 3 / 5 * -6 % 7;', '((((2 * 3) / 5) * (-6)) % 7)', 1),
+            ('-3 ** 2;', '((-3) ** 2)', 1),
+            ('2 * 4 / 5 ** 7;', '((2 * 4) / (5 ** 7))', 1),
+            ('-1 + 2 % -3 + 345354**4;', '(((-1) + (2 % (-3))) + (345354 ** 4))', 1),
+            ('-4 + 6 * 5; 45 / 6 * 8 - -1;',
+             '((-4) + (6 * 5))(((45 / 6) * 8) - (-1))', 2),
+            ('a + 4 - 5 + -3 + -b;', '((((a + 4) - 5) + (-3)) + (-b))', 1),
+            ('a ** 4 + 5 - -46 ** 6;', '(((a ** 4) + 5) - ((-46) ** 6))', 1),
+            ('a ** 5 % 3 / 2;', '(((a ** 5) % 3) / 2)', 1),
+            ('-5 * 45 ** 5 - 15 % 2;', '(((-5) * (45 ** 5)) - (15 % 2))', 1),
+            ('34 ** 3 / 7 % 45 + -102', '((((34 ** 3) / 7) % 45) + (-102))', 1),
+            ('3 ** (4 % 7) + 23 * -21', '((3 ** (4 % 7)) + (23 * (-21)))', 1),
+            ('5 >= 34 == 4 < 2 == (a == a)',
+             '(((5 >= 34) == (4 < 2)) == (a == a))', 1),
+        ]
+
+        for source, expected_result, expected_statement_count in test_sources:
+            lexer: Lexer = Lexer(source)
+            parser: Parser = Parser(lexer)
+
+            program: Program = parser.parse_program()
+
+            self._test_program_statements(
+                parser, program, expected_statement_count)
+            self.assertEquals(str(program), expected_result)
+
+    def test_if_expression(self) -> None:
+        source: str = 'if x > y then {z}'
+        lexer: Lexer = Lexer(source)
+        parser: Parser = Parser(lexer)
+
+        program: Program = parser.parse_program()
+
+        self._test_program_statements(parser, program)
+
+        # Test correct node type
+        if_expression = cast(If, cast(ExpressionStatement,
+                                      program.statements[0]).expression)
+        self.assertIsInstance(if_expression, If)
+
+        # Test condition
+        assert if_expression.condition is not None
+        self._test_infix_expression(if_expression.condition, 'x', '>', 'y')
+
+        assert if_expression.consequence is not None
+        self.assertIsInstance(if_expression.consequence, Block)
+        self.assertEquals(len(if_expression.consequence.statements), 1)
+
+        consequence_statement = cast(
+            ExpressionStatement, if_expression.consequence.statements[0])
+        assert consequence_statement.expression is not None
+        self._test_identifier(consequence_statement.expression, 'z')
+
+        # Test alternative
+        self.assertIsNone(if_expression.alternative)
+
+    def test_if_else_expression(self) -> None:
+        source: str = 'if x > y then {z} else {w}'
+        lexer: Lexer = Lexer(source)
+        parser: Parser = Parser(lexer)
+
+        program: Program = parser.parse_program()
+
+        self._test_program_statements(parser, program)
+
+        # Test correct node type
+        if_expression = cast(If, cast(ExpressionStatement,
+                                      program.statements[0]).expression)
+        self.assertIsInstance(if_expression, If)
+
+        # Test condition
+        assert if_expression.condition is not None
+        self._test_infix_expression(if_expression.condition, 'x', '>', 'y')
+
+        assert if_expression.consequence is not None
+        self.assertIsInstance(if_expression.consequence, Block)
+        self.assertEquals(len(if_expression.consequence.statements), 1)
+
+        consequence_statement = cast(
+            ExpressionStatement, if_expression.consequence.statements[0])
+        assert consequence_statement.expression is not None
+        self._test_identifier(consequence_statement.expression, 'z')
+
+        # Test alternative
+        assert if_expression.alternative is not None
+        self.assertIsInstance(if_expression.alternative, Block)
+        self.assertEquals(len(if_expression.alternative.statements), 1)
+
+        alternative_statement = cast(
+            ExpressionStatement, if_expression.alternative.statements[0])
+        assert alternative_statement.expression is not None
+        self._test_identifier(alternative_statement.expression, 'w')
+
+    def _test_function_literal(self) -> None:
+        source: str = 'fn x::int, y::int -> int {=> x + y}'
+        lexer: Lexer = Lexer(source)
+        parser: Parser = Parser(lexer)
+
+        program: Program = parser.parse_program()
+
+        self._test_program_statements(parser, program)
+
+        # Test correct node type
+        function_literal = cast(Function, cast(ExpressionStatement,
+                                               program.statements[0]).expression)
+
+        self.assertIsInstance(function_literal, Function)
+
+        # Test params
+        self.assertEquals(len(function_literal.parameters), 2)
+        self._test_literal_expression(function_literal.parameters[0], 'x')
+        self._test_literal_expression(function_literal.parameters[1], 'y')
+
+        self._test_literal_expression(
+            function_literal.type_parameters[0], 'int')
+        self._test_literal_expression(
+            function_literal.type_parameters[1], 'int')
+
+        # Test output
+        assert function_literal.type_output is not None
+        self.assertEquals(function_literal.type_output, 'int')
+
+        # Test body
+        assert function_literal.body is not None
+        self.assertEquals(len(function_literal.body.statements), 1)
+
+        body = cast(ExpressionStatement, function_literal.body.statements[0])
+        assert body.expression is not None
+        self._test_infix_expression(body.expression, 'x', '+', 'y')
+
+    def test_function_parameters(self) -> None:
+        tests = [
+            {'input':  'fn x::int -> int {1}',
+             'expected_params': ['x'],
+             'expected_type_params': ['int'],
+             'expected_type_output': 'int'
+             },
+            {'input':  'fn x::int, y::int -> int {1}',
+             'expected_params': ['x', 'y'],
+             'expected_type_params': ['int', 'int'],
+             'expected_type_output': 'int'
+             },
+            {'input':  'fn x::int, y::int, z::int -> int {1}',
+             'expected_params': ['x', 'y', 'z'],
+             'expected_type_params': ['int', 'int', 'int'],
+             'expected_type_output': 'int'
+             },
+        ]
+
+        for test in tests:
+            lexer: Lexer = Lexer(str(test['input']))
+            parser: Parser = Parser(lexer)
+
+            program: Program = parser.parse_program()
+
+            function = cast(Function, cast(
+                ExpressionStatement, program.statements[0]).expression)
+
+            self.assertEquals(len(function.parameters),
+                              len(test['expected_params']))
+
+            for idx, param in enumerate(test['expected_params']):
+                self._test_literal_expression(function.parameters[idx], param)
+
+            for idx, type_param in enumerate(test['expected_type_params']):
+                self._test_literal_expression(
+                    function.type_parameters[idx], type_param)
+
+            self.assertEquals(function.type_output,
+                              test['expected_type_output'])

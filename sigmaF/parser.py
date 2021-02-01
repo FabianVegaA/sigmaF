@@ -4,14 +4,18 @@ from typing import (
     Callable,
     Dict,
     List,
+    Tuple,
     Optional
 )
 
 from sigmaF.ast import (
+    Block,
     Boolean,
+    Function,
     ExpressionStatement,
     Expression,
     Identifier,
+    If,
     Integer,
     LetStatement,
     Prefix,
@@ -38,11 +42,14 @@ class Precedence(IntEnum):
     LESSGREATER = 3
     SUM = 4
     PRODUCT = 5
-    PREFIX = 6
-    CALL = 7
+    POW = 6
+    PREFIX = 7
+    GROUPING = 8
+    CALL = 9
 
 
 PRECEDENCE: Dict[TokenType, Precedence] = {
+    TokenType.EXPONENTIATION: Precedence.POW,
     TokenType.EQ: Precedence.EQUALS,
     TokenType.NOT_EQ: Precedence.EQUALS,
     TokenType.LT: Precedence.LESSGREATER,
@@ -249,8 +256,122 @@ class Parser:
         infix.right = self._parse_expression(precedence)
         return infix
 
+    def _parse_grouped_expression(self) -> Optional[Expression]:
+        self._advance_tokens()
+
+        expression = self._parse_expression(Precedence.LOWEST)
+
+        if not self._expected_token(TokenType.RPAREN):
+            return None
+
+        return expression
+
+    def _parse_block(self) -> Block:
+        assert self._current_token is not None
+        block_statements = Block(token=self._current_token,
+                                 statements=[])
+
+        self._advance_tokens()
+
+        while not self._current_token.token_type == TokenType.RBRACE and \
+                not self._current_token.token_type == TokenType.EOF:
+            statement = self._parse_statement()
+            if statement:
+                block_statements.statements.append(statement)
+
+            self._advance_tokens()
+
+        return block_statements
+
+    def _parse_if(self) -> Optional[If]:
+        assert self._current_token is not None
+        if_expression = If(token=self._current_token)
+
+        self._advance_tokens()
+
+        if_expression.condition = self._parse_expression(Precedence.LOWEST)
+
+        if not self._expected_token(TokenType.THEN):
+            return None
+
+        if not self._expected_token(TokenType.LBRACE):
+            return None
+
+        if_expression.consequence = self._parse_block()
+
+        if self._peek_token is not None:
+            if self._peek_token.token_type == TokenType.ELSE:
+                self._advance_tokens()
+
+                if not self._expected_token(TokenType.LBRACE):
+                    return None
+
+                if_expression.alternative = self._parse_block()
+
+        return if_expression
+
+    def _parse_function(self) -> Optional[Function]:
+        assert self._current_token is not None
+        function = Function(token=self._current_token)
+
+        if not self._expected_token(TokenType.IDENT):
+            return None
+
+        function.parameters, function.type_parameters, function.type_output = self._parse_function_parameters()
+
+        if not self._expected_token(TokenType.LBRACE):
+            return None
+
+        function.body = self._parse_block()
+
+        return function
+
+    def _parse_function_parameters(self) -> Tuple[List[Identifier], List[Identifier], str]:
+        params: List[Identifier] = []
+        type_params: List[Identifier] = []
+
+        assert self._current_token is not None
+        identifier = Identifier(token=self._current_token,
+                                value=self._current_token.literal)
+        params.append(identifier)
+
+        assert self._peek_token is not None
+        assert self._peek_token.token_type is TokenType.TYPEASSIGN
+        self._advance_tokens()
+        self._advance_tokens()
+        identifier = Identifier(token=self._current_token,
+                                value=self._current_token.literal)
+        type_params.append(identifier)
+
+        while self._peek_token.token_type == TokenType.COMMA:
+            self._advance_tokens()
+            self._advance_tokens()
+
+            identifier = Identifier(token=self._current_token,
+                                    value=self._current_token.literal)
+            params.append(identifier)
+
+            assert self._peek_token is not None
+            assert self._peek_token.token_type is TokenType.TYPEASSIGN
+            self._advance_tokens()
+            self._advance_tokens()
+            assert self._peek_token.token_type is not TokenType.CLASSNAME
+            identifier = Identifier(token=self._current_token,
+                                    value=self._current_token.literal)
+            type_params.append(identifier)
+
+        if not self._expected_token(TokenType.OUTPUTFUNTION):
+            return ([], [], '')
+
+        assert self._peek_token.token_type is TokenType.CLASSNAME
+        self._advance_tokens()
+        type_output = self._current_token.literal
+
+        return params, type_params, type_output
+
     def _register_infix_fns(self) -> IndixParseFns:
         return {
+            TokenType.EXPONENTIATION: self._parse_infix_expression,
             TokenType.PLUS: self._parse_infix_expression,
             TokenType.MINUS: self._parse_infix_expression,
             TokenType.DIVISION: self._parse_infix_expression,
@@ -267,6 +388,10 @@ class Parser:
 
     def _register_prefix_fns(self) -> PrefixParseFns:
         return {
+            TokenType.FUNCTION: self._parse_function,
+            TokenType.IF: self._parse_if,
+            TokenType.LPAREN: self._parse_grouped_expression,
+            TokenType.RPAREN: self._parse_grouped_expression,
             TokenType.FALSE: self._parse_boolean,
             TokenType.TRUE: self._parse_boolean,
             TokenType.IDENT: self._parse_identifier,

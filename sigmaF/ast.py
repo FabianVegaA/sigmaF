@@ -162,3 +162,63 @@ class Boolean(Expression):
 
     def __str__(self):
         return self.token_literal()
+
+
+class Block(Statement):
+    def __init__(self,
+                 token: Token,
+                 statements: List[Statement]
+                 ) -> None:
+        super().__init__(token)
+        self.statements = statements
+
+    def __str__(self) -> str:
+        out: List[str] = [str(statement) for statement in self.statements]
+
+        return ' '.join(out)
+
+
+class If(Expression):
+
+    def __init__(self,
+                 token: Token,
+                 condition: Optional[Expression] = None,
+                 consequence: Optional[Block] = None,
+                 alternative: Optional[Block] = None,
+                 ) -> None:
+        super().__init__(token)
+        self.condition = condition
+        self.consequence = consequence
+        self.alternative = alternative
+
+    def __str__(self) -> str:
+        out: str = f'if {str(self.condition)} {str(self.consequence)}'
+
+        if self.alternative:
+            out += f' else {str(self.alternative)}'
+
+        return out
+
+
+class Function(Expression):
+
+    def __init__(self,
+                 token: Token,
+                 parameters: List[Identifier] = [],
+                 type_parameters: List[Identifier] = [],
+                 type_output: Optional[str] = None,
+                 body: Optional[Block] = None
+                 ) -> None:
+        super().__init__(token)
+        self.parameters = parameters
+        self.type_parameters = type_parameters
+        self.type_output = type_output
+        self.body = body
+
+    def __str__(self) -> str:
+        param_and_type_list: List[str] = [f'{parameter}::{type_parameter}' for parameter, type_parameter in zip(
+            self.parameters, self.type_parameters)]
+
+        params: str = ', '.join(param_and_type_list)
+
+        return f'function: {params} -> {str(self.type_output)} { {str(self.body)} }'
