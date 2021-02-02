@@ -43,13 +43,15 @@ class ParserTest(TestCase):
                 let x = 5 ;
                 let y = 10;
                 let foo = 20;
+                let float_val = 3.14159;
+                let string_val = "This is a string;"
             '''
         lexer: Lexer = Lexer(source)
         parser: Parser = Parser(lexer)
 
         program: Program = parser.parse_program()
 
-        self.assertEqual(len(program.statements), 3)
+        self.assertEqual(len(program.statements), 5)
 
         for statement in program.statements:
             self.assertEqual(statement.token_literal(), 'let')

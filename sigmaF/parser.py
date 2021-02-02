@@ -18,11 +18,13 @@ from sigmaF.ast import (
     Identifier,
     If,
     Integer,
+    Float,
     LetStatement,
     Prefix,
     Infix,
     Program,
     Statement,
+    String,
     ReturnStatement,
 )
 from sigmaF.lexer import Lexer
@@ -162,6 +164,32 @@ class Parser:
             self._errors.append(message)
             return None
         return integer
+
+    def _parse_float(self) -> Optional[Float]:
+        assert self._current_token is not None
+        floating = Float(token=self._current_token)
+
+        try:
+            floating.value = float(self._current_token.literal)
+        except ValueError:
+            message = f'It was not possible to parse {self._current_token.literal} ' + \
+                'like Floating.'
+            self._errors.append(message)
+            return None
+        return floating
+
+    def _parse_string(self) -> Optional[String]:
+        assert self._current_token is not None
+        string = String(token=self._current_token)
+
+        try:
+            string.value = str(self._current_token.literal)
+        except ValueError:
+            message = f'It was not possible to parse {self._current_token.literal} ' + \
+                'like String.'
+            self._errors.append(message)
+            return None
+        return string
 
     def _parse_boolean(self) -> Boolean:
         assert self._current_token is not None
@@ -434,7 +462,7 @@ class Parser:
             TokenType.TRUE: self._parse_boolean,
             TokenType.IDENT: self._parse_identifier,
             TokenType.INT: self._parse_interger,
-            # TokenType.FLOAT: self._parse_float,
-            # TokenType.STRING: self._parse_string,
+            TokenType.FLOAT: self._parse_float,
+            TokenType.STRING: self._parse_string,
             TokenType.MINUS: self._parse_prefix_expression,
         }

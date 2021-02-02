@@ -4,12 +4,15 @@ from os import system, name
 from typing import List
 
 from sigmaF.ast import Program
-from sigmaF.parser import Parser
+from sigmaF.parser import (
+    Parser,
+)
 from sigmaF.lexer import Lexer
 from sigmaF.token import (
     Token,
     TokenType,
 )
+from sigmaF.evaluator import evaluate
 
 EOF_TOKEN: Token = Token(TokenType.EOF, '')
 
@@ -44,7 +47,10 @@ def start_repl() -> None:
                 _print_parse_errors(parser.errors)
                 continue
 
-            print(program)
+            evaluated = evaluate(program)
+
+            if evaluated is not None:
+                print(evaluated.inspect())
 
         while(token := lexer.next_token()) != EOF_TOKEN:
             print(token)

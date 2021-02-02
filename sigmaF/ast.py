@@ -49,6 +49,10 @@ class Program(ASTNode):
 
         return ''
 
+    # def tree(self) -> None:
+    #     for statement in self.statements:
+    #         print(f'\n{statement}')
+
     def __str__(self) -> str:
         out: List[str] = []
         for statement in self.statements:
@@ -111,6 +115,30 @@ class Integer(Expression):
     def __init__(self,
                  token: Token,
                  value: Optional[int] = None
+                 ) -> None:
+        super().__init__(token)
+        self.value = value
+
+    def __str__(self) -> str:
+        return str(self.value)
+
+
+class Float(Expression):
+    def __init__(self,
+                 token: Token,
+                 value: Optional[float] = None
+                 ) -> None:
+        super().__init__(token)
+        self.value = value
+
+    def __str__(self) -> str:
+        return str(self.value)
+
+
+class String(Expression):
+    def __init__(self,
+                 token: Token,
+                 value: Optional[str] = None
                  ) -> None:
         super().__init__(token)
         self.value = value
