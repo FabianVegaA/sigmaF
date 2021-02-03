@@ -49,9 +49,6 @@ class Program(ASTNode):
 
         return ''
 
-    # def tree(self) -> None:
-    #     for statement in self.statements:
-    #         print(f'\n{statement}')
 
     def __str__(self) -> str:
         out: List[str] = []

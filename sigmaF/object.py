@@ -14,8 +14,10 @@ from typing import (
 class ObjectType(Enum):
     BOOLEAN = auto()
     FLOAT = auto()
+    ERROR = auto()
     INTEGER = auto()
     NULL = auto()
+    RETURN = auto()
     STRING = auto()
 
 
@@ -85,6 +87,30 @@ class Null(Object):
 
     def inspect(self) -> str:
         return 'null'
+
+
+class Error(Object):
+
+    def __init__(self, message: str) -> None:
+        self.message = message
+
+    def type(self) -> ObjectType:
+        return ObjectType.ERROR
+
+    def inspect(self) -> str:
+        return f' Error: {self.message}'
+
+
+class Return(Object):
+
+    def __init__(self, value: Object) -> None:
+        self.value = value
+
+    def type(self) -> ObjectType:
+        return ObjectType.RETURN
+
+    def inspect(self) -> str:
+        return self.value.inspect()
 
 
 # TODO To create the nullable class, this will be able to evaluate for example 'int?' or 'bool?'
