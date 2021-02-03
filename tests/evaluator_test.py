@@ -16,6 +16,7 @@ from sigmaF.parser import Parser
 from sigmaF.object import (
     Boolean,
     Float,
+    Environment,
     Error,
     Integer,
     String,
@@ -165,6 +166,7 @@ class EvaluatorTest(TestCase):
                     => true % false;
                 }
              ''', 'Unknown Operator: The operator \'%\' is unknown between BOOLEAN'),
+            ('foobar;', 'Identifier not found: foobar')
         ]
 
         for source, expected in tests:
@@ -175,12 +177,24 @@ class EvaluatorTest(TestCase):
             evaluated = cast(Error, evaluated)
             self.assertEquals(evaluated.message, expected)
 
+    def test_assigment_evaluation(self) -> None:
+        tests: List[Tuple[str, int]] = [
+            ('let a = 5; a;', 5),
+            ('let a = 5; let b = a; b', 5),
+            ('let a = 5; let b = 3; b;', 3),
+            ('let a = 5; let b = 3; let c = b * a + 5; c;', 20),
+        ]
+        for source, expected in tests:
+            evaluated = self._evaluate_tests(source)
+            self._test_integer_object(evaluated, expected)
+
     def _evaluate_tests(self, source: str) -> Object:
         lexer: Lexer = Lexer(source)
         parser: Parser = Parser(lexer)
         program: Program = parser.parse_program()
+        env: Environment = Environment()
 
-        evaluated = evaluate(program)
+        evaluated = evaluate(program, env)
 
         assert evaluated is not None
         return evaluated

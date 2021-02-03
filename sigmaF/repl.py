@@ -4,6 +4,7 @@ from os import system, name
 from typing import List
 
 from sigmaF.ast import Program
+from sigmaF.object import Environment
 from sigmaF.parser import (
     Parser,
 )
@@ -33,21 +34,25 @@ def clear():
 
 
 def start_repl() -> None:
+    scanned: List[str] = []
+
     while (source := input('>> ')) != 'exit()':
 
         if source == "clear()":
             clear()
         else:
-            lexer: Lexer = Lexer(source)
+            scanned.append(source)
+            lexer: Lexer = Lexer(' '.join(scanned))
             parser: Parser = Parser(lexer)
 
             program: Program = parser.parse_program()
+            env: Environment = Environment()
 
             if len(parser.errors) > 0:
                 _print_parse_errors(parser.errors)
                 continue
 
-            evaluated = evaluate(program)
+            evaluated = evaluate(program, env)
 
             if evaluated is not None:
                 print(evaluated.inspect())

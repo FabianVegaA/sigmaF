@@ -7,7 +7,8 @@ from enum import (
     Enum,
 )
 from typing import (
-    Any
+    Any,
+    Dict
 )
 
 
@@ -112,5 +113,19 @@ class Return(Object):
     def inspect(self) -> str:
         return self.value.inspect()
 
+class Environment(Dict):
+    
+    def __init__(self):
+        self._store = dict()
+        
+    def __getitem__(self, key):
+        return self._store[key]
+    
+    def __setitem__(self, key, value):
+        self._store[key] = value
+    def __delitem__(self, key):
+        del self._store[key]
+        
+        
 
 # TODO To create the nullable class, this will be able to evaluate for example 'int?' or 'bool?'
