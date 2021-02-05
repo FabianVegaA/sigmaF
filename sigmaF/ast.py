@@ -49,7 +49,6 @@ class Program(ASTNode):
 
         return ''
 
-
     def __str__(self) -> str:
         out: List[str] = []
         for statement in self.statements:
@@ -231,7 +230,7 @@ class Function(Expression):
                  token: Token,
                  parameters: List[Identifier] = [],
                  type_parameters: List[Identifier] = [],
-                 type_output: Optional[str] = None,
+                 type_output: Optional[Identifier] = None,
                  body: Optional[Block] = None
                  ) -> None:
         super().__init__(token)
@@ -241,7 +240,7 @@ class Function(Expression):
         self.body = body
 
     def __str__(self) -> str:
-        param_and_type_list: List[str] = [f'{parameter}::{type_parameter}' for parameter, type_parameter in zip(
+        param_and_type_list: List[str] = [f'{parameter}::{type_parameter} ' for parameter, type_parameter in zip(
             self.parameters, self.type_parameters)]
 
         params: str = ', '.join(param_and_type_list)

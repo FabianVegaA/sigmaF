@@ -8,13 +8,24 @@ from enum import (
 )
 from typing import (
     Any,
-    Dict
+    Dict,
+    List,
+    Optional
+)
+
+from typing_extensions import Protocol
+
+from sigmaF.ast import (
+    Block,
+    Identifier
 )
 
 
 class ObjectType(Enum):
     BOOLEAN = auto()
+    BUILTING = auto()
     FLOAT = auto()
+    FUNCTION = auto()
     ERROR = auto()
     INTEGER = auto()
     NULL = auto()
@@ -113,19 +124,68 @@ class Return(Object):
     def inspect(self) -> str:
         return self.value.inspect()
 
+
 class Environment(Dict):
-    
-    def __init__(self):
+
+    def __init__(self, outer=None):
         self._store = dict()
-        
+        self._outer = outer
+
     def __getitem__(self, key):
-        return self._store[key]
-    
+        try:
+            return self._store[key]
+        except KeyError as e:
+            if self._outer is not None:
+                return self._outer[key]
+
+            raise e
+
     def __setitem__(self, key, value):
         self._store[key] = value
+
     def __delitem__(self, key):
         del self._store[key]
-        
-        
+
+
+class Function(Object):
+
+    def __init__(self,
+                 parameters: List[Identifier],
+                 type_parameters: List[Identifier],
+                 type_output: Optional[Identifier],
+                 body: Block,
+                 env: Environment
+                 ) -> None:
+        self.parameters = parameters
+        self.type_parameters = type_parameters
+        self.type_output = type_output
+        self.body = body
+        self.env = env
+
+    def type(self) -> ObjectType:
+        return ObjectType.FUNCTION
+
+    def inspect(self) -> str:
+        params_and_types: str = ', '.join([f'{param}::{type_param}' for param, type_param in zip(
+            self.parameters, self.type_parameters)])
+
+        return f'fn {params_and_types} -> {self.type_output} {{\n\t{self.body}\n}}'
+
+
+class BuiltinFunction(Protocol):
+
+    def __call__(self, *args: Object) -> Object: ...
+
+
+class Builtin(Object):
+
+    def __init__(self, fn: BuiltinFunction) -> None:
+        self.fn = fn
+
+    def type(self) -> ObjectType:
+        return ObjectType.BUILTING
+
+    def inspect(self) -> str:
+        return 'builtin function'
 
 # TODO To create the nullable class, this will be able to evaluate for example 'int?' or 'bool?'

@@ -496,5 +496,6 @@ class ParserTest(TestCase):
                 self._test_literal_expression(
                     function.type_parameters[idx], type_param)
 
-            self.assertEquals(function.type_output,
+            assert function.type_output is not None
+            self.assertEquals(function.type_output.value,
                               test['expected_type_output'])

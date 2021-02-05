@@ -391,7 +391,7 @@ class Parser:
 
         return function
 
-    def _parse_function_parameters(self) -> Tuple[List[Identifier], List[Identifier], str]:
+    def _parse_function_parameters(self) -> Tuple[List[Identifier], List[Identifier], Optional[Identifier]]:
         params: List[Identifier] = []
         type_params: List[Identifier] = []
 
@@ -426,11 +426,12 @@ class Parser:
             type_params.append(identifier)
 
         if not self._expected_token(TokenType.OUTPUTFUNTION):
-            return ([], [], '')
+            return ([], [], None)
 
         assert self._peek_token.token_type is TokenType.CLASSNAME
         self._advance_tokens()
-        type_output = self._current_token.literal
+        type_output: Identifier = Identifier(self._current_token,
+                                             self._current_token.literal)
 
         return params, type_params, type_output
 

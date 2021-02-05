@@ -3,6 +3,7 @@ from typing import (
     cast,
     List,
     Tuple,
+    Union
 )
 from unittest import TestCase
 
@@ -16,6 +17,7 @@ from sigmaF.parser import Parser
 from sigmaF.object import (
     Boolean,
     Float,
+    Function,
     Environment,
     Error,
     Integer,
@@ -187,6 +189,82 @@ class EvaluatorTest(TestCase):
         for source, expected in tests:
             evaluated = self._evaluate_tests(source)
             self._test_integer_object(evaluated, expected)
+
+    def test_function_evaluation(self):
+        source: str = 'fn x::int -> int { x + 2;};'
+
+        evaluated = self._evaluate_tests(source)
+
+        self.assertIsInstance(evaluated, Function)
+
+        evaluated = cast(Function, evaluated)
+        self.assertEquals(len(evaluated.parameters), 1)
+        self.assertEquals(len(evaluated.type_parameters), 1)
+        self.assertEquals(str(evaluated.parameters[0]), 'x')
+        self.assertEquals(str(evaluated.type_parameters[0]), 'int')
+        self.assertEquals(str(evaluated.type_output), 'int')
+        self.assertEquals(str(evaluated.body), '(x + 2)')
+
+    def test_function_test(self) -> None:
+        tests: List[Tuple[str, int]] = [
+            ('let identity = fn x::int -> int { x }; identity(5);', 5),
+            ('''
+             let identity = fn x::int -> int {
+                 => x;
+             };
+             identity(5)
+             ''', 5),
+            ('''
+             let double = fn x::int -> int {
+                 => x * 2;
+             };
+             double(5);
+             ''', 10),
+            ('''
+             let sum = fn x::int, y::int -> int {
+                 => x + y;
+             };
+             sum(3,8);
+             ''', 11),
+            ('''
+             let sum = fn x::int, y::int -> int {
+                 => x + y;
+             };
+             sum( 5 + 5, sum(10, 10));
+             ''', 30),
+            ('fn x::int -> int { x }(5);', 5)
+        ]
+
+        for source, expected in tests:
+            evaluated = self._evaluate_tests(source)
+            self._test_integer_object(evaluated, expected)
+
+    def test_builtin_function(self) -> None:
+        tests: List[Tuple[str, Union[str, int]]] = [
+            ('length("");', 0),
+            ('length("Hello, World!");', 13),
+            ('length("Supercalifragilisticexpialidocious");', 34),
+            ('length(1);', 'Argument to length without support, it was received a INTEGER'),
+            ('length("one", "two");',
+             'Incorrect Number of arguments for length, it was received 2 arguments, and is needed only 1')
+        ]
+
+        for source, expected in tests:
+            evaluated = self._evaluate_tests(source)
+
+            if type(expected) == int:
+                expected = cast(int, expected)
+                self._test_integer_object(evaluated, expected)
+
+            else:
+                expected = cast(str, expected)
+                self._test_error_object(evaluated, expected)
+
+    def _test_error_object(self, evaluated: Object, expected: str) -> None:
+        self.assertIsInstance(evaluated, Error)
+
+        evaluated = cast(Error, evaluated)
+        self.assertEqual(evaluated.message, expected)
 
     def _evaluate_tests(self, source: str) -> Object:
         lexer: Lexer = Lexer(source)

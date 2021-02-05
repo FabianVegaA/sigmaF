@@ -6,10 +6,13 @@ from typing import (
     Type,
 )
 
+
 import sigmaF.ast as ast
 from sigmaF.object import (
     Boolean,
+    Builtin,
     Float,
+    Function,
     Environment,
     Error,
     Integer,
@@ -19,11 +22,13 @@ from sigmaF.object import (
     Object,
     ObjectType,
 )
+from sigmaF.builtins import BUILTIN
 
 TRUE = Boolean(True)
 FALSE = Boolean(False)
 NULL = Null()
 
+_NOT_A_FUNCTION = 'It is not a function: {}'
 _TYPE_MISMATCH = 'Type Discrepancy: It is not possible to do the operation \'{}\', for an {} and a {}'
 _UNKNOW_PREFIX_OPERATOR = 'Unknown Operator: The operator \'{}\' is unknown for {}'
 _UNKNOW_INFIX_OPERATOR = 'Unknown Operator: The operator \'{}\' is unknown between {}'
@@ -117,14 +122,81 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
 
         return _evaluate_identifier(node, env)
 
+    elif node_type == ast.Function:
+        node = cast(ast.Function, node)
+
+        assert node.body is not None
+        return Function(node.parameters,
+                        node.type_parameters,
+                        node.type_output,
+                        node.body,
+                        env)
+    elif node_type == ast.Call:
+        node = cast(ast.Call, node)
+
+        function = evaluate(node.function, env)
+
+        assert node.arguments is not None
+        args = _evaluate_expression(node.arguments, env)
+
+        assert function is not None
+        return _apply_function(function, args)
+
     return None
+
+
+def _apply_function(fn: Object, args: List[Object]) -> Object:
+    if type(fn) == Function:
+        fn = cast(Function, fn)
+
+        extended_environment = _extend_function_enviroment(fn, args)
+        evaluated = evaluate(fn.body, extended_environment)
+
+        assert evaluated is not None
+        return _unwrap_return_value(evaluated)
+
+    elif type(fn) == Builtin:
+        fn = cast(Builtin, fn)
+
+        return fn.fn(*args)
+
+    else:
+        return _new_error(_NOT_A_FUNCTION, [fn.type().name])
+
+
+def _extend_function_enviroment(fn: Function, args: List[Object]) -> Environment:
+    env: Environment = Environment(outer=fn.env)
+    for idx, param in enumerate(fn.parameters):
+        env[param.value] = args[idx - 1]
+
+    return env
+
+
+def _unwrap_return_value(obj: Object) -> Object:
+    if type(obj) == Return:
+        obj = cast(Return, obj)
+        return obj.value
+
+    return obj
+
+
+def _evaluate_expression(expressions: List[ast.Expression], env: Environment) -> List[Object]:
+    result: List[Object] = []
+
+    for expression in expressions:
+        evaluated = evaluate(expression, env)
+
+        assert evaluated is not None
+        result.append(evaluated)
+
+    return result
 
 
 def _evaluate_identifier(node: ast.Identifier, env: Environment) -> Object:
     try:
         return env[node.value]
     except KeyError:
-        return _new_error(_UNKNOW_IDENTIFIER, [node.value])
+        return BUILTIN.get(node.value, _new_error(_UNKNOW_IDENTIFIER, [node.value]))
 
 
 def _evaluate_if_expression(if_expression: ast.If, env: Environment) -> Optional[Object]:
