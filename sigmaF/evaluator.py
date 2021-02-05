@@ -16,6 +16,7 @@ from sigmaF.object import (
     Environment,
     Error,
     Integer,
+    ValueList,
     Null,
     Return,
     String,
@@ -141,7 +142,10 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
 
         assert function is not None
         return _apply_function(function, args)
+    elif node_type == ast.ListValues:
+        node = cast(ast.ListValues, node)
 
+        return _evaluate_item_list(node, env)
     return None
 
 
@@ -178,6 +182,17 @@ def _unwrap_return_value(obj: Object) -> Object:
         return obj.value
 
     return obj
+
+
+def _evaluate_item_list(node: ast.ListValues, env: Environment) -> ValueList:
+    values: List[Object] = []
+
+    for value in node.values:
+        evaluated = evaluate(value, env)
+
+        assert evaluated is not None
+        values.append(evaluated)
+    return ValueList(values)
 
 
 def _evaluate_expression(expressions: List[ast.Expression], env: Environment) -> List[Object]:

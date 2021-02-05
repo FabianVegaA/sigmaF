@@ -43,6 +43,10 @@ class Lexer:
             token = Token(TokenType.LBRACE, self._character)
         elif match(r'^\}$', self._character):
             token = Token(TokenType.RBRACE, self._character)
+        elif match(r'^\[$', self._character):
+            token = Token(TokenType.LBRAKET, self._character)
+        elif match(r'^\]$', self._character):
+            token = Token(TokenType.RBRAKET, self._character)
         elif match(r'^\,$', self._character):
             token = Token(TokenType.COMMA, self._character)
         elif match(r'^;$', self._character):

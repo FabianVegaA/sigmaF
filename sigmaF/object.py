@@ -28,6 +28,7 @@ class ObjectType(Enum):
     FUNCTION = auto()
     ERROR = auto()
     INTEGER = auto()
+    LIST = auto()
     NULL = auto()
     RETURN = auto()
     STRING = auto()
@@ -187,5 +188,21 @@ class Builtin(Object):
 
     def inspect(self) -> str:
         return 'builtin function'
+
+
+class ValueList(Object):
+
+    def __init__(self, values: List[Object] = []) -> None:
+        self.values = values
+
+    def type(self) -> ObjectType:
+        return ObjectType.LIST
+
+    def inspect(self) -> str:
+        values_list: List[Any] = [value.value for value in self.values]
+        if self.values[0].type() is ObjectType.STRING:
+            return '[\"' + '\", \"'.join(values_list) + '\"]'
+        return str(values_list)
+
 
 # TODO To create the nullable class, this will be able to evaluate for example 'int?' or 'bool?'

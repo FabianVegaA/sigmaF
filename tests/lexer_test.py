@@ -63,7 +63,7 @@ class LexerTest(TestCase):
         self.assertEquals(tokens, expected_tokens)
 
     def test_delimiters(self) -> None:
-        source: str = '(){},;'
+        source: str = '(){}[],;'
         lexer: Lexer = Lexer(source)
 
         tokens: List[Token] = []
@@ -75,6 +75,8 @@ class LexerTest(TestCase):
             Token(TokenType.RPAREN, ')'),
             Token(TokenType.LBRACE, '{'),
             Token(TokenType.RBRACE, '}'),
+            Token(TokenType.LBRAKET, '['),
+            Token(TokenType.RBRAKET, ']'),
             Token(TokenType.COMMA, ','),
             Token(TokenType.SEMICOLON, ';')
         ]

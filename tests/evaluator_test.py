@@ -21,6 +21,7 @@ from sigmaF.object import (
     Environment,
     Error,
     Integer,
+    ValueList,
     String,
     Object,
 )
@@ -259,6 +260,21 @@ class EvaluatorTest(TestCase):
             else:
                 expected = cast(str, expected)
                 self._test_error_object(evaluated, expected)
+
+    def test_list(self) -> None:
+        tests: List[Tuple[str, list]] = [
+            ('[1,2,3]', [1, 2, 3]),
+            ('[1.0, 2.0, 3.0]', [1.0, 2.0, 3.0]),
+            ('["Hello", "World","!"]', ["Hello", "World", "!"])
+        ]
+
+        for source, expected in tests:
+            evaluated = self._evaluate_tests(source)
+
+            evaluated = cast(ValueList, evaluated)
+            for item_evaluated, item_expected in zip(evaluated.values, expected):
+                assert item_evaluated != item_expected and type(
+                    item_evaluated) != type(item_expected)
 
     def _test_error_object(self, evaluated: Object, expected: str) -> None:
         self.assertIsInstance(evaluated, Error)

@@ -19,6 +19,7 @@ from sigmaF.ast import (
     Integer,
     Program,
     LetStatement,
+    ListValues,
     ReturnStatement,
     ExpressionStatement
 )
@@ -499,3 +500,23 @@ class ParserTest(TestCase):
             assert function.type_output is not None
             self.assertEquals(function.type_output.value,
                               test['expected_type_output'])
+
+    def test_list(self) -> None:
+        tests: List[Tuple[str, List[int]]] = [
+            ('[]', []),
+            ('[1,2,3];', [1, 2, 3]),
+            ('[1,1,2,3,5];', [1, 1, 2, 3, 5]),
+            ('[2,3,5,7,11];', [2, 3, 5, 7, 11])
+        ]
+
+        for source, expected in tests:
+            lexer: Lexer = Lexer(source)
+            parser: Parser = Parser(lexer)
+
+            program: Program = parser.parse_program()
+
+            list_values = cast(ListValues, cast(ExpressionStatement,
+                                                program.statements[0]).expression)
+
+            for item, expect in zip(list_values.values, expected):
+                self.assertEquals(item.value, expect)

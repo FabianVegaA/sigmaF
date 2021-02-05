@@ -20,6 +20,7 @@ from sigmaF.ast import (
     Integer,
     Float,
     LetStatement,
+    ListValues,
     Prefix,
     Infix,
     Program,
@@ -435,6 +436,44 @@ class Parser:
 
         return params, type_params, type_output
 
+    def _parse_list(self) -> Optional[ListValues]:
+        assert self._current_token is not None
+        list_values = ListValues(token=self._current_token)
+
+        self._advance_tokens()
+
+        if self._current_token.token_type == TokenType.RBRAKET:
+            return list_values
+
+        values = []
+
+        if self._current_token.token_type not in [TokenType.INT, TokenType.FLOAT, TokenType.STRING, TokenType.TRUE, TokenType.FALSE]:
+            return None
+
+        token_type = self._current_token.token_type
+
+        values.append(
+            self._prefix_parse_fns[self._current_token.token_type]())
+
+        self._advance_tokens()
+        while self._current_token.token_type == TokenType.COMMA:
+
+            self._advance_tokens()
+
+            if self._current_token.token_type != token_type:
+                return None
+
+            values.append(
+                self._prefix_parse_fns[self._current_token.token_type]())
+
+            self._advance_tokens()
+
+        if self._current_token.token_type is not TokenType.RBRAKET:
+            return None
+        list_values.values = values
+
+        return list_values
+
     def _register_infix_fns(self) -> IndixParseFns:
         return {
             TokenType.EXPONENTIATION: self._parse_infix_expression,
@@ -459,6 +498,7 @@ class Parser:
             TokenType.IF: self._parse_if,
             TokenType.LPAREN: self._parse_grouped_expression,
             TokenType.RPAREN: self._parse_grouped_expression,
+            TokenType.LBRAKET: self._parse_list,
             TokenType.FALSE: self._parse_boolean,
             TokenType.TRUE: self._parse_boolean,
             TokenType.IDENT: self._parse_identifier,
