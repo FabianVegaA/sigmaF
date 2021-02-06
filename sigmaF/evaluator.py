@@ -266,13 +266,15 @@ def _evaluate_infix_expression(operator: str,
     elif left.type() == ObjectType.BOOLEAN \
             and right.type() == ObjectType.BOOLEAN:
         return _evaluate_bool_infix_expression(operator, left, right)
+    elif left.type() == ObjectType.LIST \
+            and right.type() == ObjectType.LIST:
+        return _evaluate_list_infix_expression(operator, left, right)
     elif left.type() != right.type():
         return _new_error(_TYPE_MISMATCH, [operator,
                                            left.type().name,
                                            right.type().name])
     else:
-        return _new_error(_UNKNOW_INFIX_OPERATOR, [left.type().name,
-                                                   operator,
+        return _new_error(_UNKNOW_INFIX_OPERATOR, [operator,
                                                    right.type().name])
 
 
@@ -290,7 +292,24 @@ def _evaluate_bool_infix_expression(operator: str,
         return _to_boolean_object(left_value is not right_value)
     else:
         return _new_error(_UNKNOW_INFIX_OPERATOR, [operator,
-                                                   left.type().name,
+                                                   left.type().name])
+
+
+def _evaluate_list_infix_expression(operator: str,
+                                    left: Object,
+                                    right: Object
+                                    ) -> Object:
+    left_list: list = cast(ValueList, left).values
+    right_list: list = cast(ValueList, right).values
+
+    if operator == '+':
+        return ValueList(values=left_list + right_list)
+    elif operator == '==':
+        return _to_boolean_object(left_list == right_list)
+    elif operator == '!=':
+        return _to_boolean_object(left_list != right_list)
+    else:
+        return _new_error(_UNKNOW_INFIX_OPERATOR, [operator,
                                                    right.type().name])
 
 
@@ -327,8 +346,7 @@ def _evaluate_float_infix_expression(operator: str,
     elif operator == '!=':
         return _to_boolean_object(left_value != right_value)
     else:
-        return _new_error(_UNKNOW_INFIX_OPERATOR, [left.type().name,
-                                                   operator,
+        return _new_error(_UNKNOW_INFIX_OPERATOR, [operator,
                                                    right.type().name])
 
 
@@ -367,8 +385,7 @@ def _evaluate_interger_infix_expression(operator: str,
     elif operator == '!=':
         return _to_boolean_object(left_value != right_value)
     else:
-        return _new_error(_UNKNOW_INFIX_OPERATOR, [left.type().name,
-                                                   operator,
+        return _new_error(_UNKNOW_INFIX_OPERATOR, [operator,
                                                    right.type().name])
 
 
@@ -386,8 +403,7 @@ def _evaluate_string_infix_expression(operator: str,
     elif operator == '!=':
         return _to_boolean_object(left_value != right_value)
     else:
-        return _new_error(_UNKNOW_INFIX_OPERATOR, [left.type().name,
-                                                   operator,
+        return _new_error(_UNKNOW_INFIX_OPERATOR, [operator,
                                                    right.type().name])
 
 

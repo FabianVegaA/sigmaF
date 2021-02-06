@@ -520,3 +520,5 @@ class ParserTest(TestCase):
 
             for item, expect in zip(list_values.values, expected):
                 self.assertEquals(item.value, expect)
+
+

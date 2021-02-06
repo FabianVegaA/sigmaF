@@ -23,6 +23,25 @@ def _print_parse_errors(errors: List[str]):
         print(error)
 
 
+def _check_errors(source: str, enviroment: Environment) -> str:
+    lexer: Lexer = Lexer(source)
+    parser: Parser = Parser(lexer)
+
+    program: Program = parser.parse_program()
+    env: Environment = enviroment
+
+    if len(parser.errors) > 0:
+        _print_parse_errors(parser.errors)
+        return ''
+
+    evaluated = evaluate(program, env)
+
+    if evaluated is not None:
+        print(evaluated.inspect())
+        return ''
+    return source
+
+
 def clear():
     # for windows
     if name == 'nt':
@@ -36,17 +55,19 @@ def clear():
 def start_repl() -> None:
     scanned: List[str] = []
 
+    env: Environment = Environment()
+
     while (source := input('>> ')) != 'exit()':
 
         if source == "clear()":
             clear()
         else:
-            scanned.append(source)
+
+            scanned.append(_check_errors(source, env))
             lexer: Lexer = Lexer(' '.join(scanned))
             parser: Parser = Parser(lexer)
 
             program: Program = parser.parse_program()
-            env: Environment = Environment()
 
             if len(parser.errors) > 0:
                 _print_parse_errors(parser.errors)
