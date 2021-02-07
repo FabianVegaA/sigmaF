@@ -34,6 +34,7 @@ _TYPE_MISMATCH = 'Type Discrepancy: It is not possible to do the operation \'{}\
 _UNKNOW_PREFIX_OPERATOR = 'Unknown Operator: The operator \'{}\' is unknown for {}'
 _UNKNOW_INFIX_OPERATOR = 'Unknown Operator: The operator \'{}\' is unknown between {}'
 _UNKNOW_IDENTIFIER = 'Identifier not found: {}'
+_NON_MODIFIABLE_VALUE = 'Non-modifiable Value: The value of {} is not modifiable'
 
 
 def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
@@ -116,7 +117,11 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
         value = evaluate(node.value, env)
 
         assert node.name is not None
-        env[node.name.value] = value
+
+        if not node.name.value in env._store:
+            env[node.name.value] = value
+        else:
+            return _new_error(_NON_MODIFIABLE_VALUE, [node.name.value])
 
     elif node_type == ast.Identifier:
         node = cast(ast.Identifier, node)

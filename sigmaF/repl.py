@@ -4,7 +4,10 @@ from os import system, name
 from typing import List
 
 from sigmaF.ast import Program
-from sigmaF.object import Environment
+from sigmaF.object import (
+    Environment,
+    ObjectType
+)
 from sigmaF.parser import (
     Parser,
 )
@@ -53,11 +56,11 @@ def clear():
 
 
 def start_repl(source: str = '') -> None:
-    scanned: List[str] = [source]
+    scanned: List[str] = []
     env: Environment = Environment()
 
     scanned.append(_check_errors(source, env))
-    
+
     lexer: Lexer = Lexer(' '.join(scanned))
     parser: Parser = Parser(lexer)
 
@@ -67,7 +70,7 @@ def start_repl(source: str = '') -> None:
         _print_parse_errors(parser.errors)
 
     evaluated = evaluate(program, env)
-    if evaluated is not None:
+    if evaluated is not None and evaluated.type() is not ObjectType.ERROR:
         print(evaluated.inspect())
 
     while (source := input('>> ')) != 'exit()':
@@ -77,6 +80,7 @@ def start_repl(source: str = '') -> None:
         else:
 
             scanned.append(_check_errors(source, env))
+
             lexer: Lexer = Lexer(' '.join(scanned))
             parser: Parser = Parser(lexer)
 
@@ -87,7 +91,8 @@ def start_repl(source: str = '') -> None:
                 continue
 
             evaluated = evaluate(program, env)
-            if evaluated is not None:
+
+            if evaluated is not None and evaluated.type() is not ObjectType.ERROR:
                 print(evaluated.inspect())
 
         while(token := lexer.next_token()) != EOF_TOKEN:
