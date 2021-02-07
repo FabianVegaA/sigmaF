@@ -52,10 +52,23 @@ def clear():
         _ = system('clear')
 
 
-def start_repl() -> None:
-    scanned: List[str] = []
-
+def start_repl(source: str = '') -> None:
+    scanned: List[str] = [source]
     env: Environment = Environment()
+
+    scanned.append(_check_errors(source, env))
+    
+    lexer: Lexer = Lexer(' '.join(scanned))
+    parser: Parser = Parser(lexer)
+
+    program: Program = parser.parse_program()
+
+    if len(parser.errors) > 0:
+        _print_parse_errors(parser.errors)
+
+    evaluated = evaluate(program, env)
+    if evaluated is not None:
+        print(evaluated.inspect())
 
     while (source := input('>> ')) != 'exit()':
 
@@ -74,7 +87,6 @@ def start_repl() -> None:
                 continue
 
             evaluated = evaluate(program, env)
-
             if evaluated is not None:
                 print(evaluated.inspect())
 

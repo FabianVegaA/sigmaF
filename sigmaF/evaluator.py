@@ -171,7 +171,7 @@ def _apply_function(fn: Object, args: List[Object]) -> Object:
 def _extend_function_enviroment(fn: Function, args: List[Object]) -> Environment:
     env: Environment = Environment(outer=fn.env)
     for idx, param in enumerate(fn.parameters):
-        env[param.value] = args[idx - 1]
+        env[param.value] = args[idx]
 
     return env
 

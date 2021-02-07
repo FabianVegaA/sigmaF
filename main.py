@@ -1,3 +1,5 @@
+import sys
+
 from sigmaF.repl import start_repl
 
 SIGMAF: str = """ 
@@ -15,14 +17,26 @@ SIGMAF: str = """
 """
 
 
-def main() -> None:
+def main(arg=None) -> None:
     global SIGMAF
     print('-'*106)
     print(
         f'\n\nWelcome to SigmaF, the Program Language of the future for the Programming Functional and a lot more\n\n{SIGMAF}')
     print('-'*106)
-    start_repl()
+    if arg is None:
+        start_repl()
+    else:
+        with open(arg, mode='r', encoding='utf-8') as fin:
+            lines = fin.readlines()
+        start_repl('\n'.join(lines))
 
 
 if __name__ == '__main__':
-    main()
+    args = sys.argv
+
+    if len(args) > 1:
+        arg = args[1]
+    else:
+        arg = None
+
+    main(arg)
