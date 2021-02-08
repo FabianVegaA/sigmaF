@@ -10,6 +10,7 @@ from sigmaF.ast import (
     Block,
     Boolean,
     Call,
+    CallList,
     Function,
     Infix,
     If,
@@ -126,6 +127,7 @@ class ParserTest(TestCase):
         if len(parser.errors) > 0:
             print(parser.errors)
         self.assertEquals(len(parser.errors), 0)
+
         self.assertEquals(len(program.statements), expected_statement_count)
         self.assertIsInstance(program.statements[0], ExpressionStatement)
 
@@ -319,8 +321,10 @@ class ParserTest(TestCase):
             ('a + sum(b * c) + d;', '((a + sum((b * c))) + d)', 1),
             ('sum(a, b, 1, 2 * 3, 4 + 5, sum(6, 7 * 8));',
              'sum(a, b, 1, (2 * 3), (4 + 5), sum(6, (7 * 8)))', 1),
-            ('-function(-something, other_thing ** 23) ** (-34 % 90);',
-             '((-function((-something), (other_thing ** 23))) ** ((-34) % 90))', 1),
+            ('4 % 2 == 0 && 2 > 0;', '(((4 % 2) == 0) && (2 > 0))', 1),
+            ('-4 + 2 == 0 || 2 > 0;', '((((-4) + 2) == 0) || (2 > 0))', 1)
+            # ('-function(-something, other_thing ** 23) ** (-34 % 90);',
+            #  '((-function((-something), (other_thing ** 23))) ** ((-34) % 90))', 1),
         ]
 
         for source, expected_result, expected_statement_count in test_sources:
@@ -503,7 +507,7 @@ class ParserTest(TestCase):
 
     def test_list(self) -> None:
         tests: List[Tuple[str, List[int]]] = [
-            ('[]', []),
+            ('[];', []),
             ('[1,2,3];', [1, 2, 3]),
             ('[1,1,2,3,5];', [1, 1, 2, 3, 5]),
             ('[2,3,5,7,11];', [2, 3, 5, 7, 11])
@@ -518,7 +522,27 @@ class ParserTest(TestCase):
             list_values = cast(ListValues, cast(ExpressionStatement,
                                                 program.statements[0]).expression)
 
+            self.assertIsNotNone(list_values)
             for item, expect in zip(list_values.values, expected):
                 self.assertEquals(item.value, expect)
 
+    def test_call_list(self) -> None:
+        source: str = 'list[1, 2 * 3];'
+        lexer: Lexer = Lexer(source)
+        parser: Parser = Parser(lexer)
 
+        program: Program = parser.parse_program()
+
+        self._test_program_statements(parser, program)
+
+        call_list = cast(CallList, cast(ExpressionStatement,
+                                        program.statements[0]).expression)
+
+        self.assertIsInstance(call_list, CallList)
+        self._test_identifier(call_list.list_identifier, 'list')
+
+        # Test arguments
+        assert call_list.range is not None
+        self.assertEquals(len(call_list.range), 2)
+        self._test_literal_expression(call_list.range[0], 1)
+        self._test_infix_expression(call_list.range[1], 2, '*', 3)

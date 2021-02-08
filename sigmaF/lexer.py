@@ -71,6 +71,16 @@ class Lexer:
                 token = self._make_two_character_token(TokenType.TYPEASSIGN)
             else:
                 token = Token(TokenType.ILLEGAL, self._character)
+        elif match(r'^\|$', self._character):
+            if self._peek_character() == '|':
+                token = self._make_two_character_token(TokenType.OR)
+            else:
+                token = Token(TokenType.ILLEGAL, self._character)
+        elif match(r'^&$', self._character):
+            if self._peek_character() == '&':
+                token = self._make_two_character_token(TokenType.AND)
+            else:
+                token = Token(TokenType.ILLEGAL, self._character)
         elif match(r'^/$', self._character):
             token = Token(TokenType.DIVISION, self._character)
         elif match(r'^\*$', self._character):

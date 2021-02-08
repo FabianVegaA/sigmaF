@@ -206,7 +206,7 @@ class EvaluatorTest(TestCase):
         self.assertEquals(str(evaluated.type_output), 'int')
         self.assertEquals(str(evaluated.body), '(x + 2)')
 
-    def test_function_test(self) -> None:
+    def test_function_call(self) -> None:
         tests: List[Tuple[str, int]] = [
             ('let identity = fn x::int -> int { x }; identity(5);', 5),
             ('''
@@ -276,6 +276,48 @@ class EvaluatorTest(TestCase):
                 assert item_evaluated != item_expected and type(
                     item_evaluated) != type(item_expected)
 
+    def test_list_call(self) -> None:
+        tests: List[Tuple[str, int]] = [
+            ('let identity = [1,2,3]; identity[1];', 2),
+            ('''
+             let identity = [1,2,3];
+             identity[0];
+             ''', 1),
+            ('''
+             let double = [1,1,2,3,4,5];
+             double[5];
+             ''', 5),
+            ('''
+             let sum = [1,1,2,3,5,8,13,21];
+             sum[7];
+             ''', 21),
+            ('''
+             let sum = [1,4,5,4,4,4,5];
+             sum[1 + 1];
+             ''', 5),
+            ('[1,2,3,4,5][0];', 1)
+        ]
+
+        for source, expected in tests:
+            evaluated = self._evaluate_tests(source)
+            self._test_integer_object(evaluated, expected)
+            
+    def test_bool_operator(self) -> None:
+        tests: List[Tuple[str, bool]] = [
+            ('true || true;', True),
+            ('true || false;', True),
+            ('false || true;', True),
+            ('false || false;', False),
+            ('true && true;', True),
+            ('true && false;', False),
+            ('false && true;', False),
+            ('false && false;', False),            
+        ]
+
+        for source, expected in tests:
+            evaluated = self._evaluate_tests(source)
+            self._test_boolean_object(evaluated, expected)
+
     def _test_error_object(self, evaluated: Object, expected: str) -> None:
         self.assertIsInstance(evaluated, Error)
 
@@ -310,6 +352,7 @@ class EvaluatorTest(TestCase):
 
         evaluated = cast(Integer, evaluated)
         self.assertEquals(evaluated.value, expected)
+    
 
     def _test_null_object(self, evaluated: Object) -> None:
         self.assertEquals(evaluated, NULL)

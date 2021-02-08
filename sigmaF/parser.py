@@ -12,6 +12,7 @@ from sigmaF.ast import (
     Block,
     Boolean,
     Call,
+    CallList,
     Function,
     ExpressionStatement,
     Expression,
@@ -42,16 +43,18 @@ IndixParseFns = Dict[TokenType, InfixParseFn]
 
 class Precedence(IntEnum):
     LOWEST = 1
-    EQUALS = 2
-    LESSGREATER = 3
-    SUM = 4
-    PRODUCT = 5
-    POW = 6
-    PREFIX = 7
-    CALL = 8
+    AND = 2
+    EQUALS = 3
+    LESSGREATER = 4
+    SUM = 5
+    PRODUCT = 6
+    POW = 7
+    PREFIX = 8
+    CALL = 9
 
 
 PRECEDENCE: Dict[TokenType, Precedence] = {
+    TokenType.AND: Precedence.AND,
     TokenType.EXPONENTIATION: Precedence.POW,
     TokenType.EQ: Precedence.EQUALS,
     TokenType.NOT_EQ: Precedence.EQUALS,
@@ -65,6 +68,8 @@ PRECEDENCE: Dict[TokenType, Precedence] = {
     TokenType.MODULUS: Precedence.PRODUCT,
     TokenType.MULTIPLICATION: Precedence.PRODUCT,
     TokenType.LPAREN: Precedence.CALL,
+    TokenType.LBRAKET: Precedence.CALL,
+    TokenType.OR: Precedence.AND,
 }
 
 
@@ -447,13 +452,13 @@ class Parser:
 
         values = []
 
-        if self._current_token.token_type not in [TokenType.INT, TokenType.FLOAT, TokenType.STRING, TokenType.TRUE, TokenType.FALSE]:
+        if self._current_token.token_type not in [TokenType.INT, TokenType.FLOAT, TokenType.STRING, TokenType.TRUE, TokenType.FALSE, TokenType.IDENT, TokenType.FUNCTION, TokenType.LBRAKET, TokenType.MINUS]:
             return None
 
         token_type = self._current_token.token_type
 
-        values.append(
-            self._prefix_parse_fns[self._current_token.token_type]())
+        if expression := self._parse_expression(Precedence.LOWEST):
+            values.append(expression)
 
         self._advance_tokens()
         while self._current_token.token_type == TokenType.COMMA:
@@ -463,16 +468,45 @@ class Parser:
             if self._current_token.token_type != token_type:
                 return None
 
-            values.append(
-                self._prefix_parse_fns[self._current_token.token_type]())
+            if expression := self._parse_expression(Precedence.LOWEST):
+                values.append(expression)
 
-            self._advance_tokens()
+                self._advance_tokens()
 
         if self._current_token.token_type is not TokenType.RBRAKET:
             return None
         list_values.values = values
 
         return list_values
+
+    def _parse_call_list(self, value_list: Expression) -> CallList:
+        assert self._current_token is not None
+        call_list = CallList(self._current_token, value_list)
+        call_list.range = self._parse_call_list_arguments()
+
+        return call_list
+
+    def _parse_call_list_arguments(self) -> Optional[List[Expression]]:
+        ranges: List[Expression] = []
+
+        assert self._peek_token is not None
+        if self._peek_token.token_type == TokenType.RBRAKET:
+            self._advance_tokens()
+
+            return None
+        self._advance_tokens()
+        if expression := self._parse_expression(Precedence.LOWEST):
+            ranges.append(expression)
+        while self._peek_token.token_type == TokenType.COMMA:
+            self._advance_tokens()
+            self._advance_tokens()
+
+            if expression := self._parse_expression(Precedence.LOWEST):
+                ranges.append(expression)
+        if not self._expected_token(TokenType.RBRAKET):
+            return None
+
+        return ranges
 
     def _register_infix_fns(self) -> IndixParseFns:
         return {
@@ -489,6 +523,9 @@ class Parser:
             TokenType.L_OR_EQ_T: self._parse_infix_expression,
             TokenType.G_OR_EQ_T: self._parse_infix_expression,
             TokenType.LPAREN: self._parse_call,
+            TokenType.LBRAKET: self._parse_call_list,
+            TokenType.AND: self._parse_infix_expression,
+            TokenType.OR: self._parse_infix_expression,
 
         }
 
@@ -499,6 +536,7 @@ class Parser:
             TokenType.LPAREN: self._parse_grouped_expression,
             TokenType.RPAREN: self._parse_grouped_expression,
             TokenType.LBRAKET: self._parse_list,
+            TokenType.RBRAKET: self._parse_list,
             TokenType.FALSE: self._parse_boolean,
             TokenType.TRUE: self._parse_boolean,
             TokenType.IDENT: self._parse_identifier,

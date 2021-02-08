@@ -35,6 +35,9 @@ _UNKNOW_PREFIX_OPERATOR = 'Unknown Operator: The operator \'{}\' is unknown for 
 _UNKNOW_INFIX_OPERATOR = 'Unknown Operator: The operator \'{}\' is unknown between {}'
 _UNKNOW_IDENTIFIER = 'Identifier not found: {}'
 _NON_MODIFIABLE_VALUE = 'Non-modifiable Value: The value of {} is not modifiable'
+_WRONG_NUMBER_INDEXES = 'Wrong number of indexes: {} indexes were delivered and between 1 and 3 are required'
+_INDIX_FAILED = 'Out range: The length of the list is {}'
+_NOT_A_LIST = 'Not a list: The object delivered is not a list is type {}'
 
 
 def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
@@ -141,17 +144,76 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
         node = cast(ast.Call, node)
 
         function = evaluate(node.function, env)
+        assert function is not None
 
         assert node.arguments is not None
         args = _evaluate_expression(node.arguments, env)
 
-        assert function is not None
         return _apply_function(function, args)
     elif node_type == ast.ListValues:
         node = cast(ast.ListValues, node)
 
         return _evaluate_item_list(node, env)
+
+    elif node_type == ast.CallList:
+        node = cast(ast.CallList, node)
+
+        list_identifier = evaluate(node.list_identifier, env)
+        assert list_identifier is not None
+
+        assert node.range is not None
+        ranges = _evaluate_expression(node.range, env)
+
+        return _get_values_list(list_identifier, ranges)
     return None
+
+
+def _get_values_list(value_list: Object, ranges: List[Object]) -> Object:
+    if type(value_list) == ValueList:
+        value_list = cast(ValueList, value_list)
+
+        start: int = 0
+        end: int = len(value_list.values)
+        index_jump: Optional[int] = None
+
+        if len(ranges) == 3:
+            assert (ranges[0].type() == ObjectType.INTEGER and ranges[1].type(
+            ) == ObjectType.INTEGER and ranges[2].type() == ObjectType.INTEGER)
+            start = cast(Integer, ranges[0]).value
+            end = cast(Integer, ranges[1]).value
+            index_jump = cast(Integer, ranges[2]).value
+        elif len(ranges) == 2:
+            assert not (ranges[0].type() == ObjectType.INTEGER and type(
+                ranges[1]) == ObjectType.INTEGER)
+            start = cast(Integer, ranges[0]).value
+            end = cast(Integer, ranges[1]).value
+            if end > len(value_list.values):
+                return NULL
+        elif len(ranges) == 1:
+            assert (ranges[0].type() == ObjectType.INTEGER)
+            start = cast(Integer, ranges[0]).value
+            end = cast(Integer, ranges[0]).value + 1
+            
+            try:
+                range_list = value_list.values.__getitem__(
+                    slice(start, end, index_jump))
+                if len(range_list) > 1:
+                    return ValueList(range_list)
+                else:
+                    return range_list[0]
+            except IndexError as e:
+                return _new_error(_INDIX_FAILED, [len(value_list.values)])
+        else:
+            return _new_error(_WRONG_NUMBER_INDEXES, [len(ranges)])
+
+        try:
+            range_list = value_list.values.__getitem__(
+                slice(start, end, index_jump))
+            return ValueList(range_list)
+        except IndexError as e:
+            return _new_error(_INDIX_FAILED, [len(value_list.values)])
+    else:
+        return _new_error(_NOT_A_LIST, [value_list.type()])
 
 
 def _apply_function(fn: Object, args: List[Object]) -> Object:
@@ -189,13 +251,16 @@ def _unwrap_return_value(obj: Object) -> Object:
     return obj
 
 
-def _evaluate_item_list(node: ast.ListValues, env: Environment) -> ValueList:
+def _evaluate_item_list(node: ast.ListValues, env: Environment) -> Object:
     values: List[Object] = []
 
     for value in node.values:
         evaluated = evaluate(value, env)
 
         assert evaluated is not None
+        if evaluated.type() is ObjectType.ERROR:
+            return _new_error(_UNKNOW_IDENTIFIER, [value.value])
+
         values.append(evaluated)
     return ValueList(values)
 
@@ -295,6 +360,10 @@ def _evaluate_bool_infix_expression(operator: str,
         return _to_boolean_object(left_value is right_value)
     elif operator == '!=':
         return _to_boolean_object(left_value is not right_value)
+    elif operator == '||':
+        return _to_boolean_object(left_value or right_value)
+    elif operator == '&&':
+        return _to_boolean_object(left_value and right_value)
     else:
         return _new_error(_UNKNOW_INFIX_OPERATOR, [operator,
                                                    left.type().name])

@@ -199,10 +199,12 @@ class ValueList(Object):
         return ObjectType.LIST
 
     def inspect(self) -> str:
-        values_list: List[Any] = [value.value for value in self.values]
-        if self.values[0].type() is ObjectType.STRING:
-            return '[\"' + '\", \"'.join(values_list) + '\"]'
-        return str(values_list)
+        values_list: List[str] = [value.inspect() for value in self.values]
+        
+        if len(self.values) > 0 and self.values[0].type() is ObjectType.STRING:
+            return ('[\"' + '\", \"'.join(values_list) + '\"]')
+        
+        return ('[' + ', '.join(values_list) + ']')
 
 
 # TODO To create the nullable class, this will be able to evaluate for example 'int?' or 'bool?'

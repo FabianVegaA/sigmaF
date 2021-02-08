@@ -1,5 +1,10 @@
 import sys
 
+from typing import (
+    Optional,
+    List
+)
+
 from sigmaF.repl import start_repl
 
 SIGMAF: str = """ 
@@ -32,7 +37,8 @@ def main(arg=None) -> None:
 
 
 if __name__ == '__main__':
-    args = sys.argv
+    args: List[str] = sys.argv
+    arg: Optional[str]
 
     if len(args) > 1:
         arg = args[1]

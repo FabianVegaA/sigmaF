@@ -11,6 +11,7 @@ from typing import (
 
 @unique
 class TokenType(Enum):
+    AND = auto()
     ASSIGN = auto()
     COMMA = auto()
     CLASSNAME = auto()
@@ -48,6 +49,7 @@ class TokenType(Enum):
     THEN = auto()
     TRUE = auto()
     TYPEASSIGN = auto()
+    OR = auto()
     OUTPUTFUNTION = auto()
 
 
@@ -68,9 +70,11 @@ def lookup_token_type(literal: str) -> TokenType:
         'if': TokenType.IF,
         'then': TokenType.THEN,
         'else': TokenType.ELSE,
+        'bool': TokenType.CLASSNAME,
         'int': TokenType.CLASSNAME,
         'str': TokenType.CLASSNAME,
         'float': TokenType.CLASSNAME,
+        'function': TokenType.CLASSNAME,
         'set': TokenType.CLASSNAME,
     }
 

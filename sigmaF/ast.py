@@ -276,3 +276,22 @@ class ListValues(Expression):
 
     def __str__(self) -> str:
         return str([str(value) for value in self.values])
+
+
+class CallList(Expression):
+
+    def __init__(self,
+                 token: Token,
+                 list_identifier: Expression,
+                 range: Optional[List[Expression]] = None
+                 ) -> None:
+        super().__init__(token)
+        self.list_identifier = list_identifier
+        self.range = range
+
+    def __str__(self) -> str:
+        assert self.range is not None
+        range_list: List[str] = [str(end_of) for end_of in self.range]
+        args: str = ', '.join(range_list)
+
+        return f'{str(self.list_identifier)}({args})'

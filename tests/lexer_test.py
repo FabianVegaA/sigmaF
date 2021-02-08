@@ -199,11 +199,13 @@ class LexerTest(TestCase):
             10 >= 10
             10 <= 10
             10 ** 10
+            10 || 10
+            10 && 10
         '''
         lexer: Lexer = Lexer(source)
 
         tokens: List[Token] = []
-        for i in range(15):
+        for i in range(21):
             tokens.append(lexer.next_token())
 
         expected_tokens: List[Token] = [
@@ -221,6 +223,12 @@ class LexerTest(TestCase):
             Token(TokenType.INT, '10'),
             Token(TokenType.INT, '10'),
             Token(TokenType.EXPONENTIATION, '**'),
+            Token(TokenType.INT, '10'),
+            Token(TokenType.INT, '10'),
+            Token(TokenType.OR, '||'),
+            Token(TokenType.INT, '10'),
+            Token(TokenType.INT, '10'),
+            Token(TokenType.AND, '&&'),
             Token(TokenType.INT, '10'),
         ]
         self.assertEquals(tokens, expected_tokens)

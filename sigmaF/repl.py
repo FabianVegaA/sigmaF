@@ -78,13 +78,13 @@ def start_repl(source: str = '') -> None:
         if source == "clear()":
             clear()
         else:
-
+            
             scanned.append(_check_errors(source, env))
 
-            lexer: Lexer = Lexer(' '.join(scanned))
-            parser: Parser = Parser(lexer)
+            lexer = Lexer(' '.join(scanned))
+            parser = Parser(lexer)
 
-            program: Program = parser.parse_program()
+            program = parser.parse_program()
 
             if len(parser.errors) > 0:
                 _print_parse_errors(parser.errors)
