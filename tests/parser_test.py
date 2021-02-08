@@ -527,7 +527,7 @@ class ParserTest(TestCase):
                 self.assertEquals(item.value, expect)
 
     def test_call_list(self) -> None:
-        source: str = 'list[1, 2 * 3];'
+        source: str = 'value_list[1, 2 * 3];'
         lexer: Lexer = Lexer(source)
         parser: Parser = Parser(lexer)
 
@@ -539,7 +539,7 @@ class ParserTest(TestCase):
                                         program.statements[0]).expression)
 
         self.assertIsInstance(call_list, CallList)
-        self._test_identifier(call_list.list_identifier, 'list')
+        self._test_identifier(call_list.list_identifier, 'value_list')
 
         # Test arguments
         assert call_list.range is not None

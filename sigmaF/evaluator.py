@@ -1,9 +1,11 @@
 from typing import (
     Any,
     cast,
+    Dict,
     List,
     Optional,
     Type,
+    Union
 )
 
 
@@ -38,6 +40,25 @@ _NON_MODIFIABLE_VALUE = 'Non-modifiable Value: The value of {} is not modifiable
 _WRONG_NUMBER_INDEXES = 'Wrong number of indexes: {} indexes were delivered and between 1 and 3 are required'
 _INDIX_FAILED = 'Out range: The length of the list is {}'
 _NOT_A_LIST = 'Not a list: The object delivered is not a list is type {}'
+_WRONG_ARGS = 'Arguments wrongs: The function expected to receive {} and receives {}'
+
+
+TYPE_REGISTER_LITERAL: Dict[str, ObjectType] = {
+    'int': ObjectType.INTEGER,
+    'str': ObjectType.STRING,
+    'bool': ObjectType.BOOLEAN,
+    'float': ObjectType.FLOAT,
+    'list': ObjectType.LIST,
+    'function': ObjectType.FUNCTION,
+}
+TYPE_REGISTER_OBJECT:  Dict[ObjectType, str] = {
+    ObjectType.INTEGER: 'int',
+    ObjectType.STRING: 'str',
+    ObjectType.BOOLEAN: 'bool',
+    ObjectType.FLOAT: 'float',
+    ObjectType.LIST: 'list',
+    ObjectType.FUNCTION: 'function'
+}
 
 
 def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
@@ -149,6 +170,21 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
         assert node.arguments is not None
         args = _evaluate_expression(node.arguments, env)
 
+        if not _check_type_args_function(function, args):
+            function = cast(Function, function)
+
+            type_params = function.type_parameters
+            type_args = [TYPE_REGISTER_OBJECT[arg.type()] for arg in args]
+
+            return _new_error(_WRONG_ARGS, [
+                ', '.join([type_param.value for type_param in type_params[0:-1]]
+                          ) + f', and {type_params[-1].value}'
+                if len(type_args) > 1 else type_params[0].value,
+
+                ' ,'.join(type_args[0:-1]) + f', and {type_args[-1]}'
+                if len(type_args) > 1 else type_args[0]
+            ])
+
         return _apply_function(function, args)
     elif node_type == ast.ListValues:
         node = cast(ast.ListValues, node)
@@ -193,7 +229,7 @@ def _get_values_list(value_list: Object, ranges: List[Object]) -> Object:
             assert (ranges[0].type() == ObjectType.INTEGER)
             start = cast(Integer, ranges[0]).value
             end = cast(Integer, ranges[0]).value + 1
-            
+
             try:
                 range_list = value_list.values.__getitem__(
                     slice(start, end, index_jump))
@@ -214,6 +250,19 @@ def _get_values_list(value_list: Object, ranges: List[Object]) -> Object:
             return _new_error(_INDIX_FAILED, [len(value_list.values)])
     else:
         return _new_error(_NOT_A_LIST, [value_list.type()])
+
+
+def _check_type_args_function(fn: Object, args: List[Object]) -> bool:
+    if type(fn) == Function:
+        fn = cast(Function, fn)
+        for idx, arg in enumerate(args):
+            type_param = fn.type_parameters[idx]
+            if not arg.type() == TYPE_REGISTER_LITERAL[type_param.value]:
+                return False
+        return True
+
+    else:
+        return True
 
 
 def _apply_function(fn: Object, args: List[Object]) -> Object:
