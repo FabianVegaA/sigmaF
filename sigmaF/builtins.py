@@ -24,7 +24,7 @@ _UNSUPPORTED_ARGUMENT_TYPE = 'Argument to {} without support, it was received a 
 
 
 def length(*args: Object) -> Object:
-    
+
     argument: Optional[Union[String, ValueList]] = None
     if len(args) != 1:
         return Error(_WRONG_NUMBER_OF_ARGS.format(len(args), 1))
@@ -70,13 +70,28 @@ def printLn(*args: Object) -> Object:
             print(argument.inspect())
 
         else:
-            print('----->',args[0])
+            print('----->', args[0])
             return Error(_UNSUPPORTED_ARGUMENT_TYPE.format('printLn', args[0].type().name))
 
         return Null()
 
 
+def negation_bolean(*args: Object):
+    if len(args) != 1:
+        return Error(_WRONG_NUMBER_OF_ARGS.format(len(args), 1))
+    else:
+        type_arg: Type = type(args[0])
+        argument: Optional[Boolean] = None
+
+        if type_arg == Boolean:
+            argument = cast(Boolean, args[0])
+            return Boolean(not argument.value)
+        else:
+            return Error(_UNSUPPORTED_ARGUMENT_TYPE.format('not', args[0].type().name))
+
+
 BUILTIN: Dict[str, Builtin] = {
     'length': Builtin(fn=length),
     'printLn': Builtin(fn=printLn),
+    'not': Builtin(fn=negation_bolean),
 }
