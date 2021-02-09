@@ -100,23 +100,26 @@ value_list[0, 8, 2] -- Output: [1, 3, 5, 7]
 
 > **Warning**: SigmaF does not allow the operation between different data type.
 
-Some operators are:
-| Operator             | symbol|
-|----------------------|------|
-| Plus                 | +    |
-| Minus                | -    |
-| Multiplication       | *    |
-| Division             | /    |
-| Modulus              | %    |
-| Exponential          | **   |
-| Equal                | ==   |
-| Not Equal            | !=   |
-| Less than            | <    |
-| Greater than         | >    |
-| Less or equal than   | <=   |
-| Grater or equal than | >=   |
-| And                  | &&   |
-| Or                   | \|\| |
+These are operators:
+| Operator             | Symbol |
+|----------------------|--------|
+| Plus                 |    +   |
+| Minus                |    -   |
+| Multiplication       |    *   |
+| Division             |    /   |
+| Modulus              |    %   |
+| Exponential          |   **   |
+| Equal                |   ==   |
+| Not Equal            |   !=   |
+| Less than            |    <   |
+| Greater than         |    >   |
+| Less or equal than   |   <=   |
+| Grater or equal than |   >=   |
+| And                  |   &&   |
+| Or                   |  \|\|  |
+<br/>
+
+> The operator of negation for Boolean was not included, for this, you can use the function `not()`
 
 ### Functions
 
