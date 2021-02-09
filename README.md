@@ -65,7 +65,7 @@ Before of all it is necessary to know this.
 ``` SigmaF
 printLn("Hello, World!")
 ```
-## Comment
+### Comments
 
 If you want to comment on your code, you can use:
 ```sql
