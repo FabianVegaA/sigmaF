@@ -44,31 +44,54 @@ python3.8 main.py < file.sf >
 
 It should show some like it.
 ![Imgur](https://i.imgur.com/bZRpaEx.png)
-
 ## Tutorial SigmaF
 Before averything first is it.
 ```SigmaF
 printLn("Hello, World!")
 ```
+### Let Statements
 This language have not variables, in its place use values for daclare must utilize `let` and give it a value, for example:
-```Python
-let a = 1        # Interger
-let b = 1.0      # Float
-let c = "string" # String
-let d = true     # Boolean
-let d = [1,2,3]  # List
-...              # And Others
+```sql
+let a = 1        -- Interger
+let b = 1.0      -- Float
+let c = "string" -- String
+let d = true     -- Boolean
+let d = [1,2,3]  -- List
+...              -- And Others
 ```
 Sigma allows data type as Integer, Float, Boolean, and String. Also, it allows all the data types before, lists and functions.
 
+### Operators
+> **Warning**: SigmaF does not allow the operation between different data type.
+
+Some operators are:
+| Plus                 | +    |
+|----------------------|------|
+| Minus                | -    |
+| Multiplication       | *    |
+| Division             | /    |
+| Modulus              | %    |
+| Exponential          | **   |
+| Equal                | ==   |
+| Not Equal            | !=   |
+| Less than            | <    |
+| Greater than         | >    |
+| Less or equal than   | <=   |
+| Grater or equal than | >=   |
+| And                  | &&   |
+| Or                   | \|\| |
+
+### Functions
 For declare function you use the next sintaxis:
 ```Python
-let example_function = fn <name argument>::<argument type> -> <output type> {
+let example_function = fn <Name Argument>::<Argument Type> -> <Output Type> {
     => <Return Value>
 }  
 ```
+> (The symbol `=>` mean return inside of the language)
+
 For example:
-```Python
+```sql
 let is_prime_number = fn x::int, i::int -> bool {
     if x <= 1 then {=> false;}
     if x == i then {=> true;}
@@ -76,6 +99,33 @@ let is_prime_number = fn x::int, i::int -> bool {
     => is_prime_number(x, i+1);
 }
 
-printLn(is_prime_number(11, 2)) # Output: true
+printLn(is_prime_number(11, 2)) -- Output: true
 ```
+### Conditionals
+Regarding the conditionals the syntax struct is:
+```Python
+if <Condition> then {
+    <Consequence>
+}
+else{
+    <Other Consequence>
+}
+```
+For example:
+```Python
+if x <= 1 || x % i == 0 then {
+    false;
+}
+if x == i then {
+    true;
+}
+else {
+    false;
+}
+```
+
+
+
+
+
 
