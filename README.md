@@ -59,7 +59,18 @@ let d = true     -- Boolean
 let d = [1,2,3]  -- List
 ...              -- And Others
 ```
-Sigma allows data type as Integer, Float, Boolean, and String. Also, it allows all the data types before, lists and functions.
+SigmaF allows data type as Integer, Float, Boolean, and String.
+### Lists 
+The List allows all the data types before, lists and functions.
+
+Also, it allows get item through the next notation:
+```sql
+let value_list = [1,2,3,4,5,6,7,8,9]
+value_list[0]       -- Output: 1
+value_list[0, 4]    -- Output: [1,2,3,4]
+value_list[0, 8, 2] -- Output: [1, 3, 5, 7]
+```
+> The struct of *List CAll* is example_list[\<Start>, \<End>, \<Index Jump>]
 
 ### Operators
 > **Warning**: SigmaF does not allow the operation between different data type.
