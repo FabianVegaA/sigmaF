@@ -1,24 +1,24 @@
 # SigmaF
 
-The project sigmaF search to create a new program language in the paradigm functional.
+The SigmaF project seeks to create a new programing language in the functional paradigm inspired by languages like Haskell, Python, JavaScript, and Rust.
 
-SigmaF is a programming language of the Functional paradigm, inspired by languages like Haskell, Python, JavaScript, and Rust.
-
-The interpreter is build with Python 3.8 with strategie Tree Walking Interpreter.
+It is an interpreted language with its interpreter fully built using Python 3.8.
 
 ## Install
 
-Until now has implemented just the REPL, but you can execute a file with extension ' *.sf* ' inside of this.
+It has been implemented for the moment only REPL, but you can execute a file with extension ' *.sf* ' inside of it.
 
-For install the REPL you must clone the repositorie in your machine.
+### For install the REPL you must: 
 
-Create a virtual enviroment.
+1. Clone the repositorie in your machine.
+
+2. Create a virtual enviroment.
 
 ``` shell
 python3 -m venv venv
 ```
 
-Run the virtual enviroment
+3. Run the virtual enviroment
 
 * Linux or Mac
 
@@ -34,7 +34,7 @@ cd sigmaF
 source /venv/Scripts/activate
 ```
 
-Install requirements
+4. Install requirements
 
 ``` shell
 pip install -r requirements.txt
