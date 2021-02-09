@@ -1,4 +1,5 @@
 import readline
+import re
 
 from os import system, name
 from typing import List
@@ -26,7 +27,20 @@ def _print_parse_errors(errors: List[str]):
         print(error)
 
 
+def _clean_comments(source: str) -> str:
+    pattern_single_line_comment = re.compile(r'\-\-.*(\n|\b)')
+    pattern_multiline_comment = re.compile(r'\/\*(\s|.)*?\*\/')
+    
+    source = re.sub(pattern_multiline_comment, '', source)
+    source = re.sub(pattern_single_line_comment, '', source)
+    
+    return source
+
+
 def _check_errors(source: str, enviroment: Environment) -> str:
+    source = _clean_comments(source)
+    print(source)
+
     lexer: Lexer = Lexer(source)
     parser: Parser = Parser(lexer)
 
@@ -78,7 +92,7 @@ def start_repl(source: str = '') -> None:
         if source == "clear()":
             clear()
         else:
-            
+
             scanned.append(_check_errors(source, env))
 
             lexer = Lexer(' '.join(scanned))
