@@ -40,7 +40,7 @@ _NON_MODIFIABLE_VALUE = 'Non-modifiable Value: The value of {} is not modifiable
 _WRONG_NUMBER_INDEXES = 'Wrong number of indexes: {} indexes were delivered and between 1 and 3 are required'
 _INDIX_FAILED = 'Out range: The length of the list is {}'
 _NOT_A_LIST = 'Not a list: The object delivered is not a list is type {}'
-_WRONG_ARGS = 'Arguments wrongs: The function expected to receive {} and receives {}'
+_WRONG_ARGS = 'Arguments wrongs: The function expected to receive types {} and receives {}'
 
 
 TYPE_REGISTER_LITERAL: Dict[str, ObjectType] = {
@@ -183,7 +183,7 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
 
                 ' ,'.join(type_args[0:-1]) + f', and {type_args[-1]}'
                 if len(type_args) > 1 else type_args[0]
-            ])
+                ])
 
         return _apply_function(function, args)
     elif node_type == ast.ListValues:
