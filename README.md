@@ -60,7 +60,7 @@ It should show some like it.
 
 ## Tutorial SigmaF
 
-Before averything first is it.
+Before of all it is necessary to know this.
 
 ``` SigmaF
 printLn("Hello, World!")
@@ -75,7 +75,7 @@ let a = 1        -- Interger
 let b = 1.0      -- Float
 let c = "string" -- String
 let d = true     -- Boolean
-let d = [1,2,3]  -- List
+let e = [1,2,3]  -- List
 ...              -- And Others
 ```
 
