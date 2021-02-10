@@ -79,7 +79,7 @@ If you want to comment your code, you can use:
 
 ### Let Statements
 
-This language doesn't use variables, instead, you can only declare static values. 
+This language doesn't use variables. Instead of variables, you can only declare static values.
 
 For daclaring a value, you must use `let` and give it a value. For example:
 
