@@ -144,7 +144,7 @@ let example_function = fn <Name Argument>::<Argument Type> -> <Output Type> {
 }  
 ```
 
-> (The symbol `=>` means return inside of the language)
+> (For return, you must use the => symbol)
 
 For example:
 
