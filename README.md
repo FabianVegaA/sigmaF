@@ -79,7 +79,9 @@ If you want to comment your code, you can use:
 
 ### Let Statements
 
-This language doesn't use variables. For daclaring a value, you must use `let` and give it a value. For example::
+This language doesn't use variables, instead, you can only declare static values. 
+
+For daclaring a value, you must use `let` and give it a value. For example:
 
 ``` sql
 let a = 1        -- Interger
@@ -105,7 +107,7 @@ value_list[0, 4]    -- Output: [1,2,3,4]
 value_list[0, 8, 2] -- Output: [1, 3, 5, 7]
 ```
 
-> The struct of *List CAll* is example_list[\<Start>, \<End>, \<Index Jump>]
+> The struct of **List CAll** is `example_list[\<Start>, \<End>, \<Index Jump>]`
 
 ### Operators
 
@@ -134,7 +136,7 @@ These are operators:
 
 ### Functions
 
-For declaring a function, you need to use the next sintaxis:
+For declaring a function, you need to use the next syntax:
 
 ``` Python
 let example_function = fn <Name Argument>::<Argument Type> -> <Output Type> {
