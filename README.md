@@ -127,7 +127,7 @@ These are operators:
 | Less than            |    <   |
 | Greater than         |    >   |
 | Less or equal than   |   <=   |
-| Grater or equal than |   >=   |
+| Greater or equal than |   >=   |
 | And                  |   &&   |
 | Or                   |  \|\|  |
 <br/>
