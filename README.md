@@ -48,7 +48,7 @@ You can execute code lines inside of the REPL using:
 python3.8 main.py
 ```
 
-Also, you can create a script with your code and use it inside of any statement . For this you can use:
+Also, you can create a script with your code and use it inside of any statement. For this you can use:
 
 ``` shell
 python3.8 main.py < file.sf >
@@ -79,7 +79,7 @@ If you want to comment your code, you can use:
 
 ### Let Statements
 
-This language doesn't have variables, in its place use values for daclare must utilize `let` and give it a value, for example:
+This language doesn't use variables. For daclaring a value, you must use `let` and give it a value. For example::
 
 ``` sql
 let a = 1        -- Interger
