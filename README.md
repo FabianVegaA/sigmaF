@@ -60,7 +60,7 @@ It should show something like this:
 
 ## Tutorial SigmaF
 
-Before of all it is necessary to know this.
+Before to start, it's necessary to know this.
 
 ``` SigmaF
 printLn("Hello, World!")
@@ -109,7 +109,7 @@ value_list[0, 8, 2] -- Output: [1, 3, 5, 7]
 
 ### Operators
 
-> **Warning**: SigmaF does not allow the operation between different data type.
+> **Warning**: SigmaF does not allow the operation between different data types.
 
 These are operators:
 | Operator             | Symbol |
