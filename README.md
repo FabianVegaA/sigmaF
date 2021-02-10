@@ -2,15 +2,15 @@
 
 The SigmaF project seeks to create a new programing language in the functional paradigm inspired by languages like Haskell, Python, JavaScript, and Rust.
 
-It is an interpreted language with its interpreter fully built using Python 3.8.
+It is an interpreted language fully built using Python 3.8.
 
 ## Install
 
-It has been implemented for the moment only REPL, but you can execute a file with extension ' *.sf* ' inside of it.
+It has been implemented only in REPL for the moment , but you can execute a file with the ' *.sf* ' extension inside of it.
 
 ### For install the REPL you must: 
 
-1. Clone the repositorie in your machine.
+1. Clone the repository in your machine.
 
 2. Create a virtual enviroment.
 
@@ -42,19 +42,19 @@ pip install -r requirements.txt
 
 ## How use the REPL?
 
-Inside the it you can execute code lines using:
+You can execute code lines inside of the REPL using:
 
 ``` shell
 python3.8 main.py
 ```
 
-Also, you can create a script with your code and use any statement inside, for this you use:
+Also, you can create a script with your code and use it inside of any statement . For this you can use:
 
 ``` shell
 python3.8 main.py < file.sf >
 ```
 
-It should show some like it.
+It should show something like this:
 
 ![Imgur](https://i.imgur.com/bZRpaEx.png)
 
@@ -67,7 +67,7 @@ printLn("Hello, World!")
 ```
 ### Comments
 
-If you want to comment on your code, you can use:
+If you want to comment your code, you can use:
 ```sql
 
 -- This is a single line comment
@@ -79,7 +79,7 @@ If you want to comment on your code, you can use:
 
 ### Let Statements
 
-This language have not variables, in its place use values for daclare must utilize `let` and give it a value, for example:
+This language doesn't have variables, in its place use values for daclare must utilize `let` and give it a value, for example:
 
 ``` sql
 let a = 1        -- Interger
@@ -94,9 +94,9 @@ SigmaF allows data type as Integer, Float, Boolean, and String.
 
 ### Lists 
 
-The List allows all the data types before, lists and functions.
+The List allows to all the data types before, lists and functions.
 
-Also, it allows get item through the next notation:
+Also, it allows to get an item through the next notation:
 
 ``` sql
 let value_list = [1,2,3,4,5,6,7,8,9]
@@ -130,11 +130,11 @@ These are operators:
 | Or                   |  \|\|  |
 <br/>
 
-> The operator of negation for Boolean was not included, for this, you can use the function `not()`
+> The operator of negation for Boolean was not included. For this, you can use the `not()` function
 
 ### Functions
 
-For declare function you use the next sintaxis:
+For declaring a function, you need to use the next sintaxis:
 
 ``` Python
 let example_function = fn <Name Argument>::<Argument Type> -> <Output Type> {
@@ -142,7 +142,7 @@ let example_function = fn <Name Argument>::<Argument Type> -> <Output Type> {
 }  
 ```
 
-> (The symbol `=>` mean return inside of the language)
+> (The symbol `=>` means return inside of the language)
 
 For example:
 
@@ -159,7 +159,7 @@ printLn(is_prime_number(11, 2)) -- Output: true
 
 ### Conditionals
 
-Regarding the conditionals the syntax struct is:
+Regarding the conditionals, the syntax structure is:
 
 ``` Python
 if <Condition> then {
