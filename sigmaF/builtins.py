@@ -135,16 +135,18 @@ def parse(*args: Object) -> Object:
 
     elif not args[0].type() == Object and args[1].type() == String:
         types = [arg.type().name for arg in args]
-        Error(_UNSUPPORTED_ARGUMENT_TYPE.format(
+        return Error(_UNSUPPORTED_ARGUMENT_TYPE.format(
             'pow', f'{types[0]} and {types[1]}'))
 
     else:
+        arg: Optional[Union[Integer, String, Float, ValueList]] = None
+        type_arg: Type = type(args[0])
         type_parse: str = cast(String, args[1]).inspect()
 
-        if type(args[0]) == Integer and type_parse == "float":
+        if type_arg == Integer and type_parse == "float":
             arg = cast(Integer, args[0])
             return Float(float(arg.value))
-        elif type(args[0]) == String and type_parse == "list":
+        elif type_arg == String and type_parse == "list":
             arg = cast(String, args[0])
             return ValueList([String(value_list) for value_list in list(arg.value)])
         else:

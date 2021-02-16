@@ -277,6 +277,15 @@ class ListValues(Expression):
     def __str__(self) -> str:
         return str([str(value) for value in self.values])
 
+class TupleValues(Expression):
+
+    def __init__(self, token: Token, values: List[Any] = []) -> None:
+        super().__init__(token)
+        self.values = values
+
+    def __str__(self) -> str:
+        return str(tuple([str(value) for value in self.values]))
+
 
 class CallList(Expression):
 

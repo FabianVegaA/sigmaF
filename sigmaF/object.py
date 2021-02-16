@@ -32,6 +32,7 @@ class ObjectType(Enum):
     NULL = auto()
     RETURN = auto()
     STRING = auto()
+    TUPLE = auto()
 
 
 class Object(ABC):
@@ -200,11 +201,27 @@ class ValueList(Object):
 
     def inspect(self) -> str:
         values_list: List[str] = [value.inspect() for value in self.values]
-        
+
         if len(self.values) > 0 and self.values[0].type() is ObjectType.STRING:
             return ('[\"' + '\", \"'.join(values_list) + '\"]')
-        
+
         return ('[' + ', '.join(values_list) + ']')
 
+
+class ValueTuple(Object):
+
+    def __init__(self, values: List[Object] = []) -> None:
+        self.values = values
+
+    def type(self) -> ObjectType:
+        return ObjectType.TUPLE
+
+    def inspect(self) -> str:
+        values_list: List[str] = [value.inspect() for value in self.values]
+
+        if len(self.values) > 0 and self.values[0].type() is ObjectType.STRING:
+            return ('(\"' + '\", \"'.join(values_list) + '\")')
+
+        return ('(' + ', '.join(values_list) + ')')
 
 # TODO To create the nullable class, this will be able to evaluate for example 'int?' or 'bool?'

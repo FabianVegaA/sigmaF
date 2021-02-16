@@ -19,6 +19,7 @@ from sigmaF.object import (
     Error,
     Integer,
     ValueList,
+    ValueTuple,
     Null,
     Return,
     String,
@@ -39,9 +40,11 @@ _UNKNOW_IDENTIFIER = 'Identifier not found: {}'
 _NON_MODIFIABLE_VALUE = 'Non-modifiable Value: The value of {} is not modifiable'
 _WRONG_NUMBER_INDEXES = 'Wrong number of indexes: {} indexes were delivered and between 1 and 3 are required'
 _INDIX_FAILED = 'Out range: The length of the list is {}'
-_NOT_A_LIST = 'Not a list: The object delivered is not a list is type {}'
+_NOT_AN_ITERABLE = 'Not a iterable: The object delivered is not a iterable type is of type {}'
 _WRONG_ARGS = 'Arguments wrongs: The function expected to receive types {} and receives {}'
-
+_INCOMPATIBLE_LIST_OPTERATION = 'Incompatible list operation: It is not possible to do the operation {} between a {} List and a {} List'
+_WRONG_NUMBER_OF_INDEXES_TUPLE = 'Wrong number of indexes: The tuple only required an index, and it was delivered {} indexes'
+_INCOMPATIBLE_TUPLE_OPTERATION = 'Incompatible tuple operation: It is not possible to do the operation {} between a {} Tuple and a {} Tuple'
 
 TYPE_REGISTER_LITERAL: Dict[str, ObjectType] = {
     'int': ObjectType.INTEGER,
@@ -49,6 +52,7 @@ TYPE_REGISTER_LITERAL: Dict[str, ObjectType] = {
     'bool': ObjectType.BOOLEAN,
     'float': ObjectType.FLOAT,
     'list': ObjectType.LIST,
+    'tuple': ObjectType.TUPLE,
     'function': ObjectType.FUNCTION,
 }
 TYPE_REGISTER_OBJECT:  Dict[ObjectType, str] = {
@@ -57,6 +61,7 @@ TYPE_REGISTER_OBJECT:  Dict[ObjectType, str] = {
     ObjectType.BOOLEAN: 'bool',
     ObjectType.FLOAT: 'float',
     ObjectType.LIST: 'list',
+    ObjectType.TUPLE: 'tuple',
     ObjectType.FUNCTION: 'function'
 }
 
@@ -183,13 +188,17 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
 
                 ' ,'.join(type_args[0:-1]) + f', and {type_args[-1]}'
                 if len(type_args) > 1 else type_args[0]
-                ])
+            ])
 
         return _apply_function(function, args)
     elif node_type == ast.ListValues:
         node = cast(ast.ListValues, node)
 
-        return _evaluate_item_list(node, env)
+        items = _evaluate_items(node, env)
+        if items[0].type() != ObjectType.ERROR:
+            return ValueList(items)
+        else:
+            return items[0]
 
     elif node_type == ast.CallList:
         node = cast(ast.CallList, node)
@@ -201,15 +210,24 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
         ranges = _evaluate_expression(node.range, env)
 
         return _get_values_list(list_identifier, ranges)
+    elif node_type == ast.TupleValues:
+        node = cast(ast.TupleValues, node)
+
+        items = _evaluate_items(node, env)
+        if items[0].type() != ObjectType.ERROR:
+            return ValueTuple(items)
+        else:
+            return items[0]
+
     return None
 
 
-def _get_values_list(value_list: Object, ranges: List[Object]) -> Object:
-    if type(value_list) == ValueList:
-        value_list = cast(ValueList, value_list)
+def _get_values_list(iterable: Object, ranges: List[Object]) -> Object:
+    if type(iterable) == ValueList:
+        iterable = cast(ValueList, iterable)
 
         start: int = 0
-        end: int = len(value_list.values)
+        end: int = len(iterable.values)
         index_jump: Optional[int] = None
 
         if len(ranges) == 3:
@@ -223,7 +241,7 @@ def _get_values_list(value_list: Object, ranges: List[Object]) -> Object:
                 ranges[1]) == ObjectType.INTEGER)
             start = cast(Integer, ranges[0]).value
             end = cast(Integer, ranges[1]).value
-            if end > len(value_list.values):
+            if end > len(iterable.values):
                 return NULL
         elif len(ranges) == 1:
             assert (ranges[0].type() == ObjectType.INTEGER)
@@ -231,25 +249,35 @@ def _get_values_list(value_list: Object, ranges: List[Object]) -> Object:
             end = cast(Integer, ranges[0]).value + 1
 
             try:
-                range_list = value_list.values.__getitem__(
+                range_list = iterable.values.__getitem__(
                     slice(start, end, index_jump))
                 if len(range_list) > 1:
                     return ValueList(range_list)
                 else:
                     return range_list[0]
             except IndexError as e:
-                return _new_error(_INDIX_FAILED, [len(value_list.values)])
+                return _new_error(_INDIX_FAILED, [len(iterable.values)])
         else:
             return _new_error(_WRONG_NUMBER_INDEXES, [len(ranges)])
 
         try:
-            range_list = value_list.values.__getitem__(
+            range_list = iterable.values.__getitem__(
                 slice(start, end, index_jump))
             return ValueList(range_list)
         except IndexError as e:
-            return _new_error(_INDIX_FAILED, [len(value_list.values)])
+            return _new_error(_INDIX_FAILED, [len(iterable.values)])
+
+    elif type(iterable) == ValueTuple:
+        iterable = cast(ValueTuple, iterable)
+
+        if len(ranges) == 1:
+            assert (ranges[0].type() == ObjectType.INTEGER)
+            index = cast(Integer, ranges[0]).value
+            return iterable.values.__getitem__(index)
+        else:
+            return _new_error(_WRONG_NUMBER_OF_INDEXES_TUPLE, [len(ranges)])
     else:
-        return _new_error(_NOT_A_LIST, [value_list.type()])
+        return _new_error(_NOT_AN_ITERABLE, [TYPE_REGISTER_OBJECT[iterable.type()]])
 
 
 def _check_type_args_function(fn: Object, args: List[Object]) -> bool:
@@ -300,7 +328,7 @@ def _unwrap_return_value(obj: Object) -> Object:
     return obj
 
 
-def _evaluate_item_list(node: ast.ListValues, env: Environment) -> Object:
+def _evaluate_items(node: Union[ast.TupleValues, ast.ListValues], env: Environment) -> List[Object]:
     values: List[Object] = []
 
     for value in node.values:
@@ -308,10 +336,10 @@ def _evaluate_item_list(node: ast.ListValues, env: Environment) -> Object:
 
         assert evaluated is not None
         if evaluated.type() is ObjectType.ERROR:
-            return _new_error(_UNKNOW_IDENTIFIER, [value.value])
+            return [_new_error(_UNKNOW_IDENTIFIER, [value.value])]
 
         values.append(evaluated)
-    return ValueList(values)
+    return values
 
 
 def _evaluate_expression(expressions: List[ast.Expression], env: Environment) -> List[Object]:
@@ -388,6 +416,9 @@ def _evaluate_infix_expression(operator: str,
     elif left.type() == ObjectType.LIST \
             and right.type() == ObjectType.LIST:
         return _evaluate_list_infix_expression(operator, left, right)
+    elif left.type() == ObjectType.TUPLE \
+            and right.type() == ObjectType.TUPLE:
+        return _evaluate_tuple_infix_expression(operator, left, right)
     elif left.type() != right.type():
         return _new_error(_TYPE_MISMATCH, [operator,
                                            left.type().name,
@@ -426,7 +457,58 @@ def _evaluate_list_infix_expression(operator: str,
     right_list: list = cast(ValueList, right).values
 
     if operator == '+':
+        if len(left_list) > 1 and len(right_list) > 1:
+            if left_list[0].type() == right_list[0].type():
+                return ValueList(values=left_list + right_list)
+            else:
+                return _new_error(_INCOMPATIBLE_LIST_OPTERATION, [operator, left_list[0].type().name, right_list[0].type().name])
         return ValueList(values=left_list + right_list)
+    elif operator == '==':
+        return _to_boolean_object(left_list == right_list)
+    elif operator == '!=':
+        return _to_boolean_object(left_list != right_list)
+    else:
+        return _new_error(_UNKNOW_INFIX_OPERATOR, [operator,
+                                                   right.type().name])
+
+
+def _evaluate_tuple_infix_expression(operator: str,
+                                     left: Object,
+                                     right: Object
+                                     ) -> Object:
+    left_list: list = cast(ValueTuple, left).values
+    right_list: list = cast(ValueTuple, right).values
+
+    if operator == '+':
+        if len(left_list) == len(right_list) and \
+                left_list[0].type() == right_list[0].type():
+
+            values = [_evaluate_infix_expression(
+                '+', l1, l2) for l1, l2 in zip(left_list, right_list)]
+
+            if values[0].type() != ObjectType.ERROR:
+                return ValueTuple(values=values)
+            else:
+                return values[0]
+        else:
+            return _new_error(_INCOMPATIBLE_TUPLE_OPTERATION,
+                              [operator, left_list[0].type().name,
+                               right_list[0].type().name])
+    elif operator == '-':
+        if len(left_list) == len(right_list) and \
+                left_list[0].type() == right_list[0].type():
+
+            values = [_evaluate_infix_expression(
+                '-', l1, l2) for l1, l2 in zip(left_list, right_list)]
+
+            if values[0].type() != ObjectType.ERROR:
+                return ValueTuple(values=values)
+            else:
+                return values[0]
+        else:
+            return _new_error(_INCOMPATIBLE_TUPLE_OPTERATION,
+                              [operator, left_list[0].type().name,
+                               right_list[0].type().name])
     elif operator == '==':
         return _to_boolean_object(left_list == right_list)
     elif operator == '!=':
