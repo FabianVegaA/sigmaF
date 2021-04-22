@@ -45,6 +45,13 @@ Welcome to SigmaF, the Program Language of the future for the Programming Functi
 >> 
 
 ```
+> WARNING:
+> If you have problems with this installation you can modify the file `home/.bashrc` and insert the below to the end of it.
+> ```
+> ## SigmaF
+> VERSION=v1.0
+> export PATH=/usr/local/lib/sigmaf/sigmaf-$VERSION:$PATH
+> ```
 ## Install via Interpreter of Python
 
 It has been implemented only in REPL for the moment , but you can execute a file with the ' *.sf* ' extension inside of it.
