@@ -4,7 +4,48 @@ The SigmaF project seeks to create a new programing language in the functional p
 
 It is an interpreted language fully built using Python 3.8.
 
-## Install
+
+## Install via binary archive on Linux
+
+1. Download the version that you prefreir  in `release`.
+2. Unzip the binary archive.
+``` console
+VERSION=v1.0
+sudo mkdir -p /usr/local/lib/sigmaf
+sudo tar -xJvf sigmaf-$VERSION.tar.xz -C /usr/local/lib/sigmaf
+```
+3. Set the environment variable ~/.profile, add below to the end.
+``` console
+VERSION=v1.0
+export PATH=/usr/local/lib/sigmaf/sigmaf-$VERSION:$PATH
+```
+4. Refresh profile
+``` console
+. ~/.profile
+```
+5. Test installation using.
+``` 
+➜ sigmaf
+Welcome to SigmaF, the Program Language of the future for the Programming Functional and a lot more
+
+ 
+                                                .         .                                                
+   d888888o.    8 8888     ,o888888o.          ,8.       ,8.                   .8.          8 8888888888   
+ .`8888:' `88.  8 8888    8888     `88.       ,888.     ,888.                 .888.         8 8888         
+ 8.`8888.   Y8  8 8888 ,8 8888       `8.     .`8888.   .`8888.               :88888.        8 8888         
+ `8.`8888.      8 8888 88 8888              ,8.`8888. ,8.`8888.             . `88888.       8 8888         
+  `8.`8888.     8 8888 88 8888             ,8'8.`8888,8^8.`8888.           .8. `88888.      8 888888888888 
+   `8.`8888.    8 8888 88 8888            ,8' `8.`8888' `8.`8888.         .8`8. `88888.     8 8888         
+    `8.`8888.   8 8888 88 8888   8888888 ,8'   `8.`88'   `8.`8888.       .8' `8. `88888.    8 8888         
+8b   `8.`8888.  8 8888 `8 8888       .8',8'     `8.`'     `8.`8888.     .8'   `8. `88888.   8 8888         
+`8b.  ;8.`8888  8 8888    8888     ,88',8'       `8        `8.`8888.   .888888888. `88888.  8 8888         
+ `Y8888P ,88P'  8 8888     `8888888P' ,8'         `         `8.`8888. .8'       `8. `88888. 8 8888         
+
+----------------------------------------------------------------------------------------------------------
+>> 
+
+```
+## Install via Interpreter of Python
 
 It has been implemented only in REPL for the moment , but you can execute a file with the ' *.sf* ' extension inside of it.
 
