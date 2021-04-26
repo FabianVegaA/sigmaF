@@ -476,15 +476,15 @@ def _evaluate_tuple_infix_expression(operator: str,
                                      left: Object,
                                      right: Object
                                      ) -> Object:
-    left_list: list = cast(ValueTuple, left).values
-    right_list: list = cast(ValueTuple, right).values
-
+    left_tuple: list = cast(ValueTuple, left).values
+    right_tuple: list = cast(ValueTuple, right).values
+    print(left_tuple, right_tuple)
     if operator == '+':
-        if len(left_list) == len(right_list) and \
-                left_list[0].type() == right_list[0].type():
+        if len(left_tuple) == len(right_tuple) and \
+                left_tuple[0].type() == right_tuple[0].type():
 
             values = [_evaluate_infix_expression(
-                '+', l1, l2) for l1, l2 in zip(left_list, right_list)]
+                '+', l1, l2) for l1, l2 in zip(left_tuple, right_tuple)]
 
             if values[0].type() != ObjectType.ERROR:
                 return ValueTuple(values=values)
@@ -492,14 +492,14 @@ def _evaluate_tuple_infix_expression(operator: str,
                 return values[0]
         else:
             return _new_error(_INCOMPATIBLE_TUPLE_OPTERATION,
-                              [operator, left_list[0].type().name,
-                               right_list[0].type().name])
+                              [operator, left_tuple[0].type().name,
+                               right_tuple[0].type().name])
     elif operator == '-':
-        if len(left_list) == len(right_list) and \
-                left_list[0].type() == right_list[0].type():
+        if len(left_tuple) == len(right_tuple) and \
+                left_tuple[0].type() == right_tuple[0].type():
 
             values = [_evaluate_infix_expression(
-                '-', l1, l2) for l1, l2 in zip(left_list, right_list)]
+                '-', l1, l2) for l1, l2 in zip(left_tuple, right_tuple)]
 
             if values[0].type() != ObjectType.ERROR:
                 return ValueTuple(values=values)
@@ -507,12 +507,33 @@ def _evaluate_tuple_infix_expression(operator: str,
                 return values[0]
         else:
             return _new_error(_INCOMPATIBLE_TUPLE_OPTERATION,
-                              [operator, left_list[0].type().name,
-                               right_list[0].type().name])
+                              [operator, left_tuple[0].type().name,
+                               right_tuple[0].type().name])
     elif operator == '==':
-        return _to_boolean_object(left_list == right_list)
+        if len(left_tuple) == len(right_tuple) and \
+                left_tuple[0].type() == right_tuple[0].type():
+            
+            left_tuple = list(map(lambda e: e.value, left_tuple))
+            right_tuple = list(map(lambda e: e.value, right_tuple))
+            
+            return _to_boolean_object(left_tuple == right_tuple)
+        else:
+            return _new_error(_INCOMPATIBLE_TUPLE_OPTERATION,
+                              [operator, left_tuple[0].type().name,
+                               right_tuple[0].type().name])
+        
     elif operator == '!=':
-        return _to_boolean_object(left_list != right_list)
+        if len(left_tuple) == len(right_tuple) and \
+                left_tuple[0].type() == right_tuple[0].type():
+            
+            left_tuple = list(map(lambda e: e.value, left_tuple))
+            right_tuple = list(map(lambda e: e.value, right_tuple))
+            
+            return _to_boolean_object(left_tuple != right_tuple)
+        else:
+            return _new_error(_INCOMPATIBLE_TUPLE_OPTERATION,
+                              [operator, left_tuple[0].type().name,
+                               right_tuple[0].type().name])
     else:
         return _new_error(_UNKNOW_INFIX_OPERATOR, [operator,
                                                    right.type().name])
