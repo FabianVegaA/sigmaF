@@ -18,6 +18,7 @@ from sigmaF.object import (
     Environment,
     Error,
     Integer,
+    Identifier,
     ValueList,
     ValueTuple,
     Null,
@@ -42,6 +43,7 @@ _WRONG_NUMBER_INDEXES = 'Wrong number of indexes: {} indexes were delivered and 
 _INDIX_FAILED = 'Out range: The length of the {} is {}'
 _NOT_AN_ITERABLE = 'Not a iterable: The object delivered is not a iterable type is of type {}'
 _WRONG_ARGS = 'Arguments wrongs: The function expected to receive types {} and receives {}'
+_WRONG_OUTPUT = 'Output wrongs: The function expected to return type {} and return {}'
 _INCOMPATIBLE_LIST_OPTERATION = 'Incompatible list operation: It is not possible to do the operation {} between a {} List and a {} List'
 _WRONG_NUMBER_OF_INDEXES_TUPLE = 'Wrong number of indexes: The tuple only required an index, and it was delivered {} indexes'
 _INCOMPATIBLE_TUPLE_OPTERATION = 'Incompatible tuple operation: It is not possible to do the operation {} between a {} Tuple and a {} Tuple'
@@ -190,7 +192,18 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
                 if len(type_args) > 1 else type_args[0]
             ])
 
-        return _apply_function(function, args)
+        return_fn = _apply_function(function, args)
+
+        if type(function) == Builtin:
+            return return_fn
+        elif type(function) == Function \
+                and _check_type_out_function(function, return_fn):
+            return return_fn
+        else:
+            function = cast(Function, function)
+            return _new_error(_WRONG_OUTPUT, [
+                function.type_output, TYPE_REGISTER_OBJECT[return_fn.type()]])
+
     elif node_type == ast.ListValues:
         node = cast(ast.ListValues, node)
 
@@ -256,7 +269,7 @@ def _get_values_list(iterable: Object, ranges: List[Object]) -> Object:
                 else:
                     return range_list[0]
             except IndexError as e:
-                return _new_error(_INDIX_FAILED, ["list",len(iterable.values)])
+                return _new_error(_INDIX_FAILED, ["list", len(iterable.values)])
         else:
             return _new_error(_WRONG_NUMBER_INDEXES, [len(ranges)])
 
@@ -265,7 +278,7 @@ def _get_values_list(iterable: Object, ranges: List[Object]) -> Object:
                 slice(start, end, index_jump))
             return ValueList(range_list)
         except IndexError as e:
-            return _new_error(_INDIX_FAILED, ["list",len(iterable.values)])
+            return _new_error(_INDIX_FAILED, ["list", len(iterable.values)])
 
     elif type(iterable) == ValueTuple:
         iterable = cast(ValueTuple, iterable)
@@ -276,7 +289,7 @@ def _get_values_list(iterable: Object, ranges: List[Object]) -> Object:
             try:
                 return iterable.values.__getitem__(index)
             except Exception as e:
-                return _new_error(_INDIX_FAILED, ["tuple",len(iterable.values)])
+                return _new_error(_INDIX_FAILED, ["tuple", len(iterable.values)])
         else:
             return _new_error(_WRONG_NUMBER_OF_INDEXES_TUPLE, [len(ranges)])
     else:
@@ -294,6 +307,15 @@ def _check_type_args_function(fn: Object, args: List[Object]) -> bool:
 
     else:
         return True
+
+
+def _check_type_out_function(fn: Object, out: Object) -> bool:
+    assert type(fn) == Function
+    fn = cast(Function, fn)
+
+    type_param = fn.type_output
+    type_param = cast(Identifier, type_param)
+    return bool(out.type() is TYPE_REGISTER_LITERAL[type_param.value])
 
 
 def _apply_function(fn: Object, args: List[Object]) -> Object:

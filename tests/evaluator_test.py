@@ -241,6 +241,37 @@ class EvaluatorTest(TestCase):
             evaluated = self._evaluate_tests(source)
             self._test_integer_object(evaluated, expected)
 
+    def test_function_call_error(self) -> None:
+        tests: List[Tuple[str, str]] = [
+            ('''let identity = fn x::int -> str {
+                => x; 
+            } 
+            identity(5);
+             ''', 'Output wrongs: The function expected to return type str and return int'),
+            ('''
+             let identity = fn x::int -> float {
+                 => x;
+             };
+             identity(5)
+             ''', 'Output wrongs: The function expected to return type float and return int'),
+            ('''
+             let double = fn x::int -> list {
+                 => x * 2;
+             };
+             double(5);
+             ''', 'Output wrongs: The function expected to return type list and return int'),
+            ('''
+             let sum = fn x::int, y::int -> tuple {
+                 => x + y;
+             };
+             sum(3,8);
+             ''', 'Output wrongs: The function expected to return type tuple and return int'),
+        ]
+
+        for source, expected in tests:
+            evaluated = self._evaluate_tests(source)
+            self._test_error_object(evaluated, expected)
+
     def test_builtin_function(self) -> None:
         tests: List[Tuple[str, Union[str, int]]] = [
             ('length("");', 0),
@@ -276,7 +307,7 @@ class EvaluatorTest(TestCase):
             for item_evaluated, item_expected in zip(evaluated.values, expected):
                 assert item_evaluated != item_expected and type(
                     item_evaluated) != type(item_expected)
-                
+
     def test_tuple(self) -> None:
         tests: List[Tuple[str, list]] = [
             ('(1,2,3)', [1, 2, 3]),
@@ -343,23 +374,27 @@ class EvaluatorTest(TestCase):
         for source, expected in tests:
             evaluated = self._evaluate_tests(source)
             self._test_integer_object(evaluated, expected)
-            
+
     def test_call_list(self) -> None:
         tests: List[Tuple[str, str]] = [
-            ('let identity = [1,2,3]; identity[3];', "Out range: The length of the list is 3"),
-            ('let identity = [1,2,3,1,2,3]; identity[100];', "Out range: The length of the list is 6"),
+            ('let identity = [1,2,3]; identity[3];',
+             "Out range: The length of the list is 3"),
+            ('let identity = [1,2,3,1,2,3]; identity[100];',
+             "Out range: The length of the list is 6"),
         ]
-        
+
         for source, expected in tests:
             evaluated = self._evaluate_tests(source)
             self._test_error_object(evaluated, expected)
-            
+
     def test_call_tuple(self) -> None:
         tests: List[Tuple[str, str]] = [
-            ('let identity = (1,2,3); identity[3];', "Out range: The length of the tuple is 3"),
-            ('let identity = (1,2,3,1,2,3); identity[100];', "Out range: The length of the tuple is 6"),
+            ('let identity = (1,2,3); identity[3];',
+             "Out range: The length of the tuple is 3"),
+            ('let identity = (1,2,3,1,2,3); identity[100];',
+             "Out range: The length of the tuple is 6"),
         ]
-        
+
         for source, expected in tests:
             evaluated = self._evaluate_tests(source)
             self._test_error_object(evaluated, expected)
@@ -373,7 +408,7 @@ class EvaluatorTest(TestCase):
             ('true && true;', True),
             ('true && false;', False),
             ('false && true;', False),
-            ('false && false;', False),            
+            ('false && false;', False),
         ]
 
         for source, expected in tests:
@@ -414,7 +449,6 @@ class EvaluatorTest(TestCase):
 
         evaluated = cast(Integer, evaluated)
         self.assertEquals(evaluated.value, expected)
-    
 
     def _test_null_object(self, evaluated: Object) -> None:
         self.assertEquals(evaluated, NULL)
