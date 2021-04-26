@@ -478,7 +478,7 @@ def _evaluate_tuple_infix_expression(operator: str,
                                      ) -> Object:
     left_tuple: list = cast(ValueTuple, left).values
     right_tuple: list = cast(ValueTuple, right).values
-    print(left_tuple, right_tuple)
+    
     if operator == '+':
         if len(left_tuple) == len(right_tuple) and \
                 left_tuple[0].type() == right_tuple[0].type():
