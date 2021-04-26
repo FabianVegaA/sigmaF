@@ -317,7 +317,33 @@ class EvaluatorTest(TestCase):
         for source, expected in tests:
             evaluated = self._evaluate_tests(source)
             self._test_integer_object(evaluated, expected)
-            
+
+    def test_tuple_call(self) -> None:
+        tests: List[Tuple[str, int]] = [
+            ('let identity = (1,2,3); identity[1];', 2),
+            ('''
+             let identity = (1,2,3);
+             identity[0];
+             ''', 1),
+            ('''
+             let double = (1,1,2,3,4,5);
+             double[5];
+             ''', 5),
+            ('''
+             let sum = (1,1,2,3,5,8,13,21);
+             sum[7];
+             ''', 21),
+            ('''
+             let sum = (1,4,5,4,4,4,5);
+             sum[1 + 1];
+             ''', 5),
+            ('(1,2,3,4,5)[0];', 1)
+        ]
+
+        for source, expected in tests:
+            evaluated = self._evaluate_tests(source)
+            self._test_integer_object(evaluated, expected)
+
     def test_bool_operator(self) -> None:
         tests: List[Tuple[str, bool]] = [
             ('true || true;', True),
