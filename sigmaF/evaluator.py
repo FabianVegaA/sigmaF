@@ -39,7 +39,7 @@ _UNKNOW_INFIX_OPERATOR = 'Unknown Operator: The operator \'{}\' is unknown betwe
 _UNKNOW_IDENTIFIER = 'Identifier not found: {}'
 _NON_MODIFIABLE_VALUE = 'Non-modifiable Value: The value of {} is not modifiable'
 _WRONG_NUMBER_INDEXES = 'Wrong number of indexes: {} indexes were delivered and between 1 and 3 are required'
-_INDIX_FAILED = 'Out range: The length of the list is {}'
+_INDIX_FAILED = 'Out range: The length of the {} is {}'
 _NOT_AN_ITERABLE = 'Not a iterable: The object delivered is not a iterable type is of type {}'
 _WRONG_ARGS = 'Arguments wrongs: The function expected to receive types {} and receives {}'
 _INCOMPATIBLE_LIST_OPTERATION = 'Incompatible list operation: It is not possible to do the operation {} between a {} List and a {} List'
@@ -256,7 +256,7 @@ def _get_values_list(iterable: Object, ranges: List[Object]) -> Object:
                 else:
                     return range_list[0]
             except IndexError as e:
-                return _new_error(_INDIX_FAILED, [len(iterable.values)])
+                return _new_error(_INDIX_FAILED, ["list",len(iterable.values)])
         else:
             return _new_error(_WRONG_NUMBER_INDEXES, [len(ranges)])
 
@@ -265,7 +265,7 @@ def _get_values_list(iterable: Object, ranges: List[Object]) -> Object:
                 slice(start, end, index_jump))
             return ValueList(range_list)
         except IndexError as e:
-            return _new_error(_INDIX_FAILED, [len(iterable.values)])
+            return _new_error(_INDIX_FAILED, ["list",len(iterable.values)])
 
     elif type(iterable) == ValueTuple:
         iterable = cast(ValueTuple, iterable)
@@ -273,7 +273,10 @@ def _get_values_list(iterable: Object, ranges: List[Object]) -> Object:
         if len(ranges) == 1:
             assert (ranges[0].type() == ObjectType.INTEGER)
             index = cast(Integer, ranges[0]).value
-            return iterable.values.__getitem__(index)
+            try:
+                return iterable.values.__getitem__(index)
+            except Exception as e:
+                return _new_error(_INDIX_FAILED, ["tuple",len(iterable.values)])
         else:
             return _new_error(_WRONG_NUMBER_OF_INDEXES_TUPLE, [len(ranges)])
     else:
@@ -478,7 +481,7 @@ def _evaluate_tuple_infix_expression(operator: str,
                                      ) -> Object:
     left_tuple: list = cast(ValueTuple, left).values
     right_tuple: list = cast(ValueTuple, right).values
-    
+
     if operator == '+':
         if len(left_tuple) == len(right_tuple) and \
                 left_tuple[0].type() == right_tuple[0].type():
@@ -512,23 +515,23 @@ def _evaluate_tuple_infix_expression(operator: str,
     elif operator == '==':
         if len(left_tuple) == len(right_tuple) and \
                 left_tuple[0].type() == right_tuple[0].type():
-            
+
             left_tuple = list(map(lambda e: e.value, left_tuple))
             right_tuple = list(map(lambda e: e.value, right_tuple))
-            
+
             return _to_boolean_object(left_tuple == right_tuple)
         else:
             return _new_error(_INCOMPATIBLE_TUPLE_OPTERATION,
                               [operator, left_tuple[0].type().name,
                                right_tuple[0].type().name])
-        
+
     elif operator == '!=':
         if len(left_tuple) == len(right_tuple) and \
                 left_tuple[0].type() == right_tuple[0].type():
-            
+
             left_tuple = list(map(lambda e: e.value, left_tuple))
             right_tuple = list(map(lambda e: e.value, right_tuple))
-            
+
             return _to_boolean_object(left_tuple != right_tuple)
         else:
             return _new_error(_INCOMPATIBLE_TUPLE_OPTERATION,

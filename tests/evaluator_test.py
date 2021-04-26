@@ -343,6 +343,26 @@ class EvaluatorTest(TestCase):
         for source, expected in tests:
             evaluated = self._evaluate_tests(source)
             self._test_integer_object(evaluated, expected)
+            
+    def test_call_list(self) -> None:
+        tests: List[Tuple[str, str]] = [
+            ('let identity = [1,2,3]; identity[3];', "Out range: The length of the list is 3"),
+            ('let identity = [1,2,3,1,2,3]; identity[100];', "Out range: The length of the list is 6"),
+        ]
+        
+        for source, expected in tests:
+            evaluated = self._evaluate_tests(source)
+            self._test_error_object(evaluated, expected)
+            
+    def test_call_tuple(self) -> None:
+        tests: List[Tuple[str, str]] = [
+            ('let identity = (1,2,3); identity[3];', "Out range: The length of the tuple is 3"),
+            ('let identity = (1,2,3,1,2,3); identity[100];', "Out range: The length of the tuple is 6"),
+        ]
+        
+        for source, expected in tests:
+            evaluated = self._evaluate_tests(source)
+            self._test_error_object(evaluated, expected)
 
     def test_bool_operator(self) -> None:
         tests: List[Tuple[str, bool]] = [
