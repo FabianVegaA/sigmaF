@@ -199,6 +199,8 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
         elif type(function) == Function \
                 and _check_type_out_function(function, return_fn):
             return return_fn
+        elif type(function) == Error:
+            return return_fn
         else:
             function = cast(Function, function)
             return _new_error(_WRONG_OUTPUT, [
@@ -208,10 +210,13 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
         node = cast(ast.ListValues, node)
 
         items = _evaluate_items(node, env)
-        if items[0].type() != ObjectType.ERROR:
-            return ValueList(items)
+        if len(items) > 0:
+            if items[0].type() != ObjectType.ERROR:
+                return ValueList(items)
+            else:
+                return items[0]
         else:
-            return items[0]
+            return ValueList([])
 
     elif node_type == ast.CallList:
         node = cast(ast.CallList, node)

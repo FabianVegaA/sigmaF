@@ -4,7 +4,8 @@ import re
 
 from typing import (
     Optional,
-    List
+    List,
+    cast
 )
 
 from sigmaF.repl import start_repl
@@ -72,9 +73,8 @@ def main(path=None, params=None) -> None:
 
         with open(path, mode='r', encoding='utf-8') as fin:
             lines = fin.readlines()
-        fin = '\n'.join(lines)
-
-        start_repl(fin)
+        src: str = '\n'.join([str(line) for line in lines])
+        start_repl(src)
 
 
 def filter_path_params(args):
