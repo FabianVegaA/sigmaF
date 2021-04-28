@@ -1,0 +1,103 @@
+let tail = fn l::list -> list {=> l[1,length(l)];}
+
+let init = fn l::list -> list {=> l[0,length(l)-1];}
+
+let last = fn l::list -> list {=> [l[length(l)-1]];}
+
+let head = fn l::list -> list {=> [l[0]];}
+
+let take = fn l::list, i::int -> list {=> l[0,i];}
+
+let rtake = fn l::list, i::int -> list {=> l[i,length(l)];}
+
+let com = fn f1::function, f2::function -> function {
+	=> fn any::list -> list {=> [f1(f2(any[0]))];}
+}
+
+let irank = fn i::int, f::int -> list {
+	if i >= f then {=> [i];}
+	=> [i] + irank(i+1, f);
+}
+
+let irank_interval = fn i::int, f::int, j::int -> list {
+	if i >= f then {=> [f];}
+	=> [i] + irank_interval(i+j, f, j);
+}
+
+let srepeat = fn s::str, n::int -> list {
+	if n <= 0 then {=> [];}
+	if n == 1 then {=> [s];}
+	=> [s] + srepeat(s, n-1);
+}
+
+let _snone_ = fn s::str -> str {=> s;} -- This does nothing
+
+let _inone_ = fn i::int -> int {=> i;} -- This does nothing
+
+let sconcat = fn l::list -> list {
+	=> sfoldl(_snone_, "", l);
+}
+
+let sconcat_map = fn l::list, f::function -> list {
+	=> sfoldl(f, "", l);
+}
+
+let map = fn f::function, l::list -> list {
+	if (l==[]) then {=> [];}
+	
+	=> [f(l[0])] + map(f, tail(l));
+}
+
+let filter = fn c::function, l::list -> list {
+       	printLn(l)
+	if (l == last(l)) then {
+		=> if (c(l[0])) then {[l[0]]} else {[]};
+	} 
+
+        => if (c(l[0])) then {[l[0]]} else {[]} +  filter(c, tail(l));
+}
+
+let ifoldl = fn f::function, i::int, l::list -> int {
+	printLn(l);
+	if length(l) == 1 then {
+		=> f(l[0]) + i;
+	}
+	=> ifoldl(f, i + f(l[0]), tail(l));
+}
+
+let sfoldl = fn f::function, s::str, l::list -> str {
+        if length(l) == 1 then {
+                => s + f(l[0]);
+        }
+        => sfoldl(f, s + f(l[0]), tail(l));
+}
+
+let reverse = fn l::list -> list {
+	if l == [] then {=> [];}
+	=> last(l) + reverse(init(l));
+}
+
+let zip = fn l1::list, l2::list -> list {
+	if l1 == last(l1) || l2 == last(l2) then {=> [(l1[0], l2[0])];}
+	=> [(l1[0],l2[0])] + zip(tail(l1),tail(l2));
+}
+
+let split = fn l::list, i::int -> list {
+	=> [take(l,i), rtake(l,i)]
+}
+
+let qsort = fn l::list -> list {
+
+	if (l == []) then {=> [];}
+	else {
+		let p = l[0];
+		let xs = tail(l);
+		
+		let c_lesser = fn q::int -> bool {=> (q < p)}
+		let c_greater = fn q::int -> bool {=> (q >= p)}
+
+		=> qsort(filter(c_lesser, xs)) + [p] + qsort(filter(c_greater, xs));
+	}
+}
+
+
