@@ -137,7 +137,8 @@ let b = 1.0      -- Float
 let c = "string" -- String
 let d = true     -- Boolean
 let e = [1,2,3]  -- List
-...              -- And Others
+let f = (1,2)    -- Tuple
+...             
 ```
 
 SigmaF allows data type as Integer, Float, Boolean, and String.
@@ -155,11 +156,30 @@ value_list[0, 4]    -- Output: [1,2,3,4]
 value_list[0, 8, 2] -- Output: [1, 3, 5, 7]
 ```
 
-> The struct of **List CAll** is `example_list[\<Start>, \<End>, \<Index Jump>]`
+> The struct of **List CAll** is `example_list[<Start>, <End>, <Jump>]`
+
+### Tuples 
+
+The tuples are data structs of length greater than 1 that allow others operation different to lists like:
+``` sql
+(1,2) + (3,4)      -- Output: (4,6)`
+(4,6,8) - (3,4,5)  -- Output: (1,2,3)`
+(0,1) == (0,1)     -- Output: true`
+(0,1) != (1,3)     -- Output: true`
+```
+To obtain the values of a tuple must use the same notation of the list, but this data structure not allow ranges as the lists (only you can get one position of a tuple).
+
+E.g. 
+``` sql
+let t = (1,2,3,4,5,6)
+t[1] -- Output: 2
+t[5] -- Output: 6
+```
+And so on.
 
 ### Operators
 
-> **Warning**: SigmaF does not allow the operation between different data types.
+> **Warning**: SigmaF have **Strong Typing**, so does not allow the operation between different data types.
 
 These are operators:
 | Operator             | Symbol |
@@ -233,3 +253,39 @@ else {
     false;
 }
 ```
+
+## Some Examples
+``` sql
+-- Quick Sort
+let qsort = fn l::list -> list {
+
+	if (l == []) then {=> [];}
+	else {
+		let p = l[0];
+		let xs = tail(l);
+		
+		let c_lesser = fn q::int -> bool {=> (q < p)}
+		let c_greater = fn q::int -> bool {=> (q >= p)}
+
+		=> qsort(filter(c_lesser, xs)) + [p] + qsort(filter(c_greater, xs));
+	}
+}
+
+-- Filter
+let filter = fn c::function, l::list -> list {
+	if (l == []) then {=> [];} 
+
+    => if (c(l[0])) then {[l[0]]} else {[]} +  filter(c, tail(l));
+}
+
+-- Map
+let map = fn f::function, l::list -> list {
+	if (l==[]) then {=> [];}
+	
+	=> [f(l[0])] + map(f, tail(l));
+}
+
+
+```
+
+For know other examples of the implementations you can go to [e.g.](egs)
