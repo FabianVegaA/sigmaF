@@ -77,10 +77,14 @@ let reverse = fn l::list -> list {
 	=> last(l) + reverse(init(l));
 }
 
+/*
 let zip = fn l1::list, l2::list -> list {
-	if l1 == last(l1) || l2 == last(l2) then {=> [(l1[0], l2[0])];}
+	if l1 == last(l1) || l2 == last(l2) then {
+		=> [(l1[0], l2[0])];
+	}
 	=> [(l1[0],l2[0])] + zip(tail(l1),tail(l2));
 }
+*/
 
 let split = fn l::list, i::int -> list {
 	=> [take(l,i), rtake(l,i)]
@@ -93,8 +97,8 @@ let qsort = fn l::list -> list {
 		let p = l[0];
 		let xs = tail(l);
 		
-		let c_lesser = fn q::int -> bool {=> (q < p)}
-		let c_greater = fn q::int -> bool {=> (q >= p)}
+		let c_lesser = fn q::int -> bool {=> (q < p)};
+		let c_greater = fn q::int -> bool {=> (q >= p)};
 
 		=> qsort(filter(c_lesser, xs)) + [p] + qsort(filter(c_greater, xs));
 	}

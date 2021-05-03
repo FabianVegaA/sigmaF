@@ -179,7 +179,7 @@ And so on.
 
 ### Operators
 
-> **Warning**: SigmaF have **Strong Typing**, so does not allow the operation between different data types.
+> **Warning**: SigmaF have **Static Typing**, so does not allow the operation between different data types.
 
 These are operators:
 | Operator             | Symbol |
