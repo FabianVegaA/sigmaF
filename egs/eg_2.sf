@@ -50,9 +50,7 @@ let map = fn f::function, l::list -> list {
 
 let filter = fn c::function, l::list -> list {
        	printLn(l)
-	if (l == last(l)) then {
-		=> if (c(l[0])) then {[l[0]]} else {[]};
-	} 
+	if (l == []) then {=> [];} 
 
         => if (c(l[0])) then {[l[0]]} else {[]} +  filter(c, tail(l));
 }
