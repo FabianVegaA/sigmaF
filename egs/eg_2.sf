@@ -75,14 +75,15 @@ let reverse = fn l::list -> list {
 	=> last(l) + reverse(init(l));
 }
 
-/*
+let ituplefy_2 = fn i::int, j::int -> tuple {=> (i,j);} 
+
 let zip = fn l1::list, l2::list -> list {
 	if l1 == last(l1) || l2 == last(l2) then {
-		=> [(l1[0], l2[0])];
+		=> [ituplefy_2(l1[0], l2[0])];
 	}
-	=> [(l1[0],l2[0])] + zip(tail(l1),tail(l2));
+	=> [ituplefy_2(l1[0],l2[0])] + zip(tail(l1),tail(l2));
 }
-*/
+
 
 let split = fn l::list, i::int -> list {
 	=> [take(l,i), rtake(l,i)]
