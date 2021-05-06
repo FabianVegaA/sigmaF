@@ -171,7 +171,7 @@ class Function(Object):
         params_and_types: str = ', '.join([f'{param}::{type_param}' for param, type_param in zip(
             self.parameters, self.type_parameters)])
 
-        return f'fn {params_and_types} -> {self.type_output} {{\n\t{self.body}\n}}'
+        return f'fn ({params_and_types}) -> {self.type_output}'
 
 
 class BuiltinFunction(Protocol):
@@ -181,14 +181,15 @@ class BuiltinFunction(Protocol):
 
 class Builtin(Object):
 
-    def __init__(self, fn: BuiltinFunction) -> None:
+    def __init__(self, fn: BuiltinFunction, io_type: str) -> None:
         self.fn = fn
+        self.io_type = io_type
 
     def type(self) -> ObjectType:
         return ObjectType.BUILTING
 
     def inspect(self) -> str:
-        return 'builtin function'
+        return self.io_type
 
 
 class ValueList(Object):
