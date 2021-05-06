@@ -300,14 +300,6 @@ class Parser:
         infix.right = self._parse_expression(precedence)
         return infix
 
-    def _parse_grouped_expression(self) -> Optional[Expression]:
-        expression = self._parse_expression(Precedence.LOWEST)
-
-        if not self._expected_token(TokenType.RPAREN):
-            return None
-
-        return expression
-
     def _parse_block(self) -> Block:
         assert self._current_token is not None
         block_statements = Block(token=self._current_token,
@@ -442,40 +434,25 @@ class Parser:
 
         return params, type_params, type_output
 
-    def _parse_tuple(self) -> Optional[Expression]:
-        assert self._old_token is not None and \
-            self._current_token is not None
-        tuple_values = TupleValues(token=self._old_token)
-
-        if self._current_token.token_type == TokenType.RPAREN:
-            return tuple_values
-
-        values = []
-        allow_types = [TokenType.INT,
-                       TokenType.FLOAT,
-                       TokenType.STRING,
-                       TokenType.TRUE,
-                       TokenType.FALSE,
-                       TokenType.IDENT,
-                       TokenType.FUNCTION,
-                       TokenType.LBRAKET,
-                       TokenType.MINUS]
-
-        if self._current_token.token_type not in allow_types:
+    def _parse_grouped_expression(self) -> Optional[Expression]:
+        expression = self._parse_expression(Precedence.LOWEST)
+        if self._peek_token.token_type is TokenType.COMMA:
+            return self._parse_tuple(expression)
+        if not self._expected_token(TokenType.RPAREN):
             return None
 
-        token_type = self._current_token.token_type
+        return expression
 
-        if expression := self._parse_expression(Precedence.LOWEST):
-            values.append(expression)
+    def _parse_tuple(self, fst_value: Optional[Expression]) -> Optional[Expression]:
+        assert self._current_token is not None
+        tuple_values = TupleValues(token=Token(TokenType.COMMA, '('))
+
+        values = [fst_value]
 
         self._advance_tokens()
+
         while self._current_token.token_type == TokenType.COMMA:
-
             self._advance_tokens()
-
-            if self._current_token.token_type != token_type:
-                return None
 
             if expression := self._parse_expression(Precedence.LOWEST):
                 values.append(expression)
@@ -484,6 +461,7 @@ class Parser:
 
         if self._current_token.token_type is not TokenType.RPAREN:
             return None
+
         tuple_values.values = values
 
         return tuple_values
@@ -493,9 +471,6 @@ class Parser:
             self._peek_token is not None
 
         self._advance_tokens()
-
-        if self._peek_token.token_type == TokenType.COMMA:
-            return self._parse_tuple()
 
         return self._parse_grouped_expression()
 
@@ -517,6 +492,8 @@ class Parser:
                        TokenType.IDENT,
                        TokenType.FUNCTION,
                        TokenType.LBRAKET,
+                       TokenType.LPAREN,
+                       TokenType.RPAREN,
                        TokenType.MINUS]
 
         if self._current_token.token_type not in allow_types:
@@ -601,7 +578,6 @@ class Parser:
             TokenType.FUNCTION: self._parse_function,
             TokenType.IF: self._parse_if,
             TokenType.LPAREN: self._parse_paren,
-            TokenType.RPAREN: self._parse_paren,
             TokenType.LBRAKET: self._parse_list,
             TokenType.RBRAKET: self._parse_list,
             TokenType.FALSE: self._parse_boolean,

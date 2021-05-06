@@ -41,6 +41,7 @@ _UNKNOW_IDENTIFIER = 'Identifier not found: {}'
 _NON_MODIFIABLE_VALUE = 'Non-modifiable Value: The value of {} is not modifiable'
 _WRONG_NUMBER_INDEXES = 'Wrong number of indexes: {} indexes were delivered and between 1 and 3 are required'
 _INDIX_FAILED = 'Out range: The length of the {} is {}'
+_TUPLE_FAIL = 'Tuple with more of one type: The tuple have {} type and {} type'
 _NOT_AN_ITERABLE = 'Not a iterable: The object delivered is not a iterable type is of type {}'
 _WRONG_ARGS = 'Arguments wrongs: The function expected to receive types {} and receives {}'
 _WRONG_OUTPUT = 'Output wrongs: The function expected to return type {} and return {}'
@@ -227,20 +228,27 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
         assert node.range is not None
         ranges = _evaluate_expression(node.range, env)
 
-        return _get_values_list(list_identifier, ranges)
+        return _get_values_iter(list_identifier, ranges)
     elif node_type == ast.TupleValues:
         node = cast(ast.TupleValues, node)
 
         items = _evaluate_items(node, env)
-        if items[0].type() != ObjectType.ERROR:
-            return ValueTuple(items)
-        else:
-            return items[0]
+        return _check_type_tuple(items)
 
     return None
 
 
-def _get_values_list(iterable: Object, ranges: List[Object]) -> Object:
+def _check_type_tuple(items: List[Object]) -> Object:
+    type_items = items[0].type()
+    for item in items:
+        if item.type() == ObjectType.ERROR:
+            return item
+        if item.type() != type_items:
+            return _new_error(_TUPLE_FAIL, [TYPE_REGISTER_OBJECT[type_items], TYPE_REGISTER_OBJECT[item.type()]])
+    return ValueTuple(items)
+
+
+def _get_values_iter(iterable: Object, ranges: List[Object]) -> Object:
     if type(iterable) == ValueList:
         iterable = cast(ValueList, iterable)
 
