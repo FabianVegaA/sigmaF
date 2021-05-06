@@ -65,7 +65,7 @@ def presentation_config(configs, params, exe_file=False):
 
 def main(path=None, params=None) -> None:
     configs = get_configs()
-    if '-version' in params:
+    if not params is None and '-version' in params:
         version = configs['version']
         print(f'SigmaF v{version}')
         return
