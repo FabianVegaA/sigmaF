@@ -174,6 +174,8 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
 
         function = evaluate(node.function, env)
         assert function is not None
+        if function.type() is ObjectType.ERROR:
+            return function
 
         assert node.arguments is not None
         args = _evaluate_expression(node.arguments, env)
@@ -281,7 +283,7 @@ def _get_values_iter(iterable: Object, ranges: List[Object]) -> Object:
                     return ValueList(range_list)
                 else:
                     return range_list[0]
-            except IndexError as e:
+            except IndexError:
                 return _new_error(_INDIX_FAILED, ["list", len(iterable.values)])
         else:
             return _new_error(_WRONG_NUMBER_INDEXES, [len(ranges)])
@@ -290,7 +292,7 @@ def _get_values_iter(iterable: Object, ranges: List[Object]) -> Object:
             range_list = iterable.values.__getitem__(
                 slice(start, end, index_jump))
             return ValueList(range_list)
-        except IndexError as e:
+        except IndexError:
             return _new_error(_INDIX_FAILED, ["list", len(iterable.values)])
 
     elif type(iterable) == ValueTuple:
@@ -301,7 +303,7 @@ def _get_values_iter(iterable: Object, ranges: List[Object]) -> Object:
             index = cast(Integer, ranges[0]).value
             try:
                 return iterable.values.__getitem__(index)
-            except Exception as e:
+            except Exception:
                 return _new_error(_INDIX_FAILED, ["tuple", len(iterable.values)])
         else:
             return _new_error(_WRONG_NUMBER_OF_INDEXES_TUPLE, [len(ranges)])
