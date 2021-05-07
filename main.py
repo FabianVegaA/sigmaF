@@ -10,7 +10,7 @@ from typing import (
 
 from sigmaF.repl import start_repl
 
-SIGMAF: str = """ 
+_SIGMAF_: str = """ 
                                                 .         .                                                
    d888888o.    8 8888     ,o888888o.          ,8.       ,8.                   .8.          8 8888888888   
  .`8888:' `88.  8 8888    8888     `88.       ,888.     ,888.                 .888.         8 8888         
@@ -24,12 +24,13 @@ SIGMAF: str = """
  `Y8888P ,88P'  8 8888     `8888888P' ,8'         `         `8.`8888. .8'       `8. `88888. 8 8888         
 """
 
+_FILENOTFOUNT = "File not fount on {}"
 
 def show_cover(version):
-    global SIGMAF
+    global _SIGMAF_
     print('-'*106)
     print(
-        f'\n\nWelcome to SigmaF v{version}, the Program Language of the future for the Programming Functional and a lot more\n\n{SIGMAF}')
+        f'\n\nWelcome to SigmaF v{version}, the Program Language of the future for the Programming Functional and a lot more\n\n{_SIGMAF_}')
     print('-'*106)
 
 
@@ -63,6 +64,16 @@ def presentation_config(configs, params, exe_file=False):
             show_cover(version)
 
 
+def read_module(path):
+    src = None
+    try:
+        with open(path, mode='r', encoding='utf-8') as fin:
+                lines = fin.readlines()
+        src = '\n'.join([str(line) for line in lines])
+    except FileNotFoundError:
+        print('\n[Error] ' + _FILENOTFOUNT.format(path) + '\n')
+    return src
+
 def main(path=None, params=None) -> None:
     configs = get_configs()
     if not params is None and '-version' in params:
@@ -75,10 +86,9 @@ def main(path=None, params=None) -> None:
     elif not path is None:
         presentation_config(configs, params, exe_file=True)
 
-        with open(path, mode='r', encoding='utf-8') as fin:
-            lines = fin.readlines()
-        src: str = '\n'.join([str(line) for line in lines])
-        start_repl(src)
+        src = read_module(path)
+        if not src is None:
+            start_repl(src)
 
 
 def filter_path_params(args):
