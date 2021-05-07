@@ -37,6 +37,7 @@ _NOT_A_FUNCTION = 'It is not a function: {}'
 _TYPE_MISMATCH = 'Type Discrepancy: It is not possible to do the operation \'{}\', for an {} and a {}'
 _UNKNOW_PREFIX_OPERATOR = 'Unknown Operator: The operator \'{}\' is unknown for {}'
 _UNKNOW_INFIX_OPERATOR = 'Unknown Operator: The operator \'{}\' is unknown between {}'
+_DIVISION_BY_ZERO = 'Division by zero: It is not possible to divide by zero {}'
 _UNKNOW_IDENTIFIER = 'Identifier not found: {}'
 _NON_MODIFIABLE_VALUE = 'Non-modifiable Value: The value of {} is not modifiable'
 _WRONG_NUMBER_INDEXES = 'Wrong number of indexes: {} indexes were delivered and between 1 and 3 are required'
@@ -596,6 +597,8 @@ def _evaluate_float_infix_expression(operator: str,
     elif operator == '**':
         return Float(left_value ** right_value)
     elif operator == '/':
+        if right_value == 0:
+                return _new_error(_DIVISION_BY_ZERO,[''])
         return Float(left_value / right_value)
     elif operator == '%':
         return Float(left_value % right_value)
@@ -632,6 +635,9 @@ def _evaluate_interger_infix_expression(operator: str,
     elif operator == '**':
         return Integer(left_value ** right_value)
     elif operator == '/':
+        if right_value == 0:
+                return _new_error(_DIVISION_BY_ZERO,[''])
+            
         if left_value % right_value == 0:
             return Integer(left_value // right_value)
         else:
