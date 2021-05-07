@@ -4,7 +4,7 @@ The SigmaF project seeks to create a new programing language in the functional p
 
 It is an interpreted language fully built using Python 3.8.
 
-
+---
 ## Install via binary archive on Linux
 
 1. Download the version that you prefreir  in `release`.
@@ -87,6 +87,7 @@ source /venv/Scripts/activate
 ``` shell
 pip install -r requirements.txt
 ```
+---
 
 ## How use the REPL?
 
@@ -99,13 +100,19 @@ python3.8 main.py
 Also, you can create a script with your code and use it inside of any statement. For this you can use:
 
 ``` shell
-python3.8 main.py < file.sf >
+python3.8 main.py <file.sf>
 ```
 
 It should show something like this:
 
 ![Imgur](https://i.imgur.com/bZRpaEx.png)
 
+### Options of command line (SigmaF v1.1)
+
+1. `-ncover`: This allows that the cover page to be not displayed.
+2. `-cover`: This allows the cover page to be displayed.
+3. `-version`: This display the version of SigmaF installed.
+---
 ## Tutorial SigmaF
 
 Before to start, it's necessary to know this.
@@ -289,3 +296,9 @@ let map = fn f::function, l::list -> list {
 ```
 
 For know other examples of the implementations you can go to [e.g.](egs)
+
+---
+## Feedback
+Feedback is very appreciated, reach out to me on [Twitter](https://twitter.com/fabianmativeal) or submit a new issue.
+## Contribute
+This is an **opensource** project, so everybody can contribute and be part of the community of [**SigmaF**](https://twitter.com/fabianmativeal/status/1385762245246922752).
