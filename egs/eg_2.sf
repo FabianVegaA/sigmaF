@@ -34,7 +34,7 @@ let _snone_ = fn s::str -> str {=> s;} -- This does nothing
 
 let _inone_ = fn i::int -> int {=> i;} -- This does nothing
 
-let sconcat = fn l::list -> list {
+let sconcat = fn l::list -> str {
 	=> sfoldl(_snone_, "", l);
 }
 
@@ -104,3 +104,9 @@ let qsort = fn l::list -> list {
 }
 
 
+let stairs = fn i::int -> str {
+	if i == 1 then {
+		=> "*\n";
+	}
+	=> stairs(i-1) + sconcat(srepeat("*", i)) + "\n";
+}
