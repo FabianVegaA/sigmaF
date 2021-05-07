@@ -226,7 +226,7 @@ class ParserTest(TestCase):
             5 == 5;
             5 != 5;
             true == true;
-            true != false;_parse_grouped_expression
+            true != false;
         '''
         lexer = Lexer(source)
         parser: Parser = Parser(lexer)
@@ -551,7 +551,7 @@ class ParserTest(TestCase):
     def test_tuple_and_list(self) -> None:
         tests: List[Tuple[str, List[List[int]]]] = [
             ('[(1,2)]', [[1, 2]]),
-            ('[(1,2), (2,3)]', [[1, 2], [2, 3]])
+            ('[(1,2), (2,3)]', [[1, 2], [2, 3]]),
         ]
 
         for source, expected in tests:
