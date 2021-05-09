@@ -185,7 +185,12 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
             function = cast(Function, function)
 
             type_params = function.type_parameters
-            type_args = [TYPE_REGISTER_OBJECT[arg.type()] for arg in args]
+
+            type_args = []
+            for arg in args:
+                if arg.type() is ObjectType.ERROR:
+                    return arg
+                type_args.append(TYPE_REGISTER_OBJECT[arg.type()])
 
             return _new_error(_WRONG_ARGS, [
                 ', '.join([type_param.value for type_param in type_params[0:-1]]
@@ -207,6 +212,10 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
             return return_fn
         else:
             function = cast(Function, function)
+
+            if return_fn.type() is ObjectType.ERROR:
+                return return_fn
+
             return _new_error(_WRONG_OUTPUT, [
                 function.type_output, TYPE_REGISTER_OBJECT[return_fn.type()]])
 
@@ -309,13 +318,17 @@ def _get_values_iter(iterable: Object, ranges: List[Object]) -> Object:
         else:
             return _new_error(_WRONG_NUMBER_OF_INDEXES_TUPLE, [len(ranges)])
     else:
+        if iterable.type() is ObjectType.ERROR:
+            return iterable
         return _new_error(_NOT_AN_ITERABLE, [TYPE_REGISTER_OBJECT[iterable.type()]])
 
 
-def _check_type_args_function(fn: Object, args: List[Object]) -> bool:
+def _check_type_args_function(fn: Object, args: List[Object]) -> Union[bool, Object]:
     if type(fn) == Function:
         fn = cast(Function, fn)
         for idx, arg in enumerate(args):
+            if arg.type() is ObjectType.ERROR:
+                return arg
             type_param = fn.type_parameters[idx]
             if not arg.type() == TYPE_REGISTER_LITERAL[type_param.value]:
                 return False
@@ -377,7 +390,12 @@ def _evaluate_items(node: Union[ast.TupleValues, ast.ListValues], env: Environme
 
         assert evaluated is not None
         if evaluated.type() is ObjectType.ERROR:
-            return [_new_error(_UNKNOW_IDENTIFIER, [value.value])]
+            if type(value) is ast.Identifier:
+                return [_new_error(_UNKNOW_IDENTIFIER, [value.value])]
+            elif type(value) is ast.CallList:
+                return [_new_error(_UNKNOW_IDENTIFIER, [value.list_identifier])]
+            else:
+                return [_new_error(_UNKNOW_IDENTIFIER, ["unknow identifier"])]
 
         values.append(evaluated)
     return values
@@ -598,7 +616,7 @@ def _evaluate_float_infix_expression(operator: str,
         return Float(left_value ** right_value)
     elif operator == '/':
         if right_value == 0:
-                return _new_error(_DIVISION_BY_ZERO,[''])
+            return _new_error(_DIVISION_BY_ZERO, [''])
         return Float(left_value / right_value)
     elif operator == '%':
         return Float(left_value % right_value)
@@ -636,8 +654,8 @@ def _evaluate_interger_infix_expression(operator: str,
         return Integer(left_value ** right_value)
     elif operator == '/':
         if right_value == 0:
-                return _new_error(_DIVISION_BY_ZERO,[''])
-            
+            return _new_error(_DIVISION_BY_ZERO, [''])
+
         if left_value % right_value == 0:
             return Integer(left_value // right_value)
         else:
