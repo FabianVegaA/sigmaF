@@ -44,7 +44,7 @@ def length(*args: Object) -> Object:
         return Error(_UNSUPPORTED_ARGUMENT_TYPE.format('length', args[0].type().name))
 
 
-def printLn(*args: Object) -> Object:
+def println(*args: Object) -> Object:
     if len(args) != 1:
         return Error(_WRONG_NUMBER_OF_ARGS.format(len(args), 1))
     else:
@@ -53,7 +53,7 @@ def printLn(*args: Object) -> Object:
                                  Float, Boolean, ValueList, Function]] = None
         if type_arg == String:
             argument = cast(String, args[0])
-            string = argument.inspect().replace('\\n', '\n')
+            string = argument.inspect().replace('\\n', '\n').replace('\\t', '\t')
             print(string)
 
         elif type_arg == Integer:
@@ -163,7 +163,7 @@ def parse(*args: Object) -> Object:
 
 BUILTIN: Dict[str, Builtin] = {
     'length': Builtin(fn=length, io_type="builtin fn (list|tuple|str) -> int"),
-    'printLn': Builtin(fn=printLn, io_type="builtin fn (any) -> null"),
+    'printLn': Builtin(fn=println, io_type="builtin fn (any) -> null"),
     'not': Builtin(fn=negation_bolean, io_type="builtin fn (bool) -> bool"),
     'pow': Builtin(fn=pow_impure, io_type="builtin fn (int|float, int|float) -> null"),
     'parse': Builtin(fn=parse, io_type="builtin fn (int|str,str) -> null"),
