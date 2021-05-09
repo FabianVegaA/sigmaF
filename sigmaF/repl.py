@@ -2,7 +2,10 @@ import readline
 import re
 
 from os import system, name
-from typing import List
+from typing import (
+    Optional,
+    List
+)
 
 from sigmaF.ast import Program
 from sigmaF.object import (
@@ -19,7 +22,11 @@ from sigmaF.token import (
 )
 from sigmaF.evaluator import evaluate
 
+
 EOF_TOKEN: Token = Token(TokenType.EOF, '')
+
+_FILENOTFOUNT = "File not fount on {}"
+_MAXIMUMRECURSIONDEPTH = 'Maximum recursion depth exceeded while being evaluated {}'
 
 
 def _print_parse_errors(errors: List[str]):
@@ -50,12 +57,27 @@ def _check_errors(source: str, enviroment: Environment) -> str:
         _print_parse_errors(parser.errors)
         return ''
 
-    evaluated = evaluate(program, env)
+    try:
+        evaluated = evaluate(program, env)
 
-    if evaluated is not None:
-        print(evaluated.inspect())
-        return ''
+        if evaluated is not None:
+            print(evaluated.inspect())
+            return ''
+    except RecursionError:
+        print('[Error] ' + _MAXIMUMRECURSIONDEPTH.format(''))
+
     return source
+
+
+def read_module(path):
+    src = None
+    try:
+        with open(path, mode='r', encoding='utf-8') as fin:
+            lines = fin.readlines()
+        src = '\n'.join([str(line) for line in lines])
+    except FileNotFoundError:
+        print('\n[Error] ' + _FILENOTFOUNT.format(path) + '\n')
+    return src
 
 
 def clear():
@@ -68,13 +90,17 @@ def clear():
         _ = system('clear')
 
 
-def start_repl(source: str = '') -> None:
-    scanned: List[str] = []
-    env: Environment = Environment()
+def update(_path: Optional[str], env: Environment):
 
-    scanned.append(_check_errors(source, env))
+    print(" ..", _path)
 
-    lexer: Lexer = Lexer(' '.join(scanned))
+    if _path is None:
+        return
+
+    return read_module(_path)
+
+
+def process(lexer: Lexer, env: Environment):
     parser: Parser = Parser(lexer)
 
     program: Program = parser.parse_program()
@@ -82,31 +108,43 @@ def start_repl(source: str = '') -> None:
     if len(parser.errors) > 0:
         _print_parse_errors(parser.errors)
 
-    evaluated = evaluate(program, env)
+    try:
+        evaluated = evaluate(program, env)
+    except RecursionError:
+        print('\n[Error] ' + _MAXIMUMRECURSIONDEPTH.format('') + '\n')
+        
     if evaluated is not None and evaluated.type() is not ObjectType.ERROR:
         print(evaluated.inspect())
+
+
+def start_repl(source: str = '', _path: Optional[str] = None) -> None:
+    scanned: List[str] = []
+    env: Environment = Environment()
+
+    scanned.append(_check_errors(source, env))
+
+    lexer: Lexer = Lexer(' '.join(scanned))
+
+    process(lexer, env)
 
     while (source := input('>> ')) != 'exit()':
 
         if source == "clear()":
             clear()
+        elif source == "update()":
+            print(env._store)
+            # TODO: Falta implementar la logica de esta
+            # funcion debe analizar env y hacer los
+            # cambios correspondientes
+            env = update(_path, env)
+
         else:
 
             scanned.append(_check_errors(source, env))
 
             lexer = Lexer(' '.join(scanned))
-            parser = Parser(lexer)
 
-            program = parser.parse_program()
-
-            if len(parser.errors) > 0:
-                _print_parse_errors(parser.errors)
-                continue
-
-            evaluated = evaluate(program, env)
-
-            if evaluated is not None and evaluated.type() is not ObjectType.ERROR:
-                print(evaluated.inspect())
+            process(lexer, env)
 
         while(token := lexer.next_token()) != EOF_TOKEN:
             print(token)
