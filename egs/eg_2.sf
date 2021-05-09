@@ -49,7 +49,6 @@ let map = fn f::function, l::list -> list {
 }
 
 let filter = fn c::function, l::list -> list {
-       	printLn(l)
 	if (l == []) then {=> [];} 
 
         => if (c(l[0])) then {[l[0]]} else {[]} +  filter(c, tail(l));
@@ -103,10 +102,30 @@ let qsort = fn l::list -> list {
 	}
 }
 
+let sto_list = fn s::str -> list {
+	=> parse(s, "list")
+} 
+
 
 let stairs = fn i::int -> str {
 	if i == 1 then {
 		=> "*\n";
 	}
 	=> stairs(i-1) + sconcat(srepeat("*", i)) + "\n";
+}
+
+let lsum = fn l::list -> int {
+    => foldl(_inone_, l)
+}
+
+let is_prime = fn x::int -> bool {
+		if x <= 1 then{=> false};
+    	if x == i then{=> true};
+    	if (x % i) == 0 then {=> false};
+
+    	=> is_prime(x, i+1);	
+}
+
+let seq_primes = fn n::int, f::function -> list {
+	=> filter(is_prime, [2] + irank_interval(3, (if n % 2 == 0 then {n - 1} else {n}), 2));
 }

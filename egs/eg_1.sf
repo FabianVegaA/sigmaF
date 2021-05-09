@@ -1,8 +1,8 @@
-let sum = fn x::int, y::int -> int {
+let sum = fn l::list -> int {
     => x + y;
 }
 
-let fibonacci_fn = fn n::int -> int {
+let fibonacci = fn n::int -> int {
     if n <= 2 then {
         => 1;
     }
@@ -11,22 +11,21 @@ let fibonacci_fn = fn n::int -> int {
     }
 }
 
-let fibonacci_opti = fn n::int, memo::list -> int {
-    if n <= 2 then {
-        => 1;
-    }
-    if length(memo) >= n - 1 then{
-        => memo[n - 1];
-    }
-    else{
-        let next_value = fibonacci_opti(n - 2, memo) + fibonacci_fn(n - 1);
-        => memo + [next_value];
-    }
-    
+let lsum = fn l::list -> int {
+    => foldl(fn i::int -> int {=> i}, l)
 }
 
-let a = 0
-a
+let fibonacci_memo = fn n::int, memo::list -> tuple {
+    if n < 0 then {=> (0, [0,0])}
+    if n == 0 then {=> (0, [0,1])}
+    if n == 1 then {=> (1, [1,1])}
+
+    let before = memo[0]
+    let result = lsum(memo)
+
+    => (result, [before, result])
+}
+
 
 let imc = fn peso_kilo::float, altura_metro::float-> float {
     => peso_kilo/(altura_metro**2.0);
