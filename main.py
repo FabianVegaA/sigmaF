@@ -8,7 +8,11 @@ from typing import (
     cast
 )
 
-from sigmaF.repl import start_repl
+from sigmaF.repl import (
+    start_repl,
+    read_module    
+)
+
 
 _SIGMAF_: str = """ 
                                                 .         .                                                
@@ -24,7 +28,7 @@ _SIGMAF_: str = """
  `Y8888P ,88P'  8 8888     `8888888P' ,8'         `         `8.`8888. .8'       `8. `88888. 8 8888         
 """
 
-_FILENOTFOUNT = "File not fount on {}"
+
 
 def show_cover(version):
     global _SIGMAF_
@@ -64,15 +68,7 @@ def presentation_config(configs, params, exe_file=False):
             show_cover(version)
 
 
-def read_module(path):
-    src = None
-    try:
-        with open(path, mode='r', encoding='utf-8') as fin:
-                lines = fin.readlines()
-        src = '\n'.join([str(line) for line in lines])
-    except FileNotFoundError:
-        print('\n[Error] ' + _FILENOTFOUNT.format(path) + '\n')
-    return src
+
 
 def main(path=None, params=None) -> None:
     configs = get_configs()
@@ -88,7 +84,7 @@ def main(path=None, params=None) -> None:
 
         src = read_module(path)
         if not src is None:
-            start_repl(src)
+            start_repl(src, path)
 
 
 def filter_path_params(args):
