@@ -91,12 +91,11 @@ def clear():
 
 
 def update(_path: Optional[str], env: Environment):
-
-    print(f"[Warning] Updated the path: { _path}")
-
     if _path is None:
         return
-
+    
+    print(f"[Warning] Updated the path: { _path}")
+    
     new_env = Environment()
 
     source: str = read_module(_path)
