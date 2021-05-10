@@ -92,12 +92,22 @@ def clear():
 
 def update(_path: Optional[str], env: Environment):
 
-    print(" ..", _path)
+    print(f"[Warning] Updated the path: { _path}")
 
     if _path is None:
         return
 
-    return read_module(_path)
+    new_env = Environment()
+
+    source: str = read_module(_path)
+    _ = Lexer(_check_errors(source, new_env))
+
+    for key, value in new_env._store.items():
+        if key in env.keys():
+            env.__delitem__(key)
+
+        env.__setitem__(key, value)
+    return env
 
 
 def process(lexer: Lexer, env: Environment):
@@ -112,9 +122,11 @@ def process(lexer: Lexer, env: Environment):
         evaluated = evaluate(program, env)
     except RecursionError:
         print('\n[Error] ' + _MAXIMUMRECURSIONDEPTH.format('') + '\n')
-        
+
     if evaluated is not None and evaluated.type() is not ObjectType.ERROR:
         print(evaluated.inspect())
+
+    return evaluated
 
 
 def start_repl(source: str = '', _path: Optional[str] = None) -> None:
@@ -125,17 +137,13 @@ def start_repl(source: str = '', _path: Optional[str] = None) -> None:
 
     lexer: Lexer = Lexer(' '.join(scanned))
 
-    process(lexer, env)
+    _ = process(lexer, env)
 
     while (source := input('>> ')) != 'exit()':
 
         if source == "clear()":
             clear()
         elif source == "update()":
-            print(env._store)
-            # TODO: Falta implementar la logica de esta
-            # funcion debe analizar env y hacer los
-            # cambios correspondientes
             env = update(_path, env)
 
         else:
@@ -144,7 +152,7 @@ def start_repl(source: str = '', _path: Optional[str] = None) -> None:
 
             lexer = Lexer(' '.join(scanned))
 
-            process(lexer, env)
+            _ = process(lexer, env)
 
         while(token := lexer.next_token()) != EOF_TOKEN:
             print(token)
