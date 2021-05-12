@@ -2,6 +2,7 @@ import readline
 import re
 
 from os import system, name
+
 from typing import (
     Optional,
     List
@@ -27,6 +28,7 @@ EOF_TOKEN: Token = Token(TokenType.EOF, '')
 
 _FILENOTFOUNT = "File not fount on {}"
 _MAXIMUMRECURSIONDEPTH = 'Maximum recursion depth exceeded while being evaluated {}'
+_EVALUATIONERROR = 'There was an error in the evaluation process {}'
 
 
 def _print_parse_errors(errors: List[str]):
@@ -65,6 +67,8 @@ def _check_errors(source: str, enviroment: Environment) -> str:
             return ''
     except RecursionError:
         print('[Error] ' + _MAXIMUMRECURSIONDEPTH.format(''))
+    except AssertionError:
+        print('\n[Error] ' + _EVALUATIONERROR.format('') + '\n')
 
     return source
 
@@ -92,10 +96,11 @@ def clear():
 
 def update(_path: Optional[str], env: Environment):
     if _path is None:
-        return
-    
+        print(f"[Warning] There is no path to be uploaded")
+        return env
+
     print(f"[Warning] Updated the path: { _path}")
-    
+
     new_env = Environment()
 
     source: str = read_module(_path)
@@ -119,13 +124,47 @@ def process(lexer: Lexer, env: Environment):
 
     try:
         evaluated = evaluate(program, env)
+
+        if evaluated is not None and evaluated.type() is not ObjectType.ERROR:
+            print(evaluated.inspect())
+
+        return evaluated
+
     except RecursionError:
         print('\n[Error] ' + _MAXIMUMRECURSIONDEPTH.format('') + '\n')
+    except AssertionError:
+        print('\n[Error] ' + _EVALUATIONERROR.format('') + '\n')
 
-    if evaluated is not None and evaluated.type() is not ObjectType.ERROR:
-        print(evaluated.inspect())
 
-    return evaluated
+def read_sublines(source):
+    left_compiled = re.compile(r'[\[\(\{]')
+    right_compiled = re.compile(r'[\]\)\}]')
+
+    stack = []
+    sub_lines = []
+
+    for match in re.findall(left_compiled, source):
+        stack.append(match)
+
+    while len(stack) != 0 and (sub_line := input('.. ')) != ';':
+
+        if sub_line != '':
+            sub_lines.append(sub_line)
+
+            if (left_matchs := re.findall(left_compiled, sub_line)):
+                for left_match in left_matchs:
+                    stack.append(left_match)
+
+            if (right_matchs := re.findall(right_compiled, sub_line)) and len(stack) > 0:
+
+                for right_match in right_matchs:
+
+                    if (stack[-1] == '{' and right_match == '}') or \
+                        (stack[-1] == '[' and right_match == ']') or \
+                            (stack[-1] == '(' and right_match == ')'):
+                        stack.pop()
+
+    return '\n'.join(sub_lines)
 
 
 def start_repl(source: str = '', _path: Optional[str] = None) -> None:
@@ -146,6 +185,8 @@ def start_repl(source: str = '', _path: Optional[str] = None) -> None:
             env = update(_path, env)
 
         else:
+            if source != '':
+                source += read_sublines(source) 
 
             scanned.append(_check_errors(source, env))
 
