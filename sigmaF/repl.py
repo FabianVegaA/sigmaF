@@ -136,6 +136,21 @@ def process(lexer: Lexer, env: Environment):
         print('\n[Error] ' + _EVALUATIONERROR.format('') + '\n')
 
 
+def _pop_push_stack(left_compiled, right_compiled, stack, source):
+    if (left_matchs := re.findall(left_compiled, source)):
+        for left_match in left_matchs:
+            stack.append(left_match)
+    if (right_matchs := re.findall(right_compiled, source)) and len(stack) > 0:
+
+        for right_match in right_matchs:
+
+            if (stack[-1] == '{' and right_match == '}') or \
+                (stack[-1] == '[' and right_match == ']') or \
+                    (stack[-1] == '(' and right_match == ')'):
+                stack.pop()
+    return stack
+
+
 def read_sublines(source):
     left_compiled = re.compile(r'[\[\(\{]')
     right_compiled = re.compile(r'[\]\)\}]')
@@ -143,26 +158,15 @@ def read_sublines(source):
     stack = []
     sub_lines = []
 
-    for match in re.findall(left_compiled, source):
-        stack.append(match)
+    stack = _pop_push_stack(left_compiled, right_compiled, stack, source)
 
     while len(stack) != 0 and (sub_line := input('.. ')) != ';':
 
         if sub_line != '':
             sub_lines.append(sub_line)
 
-            if (left_matchs := re.findall(left_compiled, sub_line)):
-                for left_match in left_matchs:
-                    stack.append(left_match)
-
-            if (right_matchs := re.findall(right_compiled, sub_line)) and len(stack) > 0:
-
-                for right_match in right_matchs:
-
-                    if (stack[-1] == '{' and right_match == '}') or \
-                        (stack[-1] == '[' and right_match == ']') or \
-                            (stack[-1] == '(' and right_match == ')'):
-                        stack.pop()
+            stack = _pop_push_stack(
+                left_compiled, right_compiled, stack, sub_line)
 
     return '\n'.join(sub_lines)
 
@@ -186,7 +190,7 @@ def start_repl(source: str = '', _path: Optional[str] = None) -> None:
 
         else:
             if source != '':
-                source += read_sublines(source) 
+                source += read_sublines(source)
 
             scanned.append(_check_errors(source, env))
 
