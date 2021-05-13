@@ -58,6 +58,7 @@ TYPE_REGISTER_LITERAL: Dict[str, ObjectType] = {
     'list': ObjectType.LIST,
     'tuple': ObjectType.TUPLE,
     'function': ObjectType.FUNCTION,
+    'null': ObjectType.INTEGER,
 }
 TYPE_REGISTER_OBJECT:  Dict[ObjectType, str] = {
     ObjectType.INTEGER: 'int',
