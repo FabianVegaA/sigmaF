@@ -39,7 +39,7 @@ def show_cover(version):
 
 
 def show_head(version):
-    print(f'SigmaF v{version} | Exit: exit() ')
+    print(f'SigmaF v{version} | Exit: exit() | Update: update()')
 
 
 def get_configs():
