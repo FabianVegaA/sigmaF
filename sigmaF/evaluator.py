@@ -49,6 +49,7 @@ _WRONG_OUTPUT = 'Output wrongs: The function expected to return type {} and retu
 _INCOMPATIBLE_LIST_OPTERATION = 'Incompatible list operation: It is not possible to do the operation {} between a {} List and a {} List'
 _WRONG_NUMBER_OF_INDEXES_TUPLE = 'Wrong number of indexes: The tuple only required an index, and it was delivered {} indexes'
 _INCOMPATIBLE_TUPLE_OPTERATION = 'Incompatible tuple operation: It is not possible to do the operation {} between a {} Tuple and a {} Tuple'
+_INCOMPATIBLE_NULL_OPTERATION = 'Incompatible null operation: It is not possible to do the operation {} between a {} and {}'
 
 TYPE_REGISTER_LITERAL: Dict[str, ObjectType] = {
     'int': ObjectType.INTEGER,
@@ -463,6 +464,10 @@ def _evaluate_infix_expression(operator: str,
 
     if left.type() == ObjectType.INTEGER \
             and right.type() == ObjectType.INTEGER:
+                
+        if left.inspect() == 'null' or right.inspect() == 'null':
+            return NULL
+        
         return _evaluate_interger_infix_expression(operator, left, right)
     elif left.type() == ObjectType.FLOAT \
             and right.type() == ObjectType.FLOAT:
