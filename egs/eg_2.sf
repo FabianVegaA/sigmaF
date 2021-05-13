@@ -118,14 +118,4 @@ let lsum = fn l::list -> int {
     => foldl(_inone_, l)
 }
 
-let is_prime = fn x::int -> bool {
-		if x <= 1 then{=> false};
-    	if x == i then{=> true};
-    	if (x % i) == 0 then {=> false};
 
-    	=> is_prime(x, i+1);	
-}
-
-let seq_primes = fn n::int, f::function -> list {
-	=> filter(is_prime, [2] + irank_interval(3, (if n % 2 == 0 then {n - 1} else {n}), 2));
-}
