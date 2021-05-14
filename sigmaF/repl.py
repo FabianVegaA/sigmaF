@@ -181,13 +181,17 @@ def start_repl(source: str = '', _path: Optional[str] = None) -> None:
 
     _ = process(lexer, env)
 
+    _pattern_path = re.compile(r'load\(([\w\.-_\/]+)\)')
+
     while (source := input('>> ')) != 'exit()':
 
         if source == "clear()":
             clear()
         elif source == "update()":
             env = update(_path, env)
-
+        elif (path := re.match(_pattern_path, source)) is not None:
+            env = update(path.group(1), env)
+            _path = path.group(1)
         else:
             if source != '':
                 source += read_sublines(source)
