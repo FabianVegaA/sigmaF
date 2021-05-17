@@ -1,6 +1,6 @@
 # SigmaF
 
-The SigmaF project seeks to create a new programing language in the functional paradigm inspired by languages like Haskell, Python, JavaScript, and Rust.
+The SigmaF project seeks to create a new programming language open source in the functional paradigm inspired by languages like Haskell, Python, JavaScript, and Rust.
 
 It is an interpreted language fully built using Python 3.8.
 
@@ -122,8 +122,8 @@ It should show something like this:
 
 ### Commands to REPL
 1. `exit()`: This it allow you exit of the REPL.
-2. `load()`: Whith this commands you can load a `file.sf`. For this, you must add like parameter a valid path.
-3. `update()`: This command reloads the path previously loaded.
+2. `load()`: Whith this commands you can load a `file.sf`. For this, you must add like parameter a valid path. (version 1.1)
+3. `update()`: This command reloads the path previously loaded. (version 1.1)
 
 ---
 ## Tutorial SigmaF
