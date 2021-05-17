@@ -108,5 +108,7 @@ if __name__ == '__main__':
         path, params = filter_path_params(args)
     else:
         path, params = None, None
-
-    main(path, params)
+    try:
+        main(path, params)
+    except KeyboardInterrupt:
+        print('\n↳ Good bye \n')
