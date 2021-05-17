@@ -22,6 +22,7 @@ from sigmaF.ast import (
     Float,
     LetStatement,
     ListValues,
+    TupleValues,
     Prefix,
     Infix,
     Program,
@@ -77,6 +78,7 @@ class Parser:
 
     def __init__(self, lexer: Lexer) -> None:
         self._lexer = lexer
+        self._old_token: Optional[Token] = None
         self._current_token: Optional[Token] = None
         self._peek_token: Optional[Token] = None
         self._errors: List[str] = []
@@ -105,6 +107,7 @@ class Parser:
         return program
 
     def _advance_tokens(self) -> None:
+        self._old_token = self._current_token
         self._current_token = self._peek_token
         self._peek_token = self._lexer.next_token()
 
@@ -297,16 +300,6 @@ class Parser:
         infix.right = self._parse_expression(precedence)
         return infix
 
-    def _parse_grouped_expression(self) -> Optional[Expression]:
-        self._advance_tokens()
-
-        expression = self._parse_expression(Precedence.LOWEST)
-
-        if not self._expected_token(TokenType.RPAREN):
-            return None
-
-        return expression
-
     def _parse_block(self) -> Block:
         assert self._current_token is not None
         block_statements = Block(token=self._current_token,
@@ -441,6 +434,46 @@ class Parser:
 
         return params, type_params, type_output
 
+    def _parse_grouped_expression(self) -> Optional[Expression]:
+        expression = self._parse_expression(Precedence.LOWEST)
+        if self._peek_token.token_type is TokenType.COMMA:
+            return self._parse_tuple(expression)
+        if not self._expected_token(TokenType.RPAREN):
+            return None
+
+        return expression
+
+    def _parse_tuple(self, fst_value: Optional[Expression]) -> Optional[Expression]:
+        assert self._current_token is not None
+        tuple_values = TupleValues(token=Token(TokenType.COMMA, '('))
+
+        values = [fst_value]
+
+        self._advance_tokens()
+
+        while self._current_token.token_type == TokenType.COMMA:
+            self._advance_tokens()
+
+            if expression := self._parse_expression(Precedence.LOWEST):
+                values.append(expression)
+
+                self._advance_tokens()
+
+        if self._current_token.token_type is not TokenType.RPAREN:
+            return None
+
+        tuple_values.values = values
+
+        return tuple_values
+
+    def _parse_paren(self) -> Optional[Expression]:
+        assert self._current_token is not None and \
+            self._peek_token is not None
+
+        self._advance_tokens()
+
+        return self._parse_grouped_expression()
+
     def _parse_list(self) -> Optional[ListValues]:
         assert self._current_token is not None
         list_values = ListValues(token=self._current_token)
@@ -451,8 +484,19 @@ class Parser:
             return list_values
 
         values = []
+        allow_types = [TokenType.INT,
+                       TokenType.FLOAT,
+                       TokenType.STRING,
+                       TokenType.TRUE,
+                       TokenType.FALSE,
+                       TokenType.IDENT,
+                       TokenType.FUNCTION,
+                       TokenType.LBRAKET,
+                       TokenType.LPAREN,
+                       TokenType.RPAREN,
+                       TokenType.MINUS]
 
-        if self._current_token.token_type not in [TokenType.INT, TokenType.FLOAT, TokenType.STRING, TokenType.TRUE, TokenType.FALSE, TokenType.IDENT, TokenType.FUNCTION, TokenType.LBRAKET, TokenType.MINUS]:
+        if self._current_token.token_type not in allow_types:
             return None
 
         token_type = self._current_token.token_type
@@ -533,8 +577,7 @@ class Parser:
         return {
             TokenType.FUNCTION: self._parse_function,
             TokenType.IF: self._parse_if,
-            TokenType.LPAREN: self._parse_grouped_expression,
-            TokenType.RPAREN: self._parse_grouped_expression,
+            TokenType.LPAREN: self._parse_paren,
             TokenType.LBRAKET: self._parse_list,
             TokenType.RBRAKET: self._parse_list,
             TokenType.FALSE: self._parse_boolean,

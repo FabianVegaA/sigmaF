@@ -22,6 +22,7 @@ from sigmaF.object import (
     Error,
     Integer,
     ValueList,
+    ValueTuple,
     String,
     Object,
 )
@@ -240,6 +241,37 @@ class EvaluatorTest(TestCase):
             evaluated = self._evaluate_tests(source)
             self._test_integer_object(evaluated, expected)
 
+    def test_function_call_error(self) -> None:
+        tests: List[Tuple[str, str]] = [
+            ('''let identity = fn x::int -> str {
+                => x; 
+            } 
+            identity(5);
+             ''', 'Output wrongs: The function expected to return type str and return int'),
+            ('''
+             let identity = fn x::int -> float {
+                 => x;
+             };
+             identity(5)
+             ''', 'Output wrongs: The function expected to return type float and return int'),
+            ('''
+             let double = fn x::int -> list {
+                 => x * 2;
+             };
+             double(5);
+             ''', 'Output wrongs: The function expected to return type list and return int'),
+            ('''
+             let sum = fn x::int, y::int -> tuple {
+                 => x + y;
+             };
+             sum(3,8);
+             ''', 'Output wrongs: The function expected to return type tuple and return int'),
+        ]
+
+        for source, expected in tests:
+            evaluated = self._evaluate_tests(source)
+            self._test_error_object(evaluated, expected)
+
     def test_builtin_function(self) -> None:
         tests: List[Tuple[str, Union[str, int]]] = [
             ('length("");', 0),
@@ -276,6 +308,21 @@ class EvaluatorTest(TestCase):
                 assert item_evaluated != item_expected and type(
                     item_evaluated) != type(item_expected)
 
+    def test_tuple(self) -> None:
+        tests: List[Tuple[str, list]] = [
+            ('(1,2,3)', [1, 2, 3]),
+            ('(1.0, 2.0, 3.0)', [1.0, 2.0, 3.0]),
+            ('("Hello", "World","!")', ["Hello", "World", "!"])
+        ]
+
+        for source, expected in tests:
+            evaluated = self._evaluate_tests(source)
+
+            evaluated = cast(ValueTuple, evaluated)
+            for item_evaluated, item_expected in zip(evaluated.values, expected):
+                assert item_evaluated != item_expected and type(
+                    item_evaluated) != type(item_expected)
+
     def test_list_call(self) -> None:
         tests: List[Tuple[str, int]] = [
             ('let identity = [1,2,3]; identity[1];', 2),
@@ -301,7 +348,57 @@ class EvaluatorTest(TestCase):
         for source, expected in tests:
             evaluated = self._evaluate_tests(source)
             self._test_integer_object(evaluated, expected)
-            
+
+    def test_tuple_call(self) -> None:
+        tests: List[Tuple[str, int]] = [
+            ('let identity = (1,2,3); identity[1];', 2),
+            ('''
+             let identity = (1,2,3);
+             identity[0];
+             ''', 1),
+            ('''
+             let double = (1,1,2,3,4,5);
+             double[5];
+             ''', 5),
+            ('''
+             let sum = (1,1,2,3,5,8,13,21);
+             sum[7];
+             ''', 21),
+            ('''
+             let sum = (1,4,5,4,4,4,5);
+             sum[1 + 1];
+             ''', 5),
+            ('(1,2,3,4,5)[0];', 1)
+        ]
+
+        for source, expected in tests:
+            evaluated = self._evaluate_tests(source)
+            self._test_integer_object(evaluated, expected)
+
+    def test_call_list(self) -> None:
+        tests: List[Tuple[str, str]] = [
+            ('let identity = [1,2,3]; identity[3];',
+             "Out range: The length of the list is 3"),
+            ('let identity = [1,2,3,1,2,3]; identity[100];',
+             "Out range: The length of the list is 6"),
+        ]
+
+        for source, expected in tests:
+            evaluated = self._evaluate_tests(source)
+            self._test_error_object(evaluated, expected)
+
+    def test_call_tuple(self) -> None:
+        tests: List[Tuple[str, str]] = [
+            ('let identity = (1,2,3); identity[3];',
+             "Out range: The length of the tuple is 3"),
+            ('let identity = (1,2,3,1,2,3); identity[100];',
+             "Out range: The length of the tuple is 6"),
+        ]
+
+        for source, expected in tests:
+            evaluated = self._evaluate_tests(source)
+            self._test_error_object(evaluated, expected)
+
     def test_bool_operator(self) -> None:
         tests: List[Tuple[str, bool]] = [
             ('true || true;', True),
@@ -311,12 +408,23 @@ class EvaluatorTest(TestCase):
             ('true && true;', True),
             ('true && false;', False),
             ('false && true;', False),
-            ('false && false;', False),            
+            ('false && false;', False),
         ]
 
         for source, expected in tests:
             evaluated = self._evaluate_tests(source)
             self._test_boolean_object(evaluated, expected)
+
+    def test_empy_list(self) -> None:
+        tests: List[Tuple[str, list]] = [
+            ('[] + []', []),
+            ('[1,2,3] + [4,5,6]', [1, 2, 3, 4, 5, 6]),
+            ('[1,2,3] + []', [1, 2, 3]),
+            ('[] + [1,2,3]', [1, 2, 3]),
+        ]
+        for source, expected in tests:
+            evaluated = self._evaluate_tests(source)
+            self._test_list_object(evaluated, expected)
 
     def _test_error_object(self, evaluated: Object, expected: str) -> None:
         self.assertIsInstance(evaluated, Error)
@@ -352,7 +460,6 @@ class EvaluatorTest(TestCase):
 
         evaluated = cast(Integer, evaluated)
         self.assertEquals(evaluated.value, expected)
-    
 
     def _test_null_object(self, evaluated: Object) -> None:
         self.assertEquals(evaluated, NULL)
@@ -362,3 +469,26 @@ class EvaluatorTest(TestCase):
 
         evaluated = cast(String, evaluated)
         self.assertEquals(evaluated.value, expected)
+
+    def _test_list_object(self, evaluated: Object, expected: list) -> None:
+        self.assertIsInstance(evaluated, ValueList)
+
+        evaluated = cast(ValueList, evaluated)
+        if len(evaluated.values) > 0:
+            for index, value in enumerate(evaluated.values):
+                if type(value) == Integer:
+                    self._test_integer_object(value, expected[index])
+                elif type(value) == String:
+                    self._test_string_object(value, expected[index])
+                elif type(value) == Float:
+                    self._test_float_object(value, expected[index])
+                elif type(value) == ValueList:
+                    self._test_list_object(value, expected[index])
+                elif type(value) == Boolean:
+                    self._test_boolean_object(value, expected[index])
+                elif type(value) == ValueTuple:
+                    self._test_list_object(value, expected[index])
+                else:
+                    self._test_null_object(value)
+        else:
+            self.assertListEqual(evaluated.values, expected)

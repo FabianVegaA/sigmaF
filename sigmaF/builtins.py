@@ -15,6 +15,7 @@ from sigmaF.object import (
     Error,
     Integer,
     ValueList,
+    ValueTuple,
     Null,
     Object,
     String
@@ -36,11 +37,14 @@ def length(*args: Object) -> Object:
     elif type(args[0]) == ValueList:
         argument = cast(ValueList, args[0])
         return Integer(len(argument.values))
+    elif type(args[0]) == ValueTuple:
+        argument = cast(ValueTuple, args[0])
+        return Integer(len(argument.values))
     else:
         return Error(_UNSUPPORTED_ARGUMENT_TYPE.format('length', args[0].type().name))
 
 
-def printLn(*args: Object) -> Object:
+def println(*args: Object) -> Object:
     if len(args) != 1:
         return Error(_WRONG_NUMBER_OF_ARGS.format(len(args), 1))
     else:
@@ -49,7 +53,8 @@ def printLn(*args: Object) -> Object:
                                  Float, Boolean, ValueList, Function]] = None
         if type_arg == String:
             argument = cast(String, args[0])
-            print(argument.inspect())
+            string = argument.inspect().replace('\\n', '\n').replace('\\t', '\t')
+            print(string)
 
         elif type_arg == Integer:
             argument = cast(Integer, args[0])
@@ -63,6 +68,10 @@ def printLn(*args: Object) -> Object:
             argument = cast(ValueList, args[0])
             print(argument.inspect())
 
+        elif type_arg == ValueTuple:
+            argument = cast(ValueTuple, args[0])
+            print(argument.inspect())
+
         elif type_arg == Boolean:
             argument = cast(Boolean, args[0])
             print(argument.inspect())
@@ -72,7 +81,6 @@ def printLn(*args: Object) -> Object:
             print(argument.inspect())
 
         else:
-            print('----->', args[0])
             return Error(_UNSUPPORTED_ARGUMENT_TYPE.format('printLn', args[0].type().name))
 
         return Null()
@@ -135,16 +143,18 @@ def parse(*args: Object) -> Object:
 
     elif not args[0].type() == Object and args[1].type() == String:
         types = [arg.type().name for arg in args]
-        Error(_UNSUPPORTED_ARGUMENT_TYPE.format(
+        return Error(_UNSUPPORTED_ARGUMENT_TYPE.format(
             'pow', f'{types[0]} and {types[1]}'))
 
     else:
+        arg: Optional[Union[Integer, String, Float, ValueList]] = None
+        type_arg: Type = type(args[0])
         type_parse: str = cast(String, args[1]).inspect()
 
-        if type(args[0]) == Integer and type_parse == "float":
+        if type_arg == Integer and type_parse == "float":
             arg = cast(Integer, args[0])
             return Float(float(arg.value))
-        elif type(args[0]) == String and type_parse == "list":
+        elif type_arg == String and type_parse == "list":
             arg = cast(String, args[0])
             return ValueList([String(value_list) for value_list in list(arg.value)])
         else:
@@ -152,9 +162,9 @@ def parse(*args: Object) -> Object:
 
 
 BUILTIN: Dict[str, Builtin] = {
-    'length': Builtin(fn=length),
-    'printLn': Builtin(fn=printLn),
-    'not': Builtin(fn=negation_bolean),
-    'pow': Builtin(fn=pow_impure),
-    'parse': Builtin(fn=parse),
+    'length': Builtin(fn=length, io_type="builtin fn (list|tuple|str) -> int"),
+    'printLn': Builtin(fn=println, io_type="builtin fn (any) -> null"),
+    'not': Builtin(fn=negation_bolean, io_type="builtin fn (bool) -> bool"),
+    'pow': Builtin(fn=pow_impure, io_type="builtin fn (int|float, int|float) -> null"),
+    'parse': Builtin(fn=parse, io_type="builtin fn (int|str,str) -> null"),
 }

@@ -1,10 +1,10 @@
 # SigmaF
 
-The SigmaF project seeks to create a new programing language in the functional paradigm inspired by languages like Haskell, Python, JavaScript, and Rust.
+The SigmaF project seeks to create a new programming language open source in the functional paradigm inspired by languages like Haskell, Python, JavaScript, and Rust.
 
 It is an interpreted language fully built using Python 3.8.
 
-
+---
 ## Install via binary archive on Linux
 
 1. Download the version that you prefreir  in `release`.
@@ -87,6 +87,7 @@ source /venv/Scripts/activate
 ``` shell
 pip install -r requirements.txt
 ```
+---
 
 ## How use the REPL?
 
@@ -95,17 +96,36 @@ You can execute code lines inside of the REPL using:
 ``` shell
 python3.8 main.py
 ```
+Or
+``` shell
+sigmaf
+```
+This depends on how you installed SigmaF.
 
 Also, you can create a script with your code and use it inside of any statement. For this you can use:
 
 ``` shell
-python3.8 main.py < file.sf >
+python3.8 main.py <file.sf>
+
+sigmaf <file.sf>
 ```
 
 It should show something like this:
 
 ![Imgur](https://i.imgur.com/bZRpaEx.png)
 
+### Options of command line (SigmaF v1.1)
+
+1. `-ncover`: This allows that the cover page to be not displayed.
+2. `-cover`: This allows the cover page to be displayed.
+3. `-version`: This display the version of SigmaF installed.
+
+### Commands to REPL
+1. `exit()`: This it allow you exit of the REPL.
+2. `load()`: Whith this commands you can load a `file.sf`. For this, you must add like parameter a valid path. (version 1.1)
+3. `update()`: This command reloads the path previously loaded. (version 1.1)
+
+---
 ## Tutorial SigmaF
 
 Before to start, it's necessary to know this.
@@ -137,7 +157,8 @@ let b = 1.0      -- Float
 let c = "string" -- String
 let d = true     -- Boolean
 let e = [1,2,3]  -- List
-...              -- And Others
+let f = (1,2)    -- Tuple
+...             
 ```
 
 SigmaF allows data type as Integer, Float, Boolean, and String.
@@ -155,11 +176,30 @@ value_list[0, 4]    -- Output: [1,2,3,4]
 value_list[0, 8, 2] -- Output: [1, 3, 5, 7]
 ```
 
-> The struct of **List CAll** is `example_list[\<Start>, \<End>, \<Index Jump>]`
+> The struct of **List CAll** is `example_list[<Start>, <End>, <Jump>]`
+
+### Tuples 
+
+The tuples are data structs of length greater than 1 that allow others operation different to lists like:
+``` sql
+(1,2) + (3,4)      -- Output: (4,6)
+(4,6,8) - (3,4,5)  -- Output: (1,2,3)
+(0,1) == (0,1)     -- Output: true
+(0,1) != (1,3)     -- Output: true
+```
+To obtain the values of a tuple must use the same notation of the list, but this data structure not allow ranges as the lists (only you can get one position of a tuple).
+
+E.g. 
+``` sql
+let t = (1,2,3,4,5,6)
+t[1] -- Output: 2
+t[5] -- Output: 6
+```
+And so on.
 
 ### Operators
 
-> **Warning**: SigmaF does not allow the operation between different data types.
+> **Warning**: SigmaF have **Static Typing**, so does not allow the operation between different data types.
 
 These are operators:
 | Operator             | Symbol |
@@ -233,3 +273,45 @@ else {
     false;
 }
 ```
+
+## Some Examples
+``` sql
+-- Quick Sort
+let qsort = fn l::list -> list {
+
+	if (l == []) then {=> [];}
+	else {
+		let p = l[0];
+		let xs = tail(l);
+		
+		let c_lesser = fn q::int -> bool {=> (q < p)}
+		let c_greater = fn q::int -> bool {=> (q >= p)}
+
+		=> qsort(filter(c_lesser, xs)) + [p] + qsort(filter(c_greater, xs));
+	}
+}
+
+-- Filter
+let filter = fn c::function, l::list -> list {
+	if (l == []) then {=> [];} 
+
+    => if (c(l[0])) then {[l[0]]} else {[]} +  filter(c, tail(l));
+}
+
+-- Map
+let map = fn f::function, l::list -> list {
+	if (l==[]) then {=> [];}
+	
+	=> [f(l[0])] + map(f, tail(l));
+}
+
+
+```
+
+For know other examples of the implementations you can go to [e.g.](egs)
+
+---
+## Feedback
+Feedback is very appreciated, reach out to me on [Twitter](https://twitter.com/fabianmativeal) or submit a new issue.
+## Contribute
+This is an **opensource** project, so everybody can contribute and be part of the community of [**SigmaF**](https://twitter.com/fabianmativeal/status/1385762245246922752).

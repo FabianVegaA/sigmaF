@@ -32,6 +32,7 @@ class ObjectType(Enum):
     NULL = auto()
     RETURN = auto()
     STRING = auto()
+    TUPLE = auto()
 
 
 class Object(ABC):
@@ -111,7 +112,7 @@ class Error(Object):
         return ObjectType.ERROR
 
     def inspect(self) -> str:
-        return f' Error: {self.message}'
+        return f' [Error] {self.message}'
 
 
 class Return(Object):
@@ -170,7 +171,7 @@ class Function(Object):
         params_and_types: str = ', '.join([f'{param}::{type_param}' for param, type_param in zip(
             self.parameters, self.type_parameters)])
 
-        return f'fn {params_and_types} -> {self.type_output} {{\n\t{self.body}\n}}'
+        return f'fn ({params_and_types}) -> {self.type_output}'
 
 
 class BuiltinFunction(Protocol):
@@ -180,14 +181,15 @@ class BuiltinFunction(Protocol):
 
 class Builtin(Object):
 
-    def __init__(self, fn: BuiltinFunction) -> None:
+    def __init__(self, fn: BuiltinFunction, io_type: str) -> None:
         self.fn = fn
+        self.io_type = io_type
 
     def type(self) -> ObjectType:
         return ObjectType.BUILTING
 
     def inspect(self) -> str:
-        return 'builtin function'
+        return self.io_type
 
 
 class ValueList(Object):
@@ -200,11 +202,27 @@ class ValueList(Object):
 
     def inspect(self) -> str:
         values_list: List[str] = [value.inspect() for value in self.values]
-        
+
         if len(self.values) > 0 and self.values[0].type() is ObjectType.STRING:
             return ('[\"' + '\", \"'.join(values_list) + '\"]')
-        
+
         return ('[' + ', '.join(values_list) + ']')
 
+
+class ValueTuple(Object):
+
+    def __init__(self, values: List[Object] = []) -> None:
+        self.values = values
+
+    def type(self) -> ObjectType:
+        return ObjectType.TUPLE
+
+    def inspect(self) -> str:
+        values_list: List[str] = [value.inspect() for value in self.values]
+
+        if len(self.values) > 0 and self.values[0].type() is ObjectType.STRING:
+            return ('(\"' + '\", \"'.join(values_list) + '\")')
+
+        return ('(' + ', '.join(values_list) + ')')
 
 # TODO To create the nullable class, this will be able to evaluate for example 'int?' or 'bool?'

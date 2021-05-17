@@ -76,6 +76,8 @@ def lookup_token_type(literal: str) -> TokenType:
         'float': TokenType.CLASSNAME,
         'function': TokenType.CLASSNAME,
         'list': TokenType.CLASSNAME,
+        'tuple': TokenType.CLASSNAME,
+        'null': TokenType.CLASSNAME,
     }
 
     return keywords.get(literal, TokenType.IDENT)

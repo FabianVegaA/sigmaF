@@ -1,0 +1,47 @@
+let sum = fn l::list -> int {
+    => x + y;
+}
+
+let fibonacci = fn n::int -> int {
+    if n <= 2 then {
+        => 1;
+    }
+    else {
+        => fibonacci_fn(n - 2) + fibonacci_fn(n - 1);
+    }
+}
+
+let lsum = fn l::list -> int {
+    => foldl(fn i::int -> int {=> i}, l)
+}
+
+let fibonacci_memo = fn n::int, memo::list -> tuple {
+    if n < 0 then {=> (0, [0,0])}
+    if n == 0 then {=> (0, [0,1])}
+    if n == 1 then {=> (1, [1,1])}
+
+    let before = memo[0]
+    let result = lsum(memo)
+
+    => (result, [before, result])
+}
+
+
+let imc = fn peso_kilo::float, altura_metro::float-> float {
+    => peso_kilo/(altura_metro**2.0);
+}
+
+let is_prime_number = fn x::int, i::int -> bool {
+    if x <= 1 then{=> false;}
+    if x == i then{=> true;}
+    if (x % i) == 0 then {=> false;}
+    => is_prime_number(x, i+1);
+}
+
+
+let foldl = fn f::function, init::int, value_list::list -> int {
+    if length(value_list) == 1 then {
+        => f(value_list[0]) + init;
+    }
+    => foldl(f, init + f(value_list[0]), value_list[1, length(value_list)]);
+}

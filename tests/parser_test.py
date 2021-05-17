@@ -21,6 +21,7 @@ from sigmaF.ast import (
     Program,
     LetStatement,
     ListValues,
+    TupleValues,
     ReturnStatement,
     ExpressionStatement
 )
@@ -525,6 +526,47 @@ class ParserTest(TestCase):
             self.assertIsNotNone(list_values)
             for item, expect in zip(list_values.values, expected):
                 self.assertEquals(item.value, expect)
+
+    def test_tuple(self) -> None:
+        tests: List[Tuple[str, List[int]]] = [
+            ('(1,2);', [1, 2]),
+            ('(1,2,3);', [1, 2, 3]),
+            ('(1,1,2,3,5);', [1, 1, 2, 3, 5]),
+            ('(2,3,5,7,11);', [2, 3, 5, 7, 11])
+        ]
+
+        for source, expected in tests:
+            lexer: Lexer = Lexer(source)
+            parser: Parser = Parser(lexer)
+
+            program: Program = parser.parse_program()
+
+            tuple_values = cast(TupleValues, cast(ExpressionStatement,
+                                                  program.statements[0]).expression)
+
+            self.assertIsNotNone(tuple_values)
+            for item, expect in zip(tuple_values.values, expected):
+                self.assertEquals(item.value, expect)
+
+    def test_tuple_and_list(self) -> None:
+        tests: List[Tuple[str, List[List[int]]]] = [
+            ('[(1,2)]', [[1, 2]]),
+            ('[(1,2), (2,3)]', [[1, 2], [2, 3]]),
+        ]
+
+        for source, expected in tests:
+            lexer: Lexer = Lexer(source)
+            parser: Parser = Parser(lexer)
+
+            program: Program = parser.parse_program()
+
+            list_values = cast(ListValues, cast(ExpressionStatement,
+                                                program.statements[0]).expression)
+
+            self.assertIsNotNone(list_values)
+            for items, expects in zip(list_values.values, expected):
+                for item, expect in zip(items.values, expects):
+                    self.assertEquals(item.value, expect)
 
     def test_call_list(self) -> None:
         source: str = 'value_list[1, 2 * 3];'

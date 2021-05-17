@@ -1,3 +1,7 @@
+# Bynaries sf
+*.swo
+*.swp
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -12,7 +16,6 @@ build/
 develop-eggs/
 dist/
 downloads/
-eggs/
 .eggs/
 lib/
 lib64/
