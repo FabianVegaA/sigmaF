@@ -55,7 +55,6 @@ let filter = fn c::function, l::list -> list {
 }
 
 let ifoldl = fn f::function, i::int, l::list -> int {
-	printLn(l);
 	if length(l) == 1 then {
 		=> f(l[0]) + i;
 	}
@@ -115,7 +114,8 @@ let stairs = fn i::int -> str {
 }
 
 let lsum = fn l::list -> int {
-    => foldl(_inone_, l)
+    if l == [] then {=> 0};
+    => ifoldl(_inone_, 0, l)
 }
 
 
