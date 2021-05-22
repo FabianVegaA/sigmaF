@@ -2,16 +2,9 @@ import sys
 import yaml
 import re
 
-from typing import (
-    Optional,
-    List,
-    cast
-)
+from typing import Optional, List, cast
 
-from sigmaF.repl import (
-    start_repl,
-    read_module    
-)
+from sigmaF.repl import start_repl, read_module
 
 
 _SIGMAF_: str = """ 
@@ -29,35 +22,35 @@ _SIGMAF_: str = """
 """
 
 
-
 def show_cover(version):
     global _SIGMAF_
-    print('-'*106)
+    print("-" * 106)
     print(
-        f'\n\nWelcome to SigmaF v{version}, the Program Language of the future for the Programming Functional and a lot more\n\n{_SIGMAF_}')
-    print('-'*106)
+        f"\n\nWelcome to SigmaF v{version}, the Program Language of the future for the Programming Functional and a lot more\n\n{_SIGMAF_}"
+    )
+    print("-" * 106)
 
 
 def show_head(version):
-    print(f'SigmaF v{version} | Exit: exit() | Update: update()')
+    print(f"SigmaF v{version} | Exit: exit() | Update: update()")
 
 
 def get_configs():
-    with open('configs.yaml', 'r') as fin:
+    with open("configs.yaml", "r") as fin:
         configs = yaml.load(fin, Loader=yaml.FullLoader)
     return dict(configs)
 
 
 def presentation_config(configs, params, exe_file=False):
-    version = configs['version']
+    version = configs["version"]
     if not params is None:
         if exe_file:
-            if '-cover' in params:
+            if "-cover" in params:
                 show_cover(version)
                 return
             show_head(version)
         else:
-            if not '-ncover' in params:
+            if not "-ncover" in params:
                 show_cover(version)
                 return
             show_head(version)
@@ -68,13 +61,11 @@ def presentation_config(configs, params, exe_file=False):
             show_cover(version)
 
 
-
-
 def main(path=None, params=None) -> None:
     configs = get_configs()
-    if not params is None and '-version' in params:
-        version = configs['version']
-        print(f'SigmaF v{version}')
+    if not params is None and "-version" in params:
+        version = configs["version"]
+        print(f"SigmaF v{version}")
         return
     if path is None:
         presentation_config(configs, params, exe_file=False)
@@ -88,8 +79,8 @@ def main(path=None, params=None) -> None:
 
 
 def filter_path_params(args):
-    path = list(filter(lambda s: not re.match('(\S+?\.sf$)', s) is None, args))
-    params = list(filter(lambda s: s.startswith('-'), args))
+    path = list(filter(lambda s: not re.match("(\S+?\.sf$)", s) is None, args))
+    params = list(filter(lambda s: s.startswith("-"), args))
     if len(path) > 0:
         path = path[0]
     else:
@@ -101,7 +92,7 @@ def filter_path_params(args):
     return path, params
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     args: List[str] = sys.argv
 
     if len(args) > 1:
@@ -111,4 +102,4 @@ if __name__ == '__main__':
     try:
         main(path, params)
     except KeyboardInterrupt:
-        print('\n↳ Good bye \n')
+        print("\n↳ Good bye \n")
