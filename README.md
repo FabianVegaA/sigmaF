@@ -10,13 +10,13 @@ It is an interpreted language fully built using Python 3.8.
 1. Download the version that you prefreir  in `release`.
 2. Unzip the binary archive.
 ``` console
-VERSION=v1.0
+VERSION=v1.1
 sudo mkdir -p /usr/local/lib/sigmaf
 sudo tar -xJvf sigmaf-$VERSION.tar.xz -C /usr/local/lib/sigmaf
 ```
 3. Set the environment variable ~/.profile, add below to the end.
 ``` console
-VERSION=v1.0
+VERSION=v1.1
 export PATH=/usr/local/lib/sigmaf/sigmaf-$VERSION:$PATH
 ```
 4. Refresh profile
@@ -49,7 +49,7 @@ Welcome to SigmaF, the Program Language of the future for the Programming Functi
 > If you have problems with this installation you can modify the file `home/.bashrc` and insert the below to the end of it.
 > ```
 > ## SigmaF
-> VERSION=v1.0
+> VERSION=v1.1
 > export PATH=/usr/local/lib/sigmaf/sigmaf-$VERSION:$PATH
 > ```
 ## Install via Interpreter of Python
