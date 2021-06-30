@@ -6,19 +6,11 @@ from enum import (
     auto,
     Enum,
 )
-from typing import (
-    Any,
-    Dict,
-    List,
-    Optional
-)
+from typing import Any, Dict, List, Optional
 
 from typing_extensions import Protocol
 
-from sigmaF.ast import (
-    Block,
-    Identifier
-)
+from sigmaF.ast import Block, Identifier
 
 
 class ObjectType(Enum):
@@ -36,7 +28,6 @@ class ObjectType(Enum):
 
 
 class Object(ABC):
-
     @abstractmethod
     def type(self) -> ObjectType:
         pass
@@ -47,7 +38,6 @@ class Object(ABC):
 
 
 class Integer(Object):
-
     def __init__(self, value: int) -> None:
         self.value = value
 
@@ -59,7 +49,6 @@ class Integer(Object):
 
 
 class Float(Object):
-
     def __init__(self, value: float) -> None:
         self.value = value
 
@@ -71,7 +60,6 @@ class Float(Object):
 
 
 class String(Object):
-
     def __init__(self, value: str) -> None:
         self.value = value
 
@@ -83,7 +71,6 @@ class String(Object):
 
 
 class Boolean(Object):
-
     def __init__(self, value: bool) -> None:
         self.value = value
 
@@ -91,20 +78,18 @@ class Boolean(Object):
         return ObjectType.BOOLEAN
 
     def inspect(self) -> str:
-        return 'true' if self.value else 'false'
+        return "true" if self.value else "false"
 
 
 class Null(Object):
-
     def type(self) -> ObjectType:
         return ObjectType.INTEGER
 
     def inspect(self) -> str:
-        return 'null'
+        return "null"
 
 
 class Error(Object):
-
     def __init__(self, message: str) -> None:
         self.message = message
 
@@ -112,11 +97,10 @@ class Error(Object):
         return ObjectType.ERROR
 
     def inspect(self) -> str:
-        return f' [Error] {self.message}'
+        return f" [Error] {self.message}"
 
 
 class Return(Object):
-
     def __init__(self, value: Object) -> None:
         self.value = value
 
@@ -128,7 +112,6 @@ class Return(Object):
 
 
 class Environment(Dict):
-
     def __init__(self, outer=None):
         self._store = dict()
         self._outer = outer
@@ -150,14 +133,14 @@ class Environment(Dict):
 
 
 class Function(Object):
-
-    def __init__(self,
-                 parameters: List[Identifier],
-                 type_parameters: List[Identifier],
-                 type_output: Optional[Identifier],
-                 body: Block,
-                 env: Environment
-                 ) -> None:
+    def __init__(
+        self,
+        parameters: List[Identifier],
+        type_parameters: List[Identifier],
+        type_output: Optional[Identifier],
+        body: Block,
+        env: Environment,
+    ) -> None:
         self.parameters = parameters
         self.type_parameters = type_parameters
         self.type_output = type_output
@@ -168,19 +151,22 @@ class Function(Object):
         return ObjectType.FUNCTION
 
     def inspect(self) -> str:
-        params_and_types: str = ', '.join([f'{param}::{type_param}' for param, type_param in zip(
-            self.parameters, self.type_parameters)])
+        params_and_types: str = ", ".join(
+            [
+                f"{param}::{type_param}"
+                for param, type_param in zip(self.parameters, self.type_parameters)
+            ]
+        )
 
-        return f'fn ({params_and_types}) -> {self.type_output}'
+        return f"fn ({params_and_types}) -> {self.type_output}"
 
 
 class BuiltinFunction(Protocol):
-
-    def __call__(self, *args: Object) -> Object: ...
+    def __call__(self, *args: Object) -> Object:
+        ...
 
 
 class Builtin(Object):
-
     def __init__(self, fn: BuiltinFunction, io_type: str) -> None:
         self.fn = fn
         self.io_type = io_type
@@ -193,7 +179,6 @@ class Builtin(Object):
 
 
 class ValueList(Object):
-
     def __init__(self, values: List[Object] = []) -> None:
         self.values = values
 
@@ -204,13 +189,12 @@ class ValueList(Object):
         values_list: List[str] = [value.inspect() for value in self.values]
 
         if len(self.values) > 0 and self.values[0].type() is ObjectType.STRING:
-            return ('[\"' + '\", \"'.join(values_list) + '\"]')
+            return '["' + '", "'.join(values_list) + '"]'
 
-        return ('[' + ', '.join(values_list) + ']')
+        return "[" + ", ".join(values_list) + "]"
 
 
 class ValueTuple(Object):
-
     def __init__(self, values: List[Object] = []) -> None:
         self.values = values
 
@@ -221,8 +205,9 @@ class ValueTuple(Object):
         values_list: List[str] = [value.inspect() for value in self.values]
 
         if len(self.values) > 0 and self.values[0].type() is ObjectType.STRING:
-            return ('(\"' + '\", \"'.join(values_list) + '\")')
+            return '("' + '", "'.join(values_list) + '")'
 
-        return ('(' + ', '.join(values_list) + ')')
+        return "(" + ", ".join(values_list) + ")"
+
 
 # TODO To create the nullable class, this will be able to evaluate for example 'int?' or 'bool?'

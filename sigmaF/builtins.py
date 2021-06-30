@@ -1,11 +1,5 @@
 import math
-from typing import (
-    cast,
-    Dict,
-    Type,
-    Union,
-    Optional
-)
+from typing import cast, Dict, Type, Union, Optional
 
 from sigmaF.object import (
     Boolean,
@@ -18,12 +12,12 @@ from sigmaF.object import (
     ValueTuple,
     Null,
     Object,
-    String
+    String,
 )
 
-_WRONG_NUMBER_OF_ARGS = 'Incorrect Number of arguments for length, it was received {} arguments, and is needed only {}'
-_UNSUPPORTED_ARGUMENT_TYPE = 'Argument to {} without support, it was received a {}'
-_PARSE_WRONG = 'It is not possible to parser since {} to {}'
+_WRONG_NUMBER_OF_ARGS = "Incorrect Number of arguments for length, it was received {} arguments, and is needed only {}"
+_UNSUPPORTED_ARGUMENT_TYPE = "Argument to {} without support, it was received a {}"
+_PARSE_WRONG = "It is not possible to parser since {} to {}"
 
 
 def length(*args: Object) -> Object:
@@ -41,7 +35,7 @@ def length(*args: Object) -> Object:
         argument = cast(ValueTuple, args[0])
         return Integer(len(argument.values))
     else:
-        return Error(_UNSUPPORTED_ARGUMENT_TYPE.format('length', args[0].type().name))
+        return Error(_UNSUPPORTED_ARGUMENT_TYPE.format("length", args[0].type().name))
 
 
 def println(*args: Object) -> Object:
@@ -49,11 +43,12 @@ def println(*args: Object) -> Object:
         return Error(_WRONG_NUMBER_OF_ARGS.format(len(args), 1))
     else:
         type_arg: Type = type(args[0])
-        argument: Optional[Union[String, Integer,
-                                 Float, Boolean, ValueList, Function]] = None
+        argument: Optional[
+            Union[String, Integer, Float, Boolean, ValueList, Function]
+        ] = None
         if type_arg == String:
             argument = cast(String, args[0])
-            string = argument.inspect().replace('\\n', '\n').replace('\\t', '\t')
+            string = argument.inspect().replace("\\n", "\n").replace("\\t", "\t")
             print(string)
 
         elif type_arg == Integer:
@@ -81,7 +76,9 @@ def println(*args: Object) -> Object:
             print(argument.inspect())
 
         else:
-            return Error(_UNSUPPORTED_ARGUMENT_TYPE.format('printLn', args[0].type().name))
+            return Error(
+                _UNSUPPORTED_ARGUMENT_TYPE.format("printLn", args[0].type().name)
+            )
 
         return Null()
 
@@ -97,7 +94,7 @@ def negation_bolean(*args: Object) -> Object:
             argument = cast(Boolean, args[0])
             return Boolean(not argument.value)
         else:
-            return Error(_UNSUPPORTED_ARGUMENT_TYPE.format('not', args[0].type().name))
+            return Error(_UNSUPPORTED_ARGUMENT_TYPE.format("not", args[0].type().name))
 
 
 def pow_impure(*args: Object) -> Object:
@@ -134,7 +131,7 @@ def pow_impure(*args: Object) -> Object:
             root_math = math.pow(radicant.value, 1 / index.value)
             return Float(root_math)
         else:
-            return Error(_UNSUPPORTED_ARGUMENT_TYPE.format('pow', args[0].type().name))
+            return Error(_UNSUPPORTED_ARGUMENT_TYPE.format("pow", args[0].type().name))
 
 
 def parse(*args: Object) -> Object:
@@ -143,8 +140,9 @@ def parse(*args: Object) -> Object:
 
     elif not args[0].type() == Object and args[1].type() == String:
         types = [arg.type().name for arg in args]
-        return Error(_UNSUPPORTED_ARGUMENT_TYPE.format(
-            'pow', f'{types[0]} and {types[1]}'))
+        return Error(
+            _UNSUPPORTED_ARGUMENT_TYPE.format("pow", f"{types[0]} and {types[1]}")
+        )
 
     else:
         arg: Optional[Union[Integer, String, Float, ValueList]] = None
@@ -162,9 +160,9 @@ def parse(*args: Object) -> Object:
 
 
 BUILTIN: Dict[str, Builtin] = {
-    'length': Builtin(fn=length, io_type="builtin fn (list|tuple|str) -> int"),
-    'printLn': Builtin(fn=println, io_type="builtin fn (any) -> null"),
-    'not': Builtin(fn=negation_bolean, io_type="builtin fn (bool) -> bool"),
-    'pow': Builtin(fn=pow_impure, io_type="builtin fn (int|float, int|float) -> null"),
-    'parse': Builtin(fn=parse, io_type="builtin fn (int|str,str) -> null"),
+    "length": Builtin(fn=length, io_type="builtin fn (list|tuple|str) -> int"),
+    "printLn": Builtin(fn=println, io_type="builtin fn (any) -> null"),
+    "not": Builtin(fn=negation_bolean, io_type="builtin fn (bool) -> bool"),
+    "pow": Builtin(fn=pow_impure, io_type="builtin fn (int|float, int|float) -> null"),
+    "parse": Builtin(fn=parse, io_type="builtin fn (int|str,str) -> null"),
 }

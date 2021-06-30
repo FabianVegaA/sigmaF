@@ -1,0 +1,58 @@
+let tail = fn l::list -> list {=> l[1,length(l)];}
+
+let init = fn l::list -> list {=> l[0,length(l)-1];}
+
+let last = fn l::list -> list {=> [l[length(l)-1]];}
+
+let head = fn l::list -> list {=> [l[0]];}
+
+let map = fn f::function, l::list -> list {
+	if (l==[]) then {=> [];}
+	
+	=> [f(l[0])] + map(f, tail(l));
+}
+
+let to_char_list = fn s::str -> list {
+    => parse(s, "list");
+}
+
+let is_unique = fn char::str, chars::list -> bool {
+    if chars == [] then {=> true;}
+    if char == chars[0] then {=> false;}
+    => true && is_unique(char, tail(chars));
+}
+
+let simbols = fn chars::list, unique_chars::list -> list {
+    if chars == [] then {=> unique_chars;}
+
+    if unique_chars == [] then {
+        => simbols(tail(chars), [chars[0]]);
+    }
+
+    if is_unique(chars[0], unique_chars) then {
+        => simbols(tail(chars), unique_chars + head(chars));
+    }
+
+    => simbols(tail(chars), unique_chars);
+} 
+
+let frecuency = fn char::str, chars::list -> int {
+    if chars == [] then {=> 0;}
+    =>  if (char == chars[0]) then {1} else {0} 
+	+ frecuency(char, tail(chars));
+}
+
+let count_simbols = fn simbols::list, chars::list -> list {
+    => map(fn s::str -> int {=> frecuency(s, chars);}, simbols);
+}
+
+let text = "aaaaaaabbababababbabcccbcba";
+let l_chars = to_char_list(text);
+
+let l_simbols = simbols(l_chars, []);
+let amount_simbols = count_simbols(l_simbols, l_chars);
+
+printLn(l_simbols); printLn(amount_simbols);
+
+
+

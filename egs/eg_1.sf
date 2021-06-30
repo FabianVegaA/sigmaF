@@ -2,13 +2,10 @@ let sum = fn l::list -> int {
     => x + y;
 }
 
-let fibonacci = fn n::int -> int {
-    if n <= 2 then {
-        => 1;
-    }
-    else {
-        => fibonacci_fn(n - 2) + fibonacci_fn(n - 1);
-    }
+let fibonacci_fn = fn n::int -> int {
+    if n < 1 then {=> 0;}
+    if n <= 2 then {=> 1;}
+    => fibonacci_fn(n - 2) + fibonacci_fn(n - 1);
 }
 
 let lsum = fn l::list -> int {

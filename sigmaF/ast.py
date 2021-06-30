@@ -2,16 +2,11 @@ from abc import (
     ABC,
     abstractmethod,
 )
-from typing import (
-    Any,
-    Optional,
-    List
-)
+from typing import Any, Optional, List
 from sigmaF.token import Token
 
 
 class ASTNode(ABC):
-
     @abstractmethod
     def token_literal(self) -> str:
         pass
@@ -22,7 +17,6 @@ class ASTNode(ABC):
 
 
 class Statement(ASTNode):
-
     def __init__(self, token: Token) -> None:
         self.token = token
 
@@ -31,7 +25,6 @@ class Statement(ASTNode):
 
 
 class Expression(ASTNode):
-
     def __init__(self, token: Token) -> None:
         self.token = token
 
@@ -40,7 +33,6 @@ class Expression(ASTNode):
 
 
 class Program(ASTNode):
-
     def __init__(self, statements: List[Statement]) -> None:
         self.statements = statements
 
@@ -48,21 +40,18 @@ class Program(ASTNode):
         if len(self.statements) > 0:
             return self.statements[0].token_literal()
 
-        return ''
+        return ""
 
     def __str__(self) -> str:
         out: List[str] = []
         for statement in self.statements:
             out.append(str(statement))
 
-        return ''.join(out)
+        return "".join(out)
 
 
 class Identifier(Expression):
-
-    def __init__(self,
-                 token: Token,
-                 value: str) -> None:
+    def __init__(self, token: Token, value: str) -> None:
         super().__init__(token)
         self.value = value
 
@@ -71,36 +60,31 @@ class Identifier(Expression):
 
 
 class LetStatement(Statement):
-
-    def __init__(self,
-                 token: Token,
-                 name: Optional[Identifier] = None,
-                 value: Optional[Expression] = None) -> None:
+    def __init__(
+        self,
+        token: Token,
+        name: Optional[Identifier] = None,
+        value: Optional[Expression] = None,
+    ) -> None:
         super().__init__(token)
         self.name = name
         self.value = value
 
     def __str__(self) -> str:
-        return f'{self.token_literal()} {str(self.name)} = {str(self.value)};'
+        return f"{self.token_literal()} {str(self.name)} = {str(self.value)};"
 
 
 class ReturnStatement(Statement):
-    def __init__(self,
-                 token: Token,
-                 return_value: Optional[Expression] = None
-                 ) -> None:
+    def __init__(self, token: Token, return_value: Optional[Expression] = None) -> None:
         super().__init__(token)
         self.return_value = return_value
 
     def __str__(self) -> str:
-        return f'{self.token_literal()} {self.return_value};'
+        return f"{self.token_literal()} {self.return_value};"
 
 
 class ExpressionStatement(Statement):
-    def __init__(self,
-                 token: Token,
-                 expression: Optional[Expression] = None
-                 ) -> None:
+    def __init__(self, token: Token, expression: Optional[Expression] = None) -> None:
         super().__init__(token)
         self.expression = expression
 
@@ -109,10 +93,7 @@ class ExpressionStatement(Statement):
 
 
 class Integer(Expression):
-    def __init__(self,
-                 token: Token,
-                 value: Optional[int] = None
-                 ) -> None:
+    def __init__(self, token: Token, value: Optional[int] = None) -> None:
         super().__init__(token)
         self.value = value
 
@@ -121,10 +102,7 @@ class Integer(Expression):
 
 
 class Float(Expression):
-    def __init__(self,
-                 token: Token,
-                 value: Optional[float] = None
-                 ) -> None:
+    def __init__(self, token: Token, value: Optional[float] = None) -> None:
         super().__init__(token)
         self.value = value
 
@@ -133,10 +111,7 @@ class Float(Expression):
 
 
 class String(Expression):
-    def __init__(self,
-                 token: Token,
-                 value: Optional[str] = None
-                 ) -> None:
+    def __init__(self, token: Token, value: Optional[str] = None) -> None:
         super().__init__(token)
         self.value = value
 
@@ -145,43 +120,34 @@ class String(Expression):
 
 
 class Prefix(Expression):
-
-    def __init__(self,
-                 token: Token,
-                 operator: str,
-                 right: Optional[Expression] = None
-                 ):
+    def __init__(self, token: Token, operator: str, right: Optional[Expression] = None):
         super().__init__(token)
         self.operator = operator
         self.right = right
 
     def __str__(self):
-        return f'({self.operator}{str(self.right)})'
+        return f"({self.operator}{str(self.right)})"
 
 
 class Infix(Expression):
-
-    def __init__(self,
-                 token: Token,
-                 left: Expression,
-                 operator: str,
-                 right: Optional[Expression] = None
-                 ) -> None:
+    def __init__(
+        self,
+        token: Token,
+        left: Expression,
+        operator: str,
+        right: Optional[Expression] = None,
+    ) -> None:
         super().__init__(token)
         self.left = left
         self.operator = operator
         self.right = right
 
     def __str__(self) -> str:
-        return f'({str(self.left)} {self.operator} {str(self.right)})'
+        return f"({str(self.left)} {self.operator} {str(self.right)})"
 
 
 class Boolean(Expression):
-
-    def __init__(self,
-                 token: Token,
-                 value: Optional[bool] = None
-                 ) -> None:
+    def __init__(self, token: Token, value: Optional[bool] = None) -> None:
         super().__init__(token)
         self.value = value
 
@@ -190,50 +156,47 @@ class Boolean(Expression):
 
 
 class Block(Statement):
-    def __init__(self,
-                 token: Token,
-                 statements: List[Statement]
-                 ) -> None:
+    def __init__(self, token: Token, statements: List[Statement]) -> None:
         super().__init__(token)
         self.statements = statements
 
     def __str__(self) -> str:
         out: List[str] = [str(statement) for statement in self.statements]
 
-        return ' '.join(out)
+        return " ".join(out)
 
 
 class If(Expression):
-
-    def __init__(self,
-                 token: Token,
-                 condition: Optional[Expression] = None,
-                 consequence: Optional[Block] = None,
-                 alternative: Optional[Block] = None,
-                 ) -> None:
+    def __init__(
+        self,
+        token: Token,
+        condition: Optional[Expression] = None,
+        consequence: Optional[Block] = None,
+        alternative: Optional[Block] = None,
+    ) -> None:
         super().__init__(token)
         self.condition = condition
         self.consequence = consequence
         self.alternative = alternative
 
     def __str__(self) -> str:
-        out: str = f'if {str(self.condition)} {str(self.consequence)}'
+        out: str = f"if {str(self.condition)} {str(self.consequence)}"
 
         if self.alternative:
-            out += f' else {str(self.alternative)}'
+            out += f" else {str(self.alternative)}"
 
         return out
 
 
 class Function(Expression):
-
-    def __init__(self,
-                 token: Token,
-                 parameters: List[Identifier] = [],
-                 type_parameters: List[Identifier] = [],
-                 type_output: Optional[Identifier] = None,
-                 body: Optional[Block] = None
-                 ) -> None:
+    def __init__(
+        self,
+        token: Token,
+        parameters: List[Identifier] = [],
+        type_parameters: List[Identifier] = [],
+        type_output: Optional[Identifier] = None,
+        body: Optional[Block] = None,
+    ) -> None:
         super().__init__(token)
         self.parameters = parameters
         self.type_parameters = type_parameters
@@ -241,21 +204,23 @@ class Function(Expression):
         self.body = body
 
     def __str__(self) -> str:
-        param_and_type_list: List[str] = [f'{parameter}::{type_parameter} ' for parameter, type_parameter in zip(
-            self.parameters, self.type_parameters)]
+        param_and_type_list: List[str] = [
+            f"{parameter}::{type_parameter} "
+            for parameter, type_parameter in zip(self.parameters, self.type_parameters)
+        ]
 
-        params: str = ', '.join(param_and_type_list)
+        params: str = ", ".join(param_and_type_list)
 
-        return f'function: {params} -> {str(self.type_output)} {str(self.body)} '
+        return f"function: {params} -> {str(self.type_output)} {str(self.body)} "
 
 
 class Call(Expression):
-
-    def __init__(self,
-                 token: Token,
-                 function: Expression,
-                 arguments: Optional[List[Expression]] = None
-                 ) -> None:
+    def __init__(
+        self,
+        token: Token,
+        function: Expression,
+        arguments: Optional[List[Expression]] = None,
+    ) -> None:
         super().__init__(token)
         self.function = function
         self.arguments = arguments
@@ -263,13 +228,12 @@ class Call(Expression):
     def __str__(self) -> str:
         assert self.arguments is not None
         arg_list: List[str] = [str(argument) for argument in self.arguments]
-        args: str = ', '.join(arg_list)
+        args: str = ", ".join(arg_list)
 
-        return f'{str(self.function)}({args})'
+        return f"{str(self.function)}({args})"
 
 
 class ListValues(Expression):
-
     def __init__(self, token: Token, values: List[Any] = []) -> None:
         super().__init__(token)
         self.values = values
@@ -277,8 +241,8 @@ class ListValues(Expression):
     def __str__(self) -> str:
         return str([str(value) for value in self.values])
 
-class TupleValues(Expression):
 
+class TupleValues(Expression):
     def __init__(self, token: Token, values: List[Any] = []) -> None:
         super().__init__(token)
         self.values = values
@@ -288,12 +252,12 @@ class TupleValues(Expression):
 
 
 class CallList(Expression):
-
-    def __init__(self,
-                 token: Token,
-                 list_identifier: Expression,
-                 range: Optional[List[Expression]] = None
-                 ) -> None:
+    def __init__(
+        self,
+        token: Token,
+        list_identifier: Expression,
+        range: Optional[List[Expression]] = None,
+    ) -> None:
         super().__init__(token)
         self.list_identifier = list_identifier
         self.range = range
@@ -301,6 +265,6 @@ class CallList(Expression):
     def __str__(self) -> str:
         assert self.range is not None
         range_list: List[str] = [str(end_of) for end_of in self.range]
-        args: str = ', '.join(range_list)
+        args: str = ", ".join(range_list)
 
-        return f'{str(self.list_identifier)}({args})'
+        return f"{str(self.list_identifier)}({args})"

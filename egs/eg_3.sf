@@ -1,0 +1,33 @@
+/*
+Perceptron Example
+*/
+
+let multi_sum = fn l1::list, l2::list -> float {
+	if l1 == [] || l2 == [] then {
+		=> 0.0;
+	}
+	=> l1[0] * l2[0] + multi_sum(tail(l1), tail(l2));
+}
+
+let e = 2.71828;
+
+let perceptron = fn as::list, ws::list, s::float, f::function -> float {
+	=> f(multi_sum(as, ws) + s);
+}
+
+let relu = fn x::float -> float {
+	=> max(0.0, x);
+}
+
+let sigmoid = fn x::float -> float {
+	=> 1.0 / (1.0 +  pow(e, -x));
+}
+
+let tail = fn l::list -> list {=> l[1,length(l)];}
+
+let max = fn x::float, y::float -> float{
+	if x > y then {=> x;}
+	else {=> y;}
+}
+
+

@@ -82,7 +82,6 @@ let zip = fn l1::list, l2::list -> list {
 	=> [ituplefy_2(l1[0],l2[0])] + zip(tail(l1),tail(l2));
 }
 
-
 let split = fn l::list, i::int -> list {
 	=> [take(l,i), rtake(l,i)]
 }
@@ -97,7 +96,9 @@ let qsort = fn l::list -> list {
 		let c_lesser = fn q::int -> bool {=> (q < p)};
 		let c_greater = fn q::int -> bool {=> (q >= p)};
 
-		=> qsort(filter(c_lesser, xs)) + [p] + qsort(filter(c_greater, xs));
+		=> qsort(filter(c_lesser, xs)) 
+			+ [p] 
+			+ qsort(filter(c_greater, xs));
 	}
 }
 

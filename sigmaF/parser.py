@@ -1,12 +1,6 @@
 from enum import IntEnum
 
-from typing import (
-    Callable,
-    Dict,
-    List,
-    Tuple,
-    Optional
-)
+from typing import Callable, Dict, List, Tuple, Optional
 
 from sigmaF.ast import (
     Block,
@@ -31,10 +25,7 @@ from sigmaF.ast import (
     ReturnStatement,
 )
 from sigmaF.lexer import Lexer
-from sigmaF.token import (
-    Token,
-    TokenType
-)
+from sigmaF.token import Token, TokenType
 
 PrefixParseFn = Callable[[], Optional[Expression]]
 PrefixParseFns = Dict[TokenType, PrefixParseFn]
@@ -75,7 +66,6 @@ PRECEDENCE: Dict[TokenType, Precedence] = {
 
 
 class Parser:
-
     def __init__(self, lexer: Lexer) -> None:
         self._lexer = lexer
         self._old_token: Optional[Token] = None
@@ -123,8 +113,10 @@ class Parser:
 
     def _expected_token_error(self, token_type: TokenType) -> None:
         assert self._peek_token is not None
-        error = f'The next token was expected to be of type {token_type} ' + \
-            f', but {self._peek_token.token_type} was obtained'
+        error = (
+            f"The next token was expected to be of type {token_type} "
+            + f", but {self._peek_token.token_type} was obtained"
+        )
 
         self._errors.append(error)
 
@@ -133,7 +125,7 @@ class Parser:
         try:
             prefix_parse_fn = self._prefix_parse_fns[self._current_token.token_type]
         except KeyError:
-            message = f'It was not found nothing funtion for parse {self._current_token.literal}'
+            message = f"It was not found nothing funtion for parse {self._current_token.literal}"
             self._errors.append(message)
 
             return None
@@ -141,7 +133,10 @@ class Parser:
         left_expression = prefix_parse_fn()
 
         assert self._peek_token is not None
-        while not self._peek_token.token_type == TokenType.SEMICOLON and precedence < self._peek_precedence():
+        while (
+            not self._peek_token.token_type == TokenType.SEMICOLON
+            and precedence < self._peek_precedence()
+        ):
             try:
                 infix_parse_fn = self._infix_parse_fns[self._peek_token.token_type]
 
@@ -156,10 +151,7 @@ class Parser:
 
     def _parse_identifier(self) -> Identifier:
         assert self._current_token is not None
-        return Identifier(
-            token=self._current_token,
-            value=self._current_token.literal
-        )
+        return Identifier(token=self._current_token, value=self._current_token.literal)
 
     def _parse_interger(self) -> Optional[Integer]:
         assert self._current_token is not None
@@ -168,8 +160,10 @@ class Parser:
         try:
             integer.value = int(self._current_token.literal)
         except ValueError:
-            message = f'It was not possible to parse {self._current_token.literal} ' + \
-                'like Integer.'
+            message = (
+                f"It was not possible to parse {self._current_token.literal} "
+                + "like Integer."
+            )
             self._errors.append(message)
             return None
         return integer
@@ -181,8 +175,10 @@ class Parser:
         try:
             floating.value = float(self._current_token.literal)
         except ValueError:
-            message = f'It was not possible to parse {self._current_token.literal} ' + \
-                'like Floating.'
+            message = (
+                f"It was not possible to parse {self._current_token.literal} "
+                + "like Floating."
+            )
             self._errors.append(message)
             return None
         return floating
@@ -194,8 +190,10 @@ class Parser:
         try:
             string.value = str(self._current_token.literal)
         except ValueError:
-            message = f'It was not possible to parse {self._current_token.literal} ' + \
-                'like String.'
+            message = (
+                f"It was not possible to parse {self._current_token.literal} "
+                + "like String."
+            )
             self._errors.append(message)
             return None
         return string
@@ -203,15 +201,16 @@ class Parser:
     def _parse_boolean(self) -> Boolean:
         assert self._current_token is not None
 
-        return Boolean(token=self._current_token,
-                       value=self._current_token.token_type == TokenType.TRUE)
+        return Boolean(
+            token=self._current_token,
+            value=self._current_token.token_type == TokenType.TRUE,
+        )
 
     def _parse_expression_statements(self) -> Optional[ExpressionStatement]:
         assert self._current_token is not None
         expression_statement = ExpressionStatement(token=self._current_token)
 
-        expression_statement.expression = self._parse_expression(
-            Precedence.LOWEST)
+        expression_statement.expression = self._parse_expression(Precedence.LOWEST)
 
         assert self._peek_token is not None
         if self._peek_token.token_type == TokenType.SEMICOLON:
@@ -246,8 +245,7 @@ class Parser:
 
         self._advance_tokens()
 
-        return_statement.return_value = self._parse_expression(
-            Precedence.LOWEST)
+        return_statement.return_value = self._parse_expression(Precedence.LOWEST)
         assert self._peek_token is not None
         if self._peek_token.token_type == TokenType.SEMICOLON:
             self._advance_tokens()
@@ -265,8 +263,9 @@ class Parser:
 
     def _parse_prefix_expression(self) -> Prefix:
         assert self._current_token is not None
-        prefix_expression = Prefix(token=self._current_token,
-                                   operator=self._current_token.literal)
+        prefix_expression = Prefix(
+            token=self._current_token, operator=self._current_token.literal
+        )
 
         self._advance_tokens()
 
@@ -290,9 +289,9 @@ class Parser:
 
     def _parse_infix_expression(self, left: Expression) -> Infix:
         assert self._current_token is not None
-        infix = Infix(token=self._current_token,
-                      operator=self._current_token.literal,
-                      left=left)
+        infix = Infix(
+            token=self._current_token, operator=self._current_token.literal, left=left
+        )
         precedence = self._current_precedence()
 
         self._advance_tokens()
@@ -302,13 +301,14 @@ class Parser:
 
     def _parse_block(self) -> Block:
         assert self._current_token is not None
-        block_statements = Block(token=self._current_token,
-                                 statements=[])
+        block_statements = Block(token=self._current_token, statements=[])
 
         self._advance_tokens()
 
-        while not self._current_token.token_type == TokenType.RBRACE and \
-                not self._current_token.token_type == TokenType.EOF:
+        while (
+            not self._current_token.token_type == TokenType.RBRACE
+            and not self._current_token.token_type == TokenType.EOF
+        ):
             statement = self._parse_statement()
             if statement:
                 block_statements.statements.append(statement)
@@ -364,7 +364,10 @@ class Parser:
 
         if_expression.consequence = self._parse_block()
 
-        if self._peek_token is not None and self._peek_token.token_type == TokenType.ELSE:
+        if (
+            self._peek_token is not None
+            and self._peek_token.token_type == TokenType.ELSE
+        ):
             self._advance_tokens()
 
             if not self._expected_token(TokenType.LBRACE):
@@ -381,7 +384,11 @@ class Parser:
         if not self._expected_token(TokenType.IDENT):
             return None
 
-        function.parameters, function.type_parameters, function.type_output = self._parse_function_parameters()
+        (
+            function.parameters,
+            function.type_parameters,
+            function.type_output,
+        ) = self._parse_function_parameters()
 
         if not self._expected_token(TokenType.LBRACE):
             return None
@@ -390,29 +397,34 @@ class Parser:
 
         return function
 
-    def _parse_function_parameters(self) -> Tuple[List[Identifier], List[Identifier], Optional[Identifier]]:
+    def _parse_function_parameters(
+        self,
+    ) -> Tuple[List[Identifier], List[Identifier], Optional[Identifier]]:
         params: List[Identifier] = []
         type_params: List[Identifier] = []
 
         assert self._current_token is not None
-        identifier = Identifier(token=self._current_token,
-                                value=self._current_token.literal)
+        identifier = Identifier(
+            token=self._current_token, value=self._current_token.literal
+        )
         params.append(identifier)
 
         assert self._peek_token is not None
         assert self._peek_token.token_type is TokenType.TYPEASSIGN
         self._advance_tokens()
         self._advance_tokens()
-        identifier = Identifier(token=self._current_token,
-                                value=self._current_token.literal)
+        identifier = Identifier(
+            token=self._current_token, value=self._current_token.literal
+        )
         type_params.append(identifier)
 
         while self._peek_token.token_type == TokenType.COMMA:
             self._advance_tokens()
             self._advance_tokens()
 
-            identifier = Identifier(token=self._current_token,
-                                    value=self._current_token.literal)
+            identifier = Identifier(
+                token=self._current_token, value=self._current_token.literal
+            )
             params.append(identifier)
 
             assert self._peek_token is not None
@@ -420,8 +432,9 @@ class Parser:
             self._advance_tokens()
             self._advance_tokens()
             assert self._peek_token.token_type is not TokenType.CLASSNAME
-            identifier = Identifier(token=self._current_token,
-                                    value=self._current_token.literal)
+            identifier = Identifier(
+                token=self._current_token, value=self._current_token.literal
+            )
             type_params.append(identifier)
 
         if not self._expected_token(TokenType.OUTPUTFUNTION):
@@ -429,8 +442,9 @@ class Parser:
 
         assert self._peek_token.token_type is TokenType.CLASSNAME
         self._advance_tokens()
-        type_output: Identifier = Identifier(self._current_token,
-                                             self._current_token.literal)
+        type_output: Identifier = Identifier(
+            self._current_token, self._current_token.literal
+        )
 
         return params, type_params, type_output
 
@@ -445,7 +459,7 @@ class Parser:
 
     def _parse_tuple(self, fst_value: Optional[Expression]) -> Optional[Expression]:
         assert self._current_token is not None
-        tuple_values = TupleValues(token=Token(TokenType.COMMA, '('))
+        tuple_values = TupleValues(token=Token(TokenType.COMMA, "("))
 
         values = [fst_value]
 
@@ -467,8 +481,7 @@ class Parser:
         return tuple_values
 
     def _parse_paren(self) -> Optional[Expression]:
-        assert self._current_token is not None and \
-            self._peek_token is not None
+        assert self._current_token is not None and self._peek_token is not None
 
         self._advance_tokens()
 
@@ -484,17 +497,19 @@ class Parser:
             return list_values
 
         values = []
-        allow_types = [TokenType.INT,
-                       TokenType.FLOAT,
-                       TokenType.STRING,
-                       TokenType.TRUE,
-                       TokenType.FALSE,
-                       TokenType.IDENT,
-                       TokenType.FUNCTION,
-                       TokenType.LBRAKET,
-                       TokenType.LPAREN,
-                       TokenType.RPAREN,
-                       TokenType.MINUS]
+        allow_types = [
+            TokenType.INT,
+            TokenType.FLOAT,
+            TokenType.STRING,
+            TokenType.TRUE,
+            TokenType.FALSE,
+            TokenType.IDENT,
+            TokenType.FUNCTION,
+            TokenType.LBRAKET,
+            TokenType.LPAREN,
+            TokenType.RPAREN,
+            TokenType.MINUS,
+        ]
 
         if self._current_token.token_type not in allow_types:
             return None
@@ -570,7 +585,6 @@ class Parser:
             TokenType.LBRAKET: self._parse_call_list,
             TokenType.AND: self._parse_infix_expression,
             TokenType.OR: self._parse_infix_expression,
-
         }
 
     def _register_prefix_fns(self) -> PrefixParseFns:

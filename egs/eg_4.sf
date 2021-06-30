@@ -1,0 +1,46 @@
+let tail = fn l::list -> list {=> l[1,length(l)];}
+let last = fn l::list -> list {=> [l[length(l)-1]];}
+
+let lsum = fn l::list -> int {
+    if l == [] then {=> 0};
+    => l[0] + lsum(tail(l))
+}
+
+let last_2 = fn l::list -> list {
+    let len = length(l);
+    => l[len - 2, len];
+}
+
+let seq_fibonacci = fn x::int -> list {
+        if x == 1 then {=> [0, 1];}
+        
+        let xs_last = seq_fibonacci(x-1);
+
+        => xs_last + [lsum(last_2(xs_last))];
+}
+
+
+
+let fibonacci = fn x::int -> int {
+    let last_2_fibonacci = fn x::int -> list {
+        if x == 1 then {=> [0, 1];}
+            
+        let xs_last = last_2_fibonacci(x-1);
+        => last(xs_last) + [lsum(last_2(xs_last))];
+    }
+    => lsum(last_2_fibonacci(x-1));
+}
+
+
+
+
+let fibonacci = fn n::int -> int {
+    if n < 1 then {=> 0;}
+    if n <= 2 then {=> 1;}
+    => fibonacci(n - 2) + fibonacci(n - 1);
+}
+
+
+
+
+

@@ -1,12 +1,5 @@
-from enum import(
-    auto,
-    Enum,
-    unique
-)
-from typing import (
-    Dict,
-    NamedTuple
-)
+from enum import auto, Enum, unique
+from typing import Dict, NamedTuple
 
 
 @unique
@@ -58,26 +51,26 @@ class Token(NamedTuple):
     literal: str
 
     def __str__(self) -> str:
-        return f'Type: {self.token_type}, Literal: {self.literal}'
+        return f"Type: {self.token_type}, Literal: {self.literal}"
 
 
 def lookup_token_type(literal: str) -> TokenType:
     keywords: Dict[str, TokenType] = {
-        'fn': TokenType.FUNCTION,
-        'let': TokenType.LET,
-        'false': TokenType.FALSE,
-        'true': TokenType.TRUE,
-        'if': TokenType.IF,
-        'then': TokenType.THEN,
-        'else': TokenType.ELSE,
-        'bool': TokenType.CLASSNAME,
-        'int': TokenType.CLASSNAME,
-        'str': TokenType.CLASSNAME,
-        'float': TokenType.CLASSNAME,
-        'function': TokenType.CLASSNAME,
-        'list': TokenType.CLASSNAME,
-        'tuple': TokenType.CLASSNAME,
-        'null': TokenType.CLASSNAME,
+        "fn": TokenType.FUNCTION,
+        "let": TokenType.LET,
+        "false": TokenType.FALSE,
+        "true": TokenType.TRUE,
+        "if": TokenType.IF,
+        "then": TokenType.THEN,
+        "else": TokenType.ELSE,
+        "bool": TokenType.CLASSNAME,
+        "int": TokenType.CLASSNAME,
+        "str": TokenType.CLASSNAME,
+        "float": TokenType.CLASSNAME,
+        "function": TokenType.CLASSNAME,
+        "list": TokenType.CLASSNAME,
+        "tuple": TokenType.CLASSNAME,
+        "null": TokenType.CLASSNAME,
     }
 
     return keywords.get(literal, TokenType.IDENT)

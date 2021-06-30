@@ -1,12 +1,4 @@
-from typing import (
-    Any,
-    cast,
-    Dict,
-    List,
-    Optional,
-    Type,
-    Union
-)
+from typing import Any, cast, Dict, List, Optional, Type, Union
 
 
 import sigmaF.ast as ast
@@ -33,42 +25,48 @@ TRUE = Boolean(True)
 FALSE = Boolean(False)
 NULL = Null()
 
-_NOT_A_FUNCTION = 'It is not a function: {}'
-_TYPE_MISMATCH = 'Type Discrepancy: It is not possible to do the operation \'{}\', for an {} and a {}'
-_UNKNOW_PREFIX_OPERATOR = 'Unknown Operator: The operator \'{}\' is unknown for {}'
-_UNKNOW_INFIX_OPERATOR = 'Unknown Operator: The operator \'{}\' is unknown between {}'
-_DIVISION_BY_ZERO = 'Division by zero: It is not possible to divide by zero {}'
-_UNKNOW_IDENTIFIER = 'Identifier not found: {}'
-_NON_MODIFIABLE_VALUE = 'Non-modifiable Value: The value of {} is not modifiable'
-_WRONG_NUMBER_INDEXES = 'Wrong number of indexes: {} indexes were delivered and between 1 and 3 are required'
-_INDIX_FAILED = 'Out range: The length of the {} is {}'
-_TUPLE_FAIL = 'Tuple with more of one type: The tuple have {} type and {} type'
-_NOT_AN_ITERABLE = 'Not a iterable: The object delivered is not a iterable type is of type {}'
-_WRONG_ARGS = 'Arguments wrongs: The function expected to receive types {} and receives {}'
-_WRONG_OUTPUT = 'Output wrongs: The function expected to return type {} and return {}'
-_INCOMPATIBLE_LIST_OPTERATION = 'Incompatible list operation: It is not possible to do the operation {} between a {} List and a {} List'
-_WRONG_NUMBER_OF_INDEXES_TUPLE = 'Wrong number of indexes: The tuple only required an index, and it was delivered {} indexes'
-_INCOMPATIBLE_TUPLE_OPTERATION = 'Incompatible tuple operation: It is not possible to do the operation {} between a {} Tuple and a {} Tuple'
-_INCOMPATIBLE_NULL_OPTERATION = 'Incompatible null operation: It is not possible to do the operation {} between a {} and {}'
+_NOT_A_FUNCTION = "It is not a function: {}"
+_TYPE_MISMATCH = (
+    "Type Discrepancy: It is not possible to do the operation '{}', for an {} and a {}"
+)
+_UNKNOW_PREFIX_OPERATOR = "Unknown Operator: The operator '{}' is unknown for {}"
+_UNKNOW_INFIX_OPERATOR = "Unknown Operator: The operator '{}' is unknown between {}"
+_DIVISION_BY_ZERO = "Division by zero: It is not possible to divide by zero {}"
+_UNKNOW_IDENTIFIER = "Identifier not found: {}"
+_NON_MODIFIABLE_VALUE = "Non-modifiable Value: The value of {} is not modifiable"
+_WRONG_NUMBER_INDEXES = "Wrong number of indexes: {} indexes were delivered and between 1 and 3 are required"
+_INDIX_FAILED = "Out range: The length of the {} is {}"
+_TUPLE_FAIL = "Tuple with more of one type: The tuple have {} type and {} type"
+_NOT_AN_ITERABLE = (
+    "Not a iterable: The object delivered is not a iterable type is of type {}"
+)
+_WRONG_ARGS = (
+    "Arguments wrongs: The function expected to receive types {} and receives {}"
+)
+_WRONG_OUTPUT = "Output wrongs: The function expected to return type {} and return {}"
+_INCOMPATIBLE_LIST_OPTERATION = "Incompatible list operation: It is not possible to do the operation {} between a {} List and a {} List"
+_WRONG_NUMBER_OF_INDEXES_TUPLE = "Wrong number of indexes: The tuple only required an index, and it was delivered {} indexes"
+_INCOMPATIBLE_TUPLE_OPTERATION = "Incompatible tuple operation: It is not possible to do the operation {} between a {} Tuple and a {} Tuple"
+_INCOMPATIBLE_NULL_OPTERATION = "Incompatible null operation: It is not possible to do the operation {} between a {} and {}"
 
 TYPE_REGISTER_LITERAL: Dict[str, ObjectType] = {
-    'int': ObjectType.INTEGER,
-    'str': ObjectType.STRING,
-    'bool': ObjectType.BOOLEAN,
-    'float': ObjectType.FLOAT,
-    'list': ObjectType.LIST,
-    'tuple': ObjectType.TUPLE,
-    'function': ObjectType.FUNCTION,
-    'null': ObjectType.INTEGER,
+    "int": ObjectType.INTEGER,
+    "str": ObjectType.STRING,
+    "bool": ObjectType.BOOLEAN,
+    "float": ObjectType.FLOAT,
+    "list": ObjectType.LIST,
+    "tuple": ObjectType.TUPLE,
+    "function": ObjectType.FUNCTION,
+    "null": ObjectType.INTEGER,
 }
-TYPE_REGISTER_OBJECT:  Dict[ObjectType, str] = {
-    ObjectType.INTEGER: 'int',
-    ObjectType.STRING: 'str',
-    ObjectType.BOOLEAN: 'bool',
-    ObjectType.FLOAT: 'float',
-    ObjectType.LIST: 'list',
-    ObjectType.TUPLE: 'tuple',
-    ObjectType.FUNCTION: 'function'
+TYPE_REGISTER_OBJECT: Dict[ObjectType, str] = {
+    ObjectType.INTEGER: "int",
+    ObjectType.STRING: "str",
+    ObjectType.BOOLEAN: "bool",
+    ObjectType.FLOAT: "float",
+    ObjectType.LIST: "list",
+    ObjectType.TUPLE: "tuple",
+    ObjectType.FUNCTION: "function",
 }
 
 
@@ -167,11 +165,9 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
         node = cast(ast.Function, node)
 
         assert node.body is not None
-        return Function(node.parameters,
-                        node.type_parameters,
-                        node.type_output,
-                        node.body,
-                        env)
+        return Function(
+            node.parameters, node.type_parameters, node.type_output, node.body, env
+        )
     elif node_type == ast.Call:
         node = cast(ast.Call, node)
 
@@ -194,21 +190,26 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
                     return arg
                 type_args.append(TYPE_REGISTER_OBJECT[arg.type()])
 
-            return _new_error(_WRONG_ARGS, [
-                ', '.join([type_param.value for type_param in type_params[0:-1]]
-                          ) + f', and {type_params[-1].value}'
-                if len(type_args) > 1 else type_params[0].value,
-
-                ' ,'.join(type_args[0:-1]) + f', and {type_args[-1]}'
-                if len(type_args) > 1 else type_args[0]
-            ])
+            return _new_error(
+                _WRONG_ARGS,
+                [
+                    ", ".join([type_param.value for type_param in type_params[0:-1]])
+                    + f", and {type_params[-1].value}"
+                    if len(type_args) > 1
+                    else type_params[0].value,
+                    " ,".join(type_args[0:-1]) + f", and {type_args[-1]}"
+                    if len(type_args) > 1
+                    else type_args[0],
+                ],
+            )
 
         return_fn = _apply_function(function, args)
 
         if type(function) == Builtin:
             return return_fn
-        elif type(function) == Function \
-                and _check_type_out_function(function, return_fn):
+        elif type(function) == Function and _check_type_out_function(
+            function, return_fn
+        ):
             return return_fn
         elif type(function) == Error:
             return return_fn
@@ -218,8 +219,10 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
             if return_fn.type() is ObjectType.ERROR:
                 return return_fn
 
-            return _new_error(_WRONG_OUTPUT, [
-                function.type_output, TYPE_REGISTER_OBJECT[return_fn.type()]])
+            return _new_error(
+                _WRONG_OUTPUT,
+                [function.type_output, TYPE_REGISTER_OBJECT[return_fn.type()]],
+            )
 
     elif node_type == ast.ListValues:
         node = cast(ast.ListValues, node)
@@ -258,7 +261,10 @@ def _check_type_tuple(items: List[Object]) -> Object:
         if item.type() == ObjectType.ERROR:
             return item
         if item.type() != type_items:
-            return _new_error(_TUPLE_FAIL, [TYPE_REGISTER_OBJECT[type_items], TYPE_REGISTER_OBJECT[item.type()]])
+            return _new_error(
+                _TUPLE_FAIL,
+                [TYPE_REGISTER_OBJECT[type_items], TYPE_REGISTER_OBJECT[item.type()]],
+            )
     return ValueTuple(items)
 
 
@@ -271,26 +277,30 @@ def _get_values_iter(iterable: Object, ranges: List[Object]) -> Object:
         index_jump: Optional[int] = None
 
         if len(ranges) == 3:
-            assert (ranges[0].type() == ObjectType.INTEGER and ranges[1].type(
-            ) == ObjectType.INTEGER and ranges[2].type() == ObjectType.INTEGER)
+            assert (
+                ranges[0].type() == ObjectType.INTEGER
+                and ranges[1].type() == ObjectType.INTEGER
+                and ranges[2].type() == ObjectType.INTEGER
+            )
             start = cast(Integer, ranges[0]).value
             end = cast(Integer, ranges[1]).value
             index_jump = cast(Integer, ranges[2]).value
         elif len(ranges) == 2:
-            assert not (ranges[0].type() == ObjectType.INTEGER and type(
-                ranges[1]) == ObjectType.INTEGER)
+            assert not (
+                ranges[0].type() == ObjectType.INTEGER
+                and type(ranges[1]) == ObjectType.INTEGER
+            )
             start = cast(Integer, ranges[0]).value
             end = cast(Integer, ranges[1]).value
             if end > len(iterable.values):
                 return NULL
         elif len(ranges) == 1:
-            assert (ranges[0].type() == ObjectType.INTEGER)
+            assert ranges[0].type() == ObjectType.INTEGER
             start = cast(Integer, ranges[0]).value
             end = cast(Integer, ranges[0]).value + 1
 
             try:
-                range_list = iterable.values.__getitem__(
-                    slice(start, end, index_jump))
+                range_list = iterable.values.__getitem__(slice(start, end, index_jump))
                 if len(range_list) > 1:
                     return ValueList(range_list)
                 else:
@@ -301,8 +311,7 @@ def _get_values_iter(iterable: Object, ranges: List[Object]) -> Object:
             return _new_error(_WRONG_NUMBER_INDEXES, [len(ranges)])
 
         try:
-            range_list = iterable.values.__getitem__(
-                slice(start, end, index_jump))
+            range_list = iterable.values.__getitem__(slice(start, end, index_jump))
             return ValueList(range_list)
         except IndexError:
             return _new_error(_INDIX_FAILED, ["list", len(iterable.values)])
@@ -311,7 +320,7 @@ def _get_values_iter(iterable: Object, ranges: List[Object]) -> Object:
         iterable = cast(ValueTuple, iterable)
 
         if len(ranges) == 1:
-            assert (ranges[0].type() == ObjectType.INTEGER)
+            assert ranges[0].type() == ObjectType.INTEGER
             index = cast(Integer, ranges[0]).value
             try:
                 return iterable.values.__getitem__(index)
@@ -349,23 +358,23 @@ def _check_type_out_function(fn: Object, out: Object) -> bool:
     return bool(out.type() is TYPE_REGISTER_LITERAL[type_param.value])
 
 
-def _apply_function(fn: Object, args: List[Object]) -> Object:
-    if type(fn) == Function:
-        fn = cast(Function, fn)
+def _apply_function(function, args: List[Object]) -> Object:
+    if type(function) == Function:
+        function = cast(Function, function)
 
-        extended_environment = _extend_function_enviroment(fn, args)
-        evaluated = evaluate(fn.body, extended_environment)
+        extended_environment = _extend_function_enviroment(function, args)
+        evaluated = evaluate(function.body, extended_environment)
 
         assert evaluated is not None
         return _unwrap_return_value(evaluated)
 
-    elif type(fn) == Builtin:
-        fn = cast(Builtin, fn)
+    elif type(function) == Builtin:
+        function = cast(Builtin, function)
 
-        return fn.fn(*args)
+        return function.fn(*args)
 
     else:
-        return _new_error(_NOT_A_FUNCTION, [fn.type().name])
+        return _new_error(_NOT_A_FUNCTION, [function.type().name])
 
 
 def _extend_function_enviroment(fn: Function, args: List[Object]) -> Environment:
@@ -384,7 +393,9 @@ def _unwrap_return_value(obj: Object) -> Object:
     return obj
 
 
-def _evaluate_items(node: Union[ast.TupleValues, ast.ListValues], env: Environment) -> List[Object]:
+def _evaluate_items(
+    node: Union[ast.TupleValues, ast.ListValues], env: Environment
+) -> List[Object]:
     values: List[Object] = []
 
     for value in node.values:
@@ -403,7 +414,9 @@ def _evaluate_items(node: Union[ast.TupleValues, ast.ListValues], env: Environme
     return values
 
 
-def _evaluate_expression(expressions: List[ast.Expression], env: Environment) -> List[Object]:
+def _evaluate_expression(
+    expressions: List[ast.Expression], env: Environment
+) -> List[Object]:
     result: List[Object] = []
 
     for expression in expressions:
@@ -422,7 +435,9 @@ def _evaluate_identifier(node: ast.Identifier, env: Environment) -> Object:
         return BUILTIN.get(node.value, _new_error(_UNKNOW_IDENTIFIER, [node.value]))
 
 
-def _evaluate_if_expression(if_expression: ast.If, env: Environment) -> Optional[Object]:
+def _evaluate_if_expression(
+    if_expression: ast.If, env: Environment
+) -> Optional[Object]:
     assert if_expression.condition is not None
     condition = evaluate(if_expression.condition, env)
 
@@ -451,256 +466,262 @@ def _evaluate_block_statement(block: ast.Block, env: Environment) -> Optional[Ob
     for statement in block.statements:
         result = evaluate(statement, env)
 
-        if result is not None and \
-                (result.type() == ObjectType.RETURN or result.type() == ObjectType.ERROR):
+        if result is not None and (
+            result.type() == ObjectType.RETURN or result.type() == ObjectType.ERROR
+        ):
             return result
     return result
 
 
-def _evaluate_infix_expression(operator: str,
-                               left: Object,
-                               right: Object
-                               ) -> Object:
+def _evaluate_infix_expression(operator: str, left: Object, right: Object) -> Object:
 
-    if left.type() == ObjectType.INTEGER \
-            and right.type() == ObjectType.INTEGER:
-                
-        if left.inspect() == 'null' or right.inspect() == 'null':
+    if left.type() == ObjectType.INTEGER and right.type() == ObjectType.INTEGER:
+
+        if left.inspect() == "null" or right.inspect() == "null":
             return NULL
-        
+
         return _evaluate_interger_infix_expression(operator, left, right)
-    elif left.type() == ObjectType.FLOAT \
-            and right.type() == ObjectType.FLOAT:
+    elif left.type() == ObjectType.FLOAT and right.type() == ObjectType.FLOAT:
         return _evaluate_float_infix_expression(operator, left, right)
-    elif left.type() == ObjectType.STRING \
-            and right.type() == ObjectType.STRING:
+    elif left.type() == ObjectType.STRING and right.type() == ObjectType.STRING:
         return _evaluate_string_infix_expression(operator, left, right)
-    elif left.type() == ObjectType.BOOLEAN \
-            and right.type() == ObjectType.BOOLEAN:
+    elif left.type() == ObjectType.BOOLEAN and right.type() == ObjectType.BOOLEAN:
         return _evaluate_bool_infix_expression(operator, left, right)
-    elif left.type() == ObjectType.LIST \
-            and right.type() == ObjectType.LIST:
+    elif left.type() == ObjectType.LIST and right.type() == ObjectType.LIST:
         return _evaluate_list_infix_expression(operator, left, right)
-    elif left.type() == ObjectType.TUPLE \
-            and right.type() == ObjectType.TUPLE:
+    elif left.type() == ObjectType.TUPLE and right.type() == ObjectType.TUPLE:
         return _evaluate_tuple_infix_expression(operator, left, right)
     elif left.type() != right.type():
-        return _new_error(_TYPE_MISMATCH, [operator,
-                                           left.type().name,
-                                           right.type().name])
+        if left.type() is ObjectType.ERROR:
+            return left
+        elif right.type() is ObjectType.ERROR:
+            return right
+        return _new_error(
+            _TYPE_MISMATCH, [operator, left.type().name, right.type().name]
+        )
+    elif left.type() is ObjectType.ERROR:
+        return left
+    elif right.type() is ObjectType.ERROR:
+        return right
     else:
-        return _new_error(_UNKNOW_INFIX_OPERATOR, [operator,
-                                                   right.type().name])
+        return _new_error(_UNKNOW_INFIX_OPERATOR, [operator, right.type().name])
 
 
-def _evaluate_bool_infix_expression(operator: str,
-                                    left: Object,
-                                    right: Object
-                                    ) -> Object:
+def _evaluate_bool_infix_expression(
+    operator: str, left: Object, right: Object
+) -> Object:
 
     left_value: bool = cast(Boolean, left).value
     right_value: bool = cast(Boolean, right).value
 
-    if operator == '==':
+    if operator == "==":
         return _to_boolean_object(left_value is right_value)
-    elif operator == '!=':
+    elif operator == "!=":
         return _to_boolean_object(left_value is not right_value)
-    elif operator == '||':
+    elif operator == "||":
         return _to_boolean_object(left_value or right_value)
-    elif operator == '&&':
+    elif operator == "&&":
         return _to_boolean_object(left_value and right_value)
     else:
-        return _new_error(_UNKNOW_INFIX_OPERATOR, [operator,
-                                                   left.type().name])
+        return _new_error(_UNKNOW_INFIX_OPERATOR, [operator, left.type().name])
 
 
-def _evaluate_list_infix_expression(operator: str,
-                                    left: Object,
-                                    right: Object
-                                    ) -> Object:
+def _evaluate_list_infix_expression(
+    operator: str, left: Object, right: Object
+) -> Object:
     left_list: list = cast(ValueList, left).values
     right_list: list = cast(ValueList, right).values
 
-    if operator == '+':
+    if operator == "+":
         if len(left_list) > 1 and len(right_list) > 1:
             if left_list[0].type() == right_list[0].type():
                 return ValueList(values=left_list + right_list)
             else:
-                return _new_error(_INCOMPATIBLE_LIST_OPTERATION, [operator, left_list[0].type().name, right_list[0].type().name])
+                return _new_error(
+                    _INCOMPATIBLE_LIST_OPTERATION,
+                    [operator, left_list[0].type().name, right_list[0].type().name],
+                )
         return ValueList(values=left_list + right_list)
-    elif operator == '==':
+    elif operator == "==":
         return _to_boolean_object(left_list == right_list)
-    elif operator == '!=':
+    elif operator == "!=":
         return _to_boolean_object(left_list != right_list)
     else:
-        return _new_error(_UNKNOW_INFIX_OPERATOR, [operator,
-                                                   right.type().name])
+        return _new_error(_UNKNOW_INFIX_OPERATOR, [operator, right.type().name])
 
 
-def _evaluate_tuple_infix_expression(operator: str,
-                                     left: Object,
-                                     right: Object
-                                     ) -> Object:
+def _evaluate_tuple_infix_expression(
+    operator: str, left: Object, right: Object
+) -> Object:
     left_tuple: list = cast(ValueTuple, left).values
     right_tuple: list = cast(ValueTuple, right).values
 
-    if operator == '+':
-        if len(left_tuple) == len(right_tuple) and \
-                left_tuple[0].type() == right_tuple[0].type():
+    if operator == "+":
+        if (
+            len(left_tuple) == len(right_tuple)
+            and left_tuple[0].type() == right_tuple[0].type()
+        ):
 
-            values = [_evaluate_infix_expression(
-                '+', l1, l2) for l1, l2 in zip(left_tuple, right_tuple)]
-
-            if values[0].type() != ObjectType.ERROR:
-                return ValueTuple(values=values)
-            else:
-                return values[0]
-        else:
-            return _new_error(_INCOMPATIBLE_TUPLE_OPTERATION,
-                              [operator, left_tuple[0].type().name,
-                               right_tuple[0].type().name])
-    elif operator == '-':
-        if len(left_tuple) == len(right_tuple) and \
-                left_tuple[0].type() == right_tuple[0].type():
-
-            values = [_evaluate_infix_expression(
-                '-', l1, l2) for l1, l2 in zip(left_tuple, right_tuple)]
+            values = [
+                _evaluate_infix_expression("+", l1, l2)
+                for l1, l2 in zip(left_tuple, right_tuple)
+            ]
 
             if values[0].type() != ObjectType.ERROR:
                 return ValueTuple(values=values)
             else:
                 return values[0]
         else:
-            return _new_error(_INCOMPATIBLE_TUPLE_OPTERATION,
-                              [operator, left_tuple[0].type().name,
-                               right_tuple[0].type().name])
-    elif operator == '==':
-        if len(left_tuple) == len(right_tuple) and \
-                left_tuple[0].type() == right_tuple[0].type():
+            return _new_error(
+                _INCOMPATIBLE_TUPLE_OPTERATION,
+                [operator, left_tuple[0].type().name, right_tuple[0].type().name],
+            )
+    elif operator == "-":
+        if (
+            len(left_tuple) == len(right_tuple)
+            and left_tuple[0].type() == right_tuple[0].type()
+        ):
+
+            values = [
+                _evaluate_infix_expression("-", l1, l2)
+                for l1, l2 in zip(left_tuple, right_tuple)
+            ]
+
+            if values[0].type() != ObjectType.ERROR:
+                return ValueTuple(values=values)
+            else:
+                return values[0]
+        else:
+            return _new_error(
+                _INCOMPATIBLE_TUPLE_OPTERATION,
+                [operator, left_tuple[0].type().name, right_tuple[0].type().name],
+            )
+    elif operator == "==":
+        if (
+            len(left_tuple) == len(right_tuple)
+            and left_tuple[0].type() == right_tuple[0].type()
+        ):
 
             left_tuple = list(map(lambda e: e.value, left_tuple))
             right_tuple = list(map(lambda e: e.value, right_tuple))
 
             return _to_boolean_object(left_tuple == right_tuple)
         else:
-            return _new_error(_INCOMPATIBLE_TUPLE_OPTERATION,
-                              [operator, left_tuple[0].type().name,
-                               right_tuple[0].type().name])
+            return _new_error(
+                _INCOMPATIBLE_TUPLE_OPTERATION,
+                [operator, left_tuple[0].type().name, right_tuple[0].type().name],
+            )
 
-    elif operator == '!=':
-        if len(left_tuple) == len(right_tuple) and \
-                left_tuple[0].type() == right_tuple[0].type():
+    elif operator == "!=":
+        if (
+            len(left_tuple) == len(right_tuple)
+            and left_tuple[0].type() == right_tuple[0].type()
+        ):
 
             left_tuple = list(map(lambda e: e.value, left_tuple))
             right_tuple = list(map(lambda e: e.value, right_tuple))
 
             return _to_boolean_object(left_tuple != right_tuple)
         else:
-            return _new_error(_INCOMPATIBLE_TUPLE_OPTERATION,
-                              [operator, left_tuple[0].type().name,
-                               right_tuple[0].type().name])
+            return _new_error(
+                _INCOMPATIBLE_TUPLE_OPTERATION,
+                [operator, left_tuple[0].type().name, right_tuple[0].type().name],
+            )
     else:
-        return _new_error(_UNKNOW_INFIX_OPERATOR, [operator,
-                                                   right.type().name])
+        return _new_error(_UNKNOW_INFIX_OPERATOR, [operator, right.type().name])
 
 
-def _evaluate_float_infix_expression(operator: str,
-                                     left: Object,
-                                     right: Object
-                                     ) -> Object:
+def _evaluate_float_infix_expression(
+    operator: str, left: Object, right: Object
+) -> Object:
 
     left_value: float = cast(Float, left).value
     right_value: float = cast(Float, right).value
 
-    if operator == '+':
+    if operator == "+":
         return Float(left_value + right_value)
-    elif operator == '-':
+    elif operator == "-":
         return Float(left_value - right_value)
-    elif operator == '*':
+    elif operator == "*":
         return Float(left_value * right_value)
-    elif operator == '**':
+    elif operator == "**":
         return Float(left_value ** right_value)
-    elif operator == '/':
+    elif operator == "/":
         if right_value == 0:
-            return _new_error(_DIVISION_BY_ZERO, [''])
+            return _new_error(_DIVISION_BY_ZERO, [""])
         return Float(left_value / right_value)
-    elif operator == '%':
+    elif operator == "%":
         return Float(left_value % right_value)
-    elif operator == '<':
+    elif operator == "<":
         return _to_boolean_object(left_value < right_value)
-    elif operator == '>':
+    elif operator == ">":
         return _to_boolean_object(left_value > right_value)
-    elif operator == '>=':
+    elif operator == ">=":
         return _to_boolean_object(left_value >= right_value)
-    elif operator == '<=':
+    elif operator == "<=":
         return _to_boolean_object(left_value <= right_value)
-    elif operator == '==':
+    elif operator == "==":
         return _to_boolean_object(left_value == right_value)
-    elif operator == '!=':
+    elif operator == "!=":
         return _to_boolean_object(left_value != right_value)
     else:
-        return _new_error(_UNKNOW_INFIX_OPERATOR, [operator,
-                                                   right.type().name])
+        return _new_error(_UNKNOW_INFIX_OPERATOR, [operator, right.type().name])
 
 
-def _evaluate_interger_infix_expression(operator: str,
-                                        left: Object,
-                                        right: Object
-                                        ) -> Object:
+def _evaluate_interger_infix_expression(
+    operator: str, left: Object, right: Object
+) -> Object:
     left_value: int = cast(Integer, left).value
     right_value: int = cast(Integer, right).value
 
-    if operator == '+':
+    if operator == "+":
         return Integer(left_value + right_value)
-    elif operator == '-':
+    elif operator == "-":
         return Integer(left_value - right_value)
-    elif operator == '*':
+    elif operator == "*":
         return Integer(left_value * right_value)
-    elif operator == '**':
+    elif operator == "**":
         return Integer(left_value ** right_value)
-    elif operator == '/':
+    elif operator == "/":
         if right_value == 0:
-            return _new_error(_DIVISION_BY_ZERO, [''])
+            return _new_error(_DIVISION_BY_ZERO, [""])
 
         if left_value % right_value == 0:
             return Integer(left_value // right_value)
         else:
             return _evaluate_float_infix_expression(operator, left, right)
-    elif operator == '%':
+    elif operator == "%":
         return Integer(left_value % right_value)
-    elif operator == '<':
+    elif operator == "<":
         return _to_boolean_object(left_value < right_value)
-    elif operator == '>':
+    elif operator == ">":
         return _to_boolean_object(left_value > right_value)
-    elif operator == '>=':
+    elif operator == ">=":
         return _to_boolean_object(left_value >= right_value)
-    elif operator == '<=':
+    elif operator == "<=":
         return _to_boolean_object(left_value <= right_value)
-    elif operator == '==':
+    elif operator == "==":
         return _to_boolean_object(left_value == right_value)
-    elif operator == '!=':
+    elif operator == "!=":
         return _to_boolean_object(left_value != right_value)
     else:
-        return _new_error(_UNKNOW_INFIX_OPERATOR, [operator,
-                                                   right.type().name])
+        return _new_error(_UNKNOW_INFIX_OPERATOR, [operator, right.type().name])
 
 
-def _evaluate_string_infix_expression(operator: str,
-                                      left: Object,
-                                      right: Object
-                                      ) -> Object:
+def _evaluate_string_infix_expression(
+    operator: str, left: Object, right: Object
+) -> Object:
     left_value: str = cast(String, left).value
     right_value: str = cast(String, right).value
 
-    if operator == '+':
+    if operator == "+":
         return String(left_value + right_value)
-    elif operator == '==':
+    elif operator == "==":
         return _to_boolean_object(left_value == right_value)
-    elif operator == '!=':
+    elif operator == "!=":
         return _to_boolean_object(left_value != right_value)
     else:
-        return _new_error(_UNKNOW_INFIX_OPERATOR, [operator,
-                                                   right.type().name])
+        return _new_error(_UNKNOW_INFIX_OPERATOR, [operator, right.type().name])
 
 
 def _evaluate_minus_operator_expression(right: Object) -> Object:
@@ -713,11 +734,11 @@ def _evaluate_minus_operator_expression(right: Object) -> Object:
 
         return Float(-right.value)
     else:
-        return _new_error(_UNKNOW_PREFIX_OPERATOR, ['-', right.type().name])
+        return _new_error(_UNKNOW_PREFIX_OPERATOR, ["-", right.type().name])
 
 
 def _evaluate_prefix_expression(operator: str, right: Object) -> Object:
-    if operator == '-':
+    if operator == "-":
         return _evaluate_minus_operator_expression(right)
     else:
         return _new_error(_UNKNOW_PREFIX_OPERATOR, [operator, right.type().name])
