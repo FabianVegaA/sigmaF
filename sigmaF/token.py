@@ -63,6 +63,7 @@ def lookup_token_type(literal: str) -> TokenType:
         "if": TokenType.IF,
         "then": TokenType.THEN,
         "else": TokenType.ELSE,
+        "return": TokenType.RETURN,
         "bool": TokenType.CLASSNAME,
         "int": TokenType.CLASSNAME,
         "str": TokenType.CLASSNAME,
