@@ -5,106 +5,121 @@ The SigmaF project seeks to create a new programming language open source in the
 It is an interpreted language fully built using Python 3.8.
 
 ---
+
 ## Install via binary archive on Linux
 
-1. Download the version that you prefreir  in `release`.
+1. Download the version that you prefreir in `release`.
 2. Unzip the binary archive.
-``` console
+
+```console
 VERSION=v1.0
 sudo mkdir -p /usr/local/lib/sigmaf
 sudo tar -xJvf sigmaf-$VERSION.tar.xz -C /usr/local/lib/sigmaf
 ```
+
 3. Set the environment variable ~/.profile, add below to the end.
-``` console
+
+```console
 VERSION=v1.0
 export PATH=/usr/local/lib/sigmaf/sigmaf-$VERSION:$PATH
 ```
+
 4. Refresh profile
-``` console
+
+```console
 . ~/.profile
 ```
+
 5. Test installation using.
-``` 
+
+```
 ➜ sigmaf
 Welcome to SigmaF, the Program Language of the future for the Programming Functional and a lot more
 
- 
-                                                .         .                                                
-   d888888o.    8 8888     ,o888888o.          ,8.       ,8.                   .8.          8 8888888888   
- .`8888:' `88.  8 8888    8888     `88.       ,888.     ,888.                 .888.         8 8888         
- 8.`8888.   Y8  8 8888 ,8 8888       `8.     .`8888.   .`8888.               :88888.        8 8888         
- `8.`8888.      8 8888 88 8888              ,8.`8888. ,8.`8888.             . `88888.       8 8888         
-  `8.`8888.     8 8888 88 8888             ,8'8.`8888,8^8.`8888.           .8. `88888.      8 888888888888 
-   `8.`8888.    8 8888 88 8888            ,8' `8.`8888' `8.`8888.         .8`8. `88888.     8 8888         
-    `8.`8888.   8 8888 88 8888   8888888 ,8'   `8.`88'   `8.`8888.       .8' `8. `88888.    8 8888         
-8b   `8.`8888.  8 8888 `8 8888       .8',8'     `8.`'     `8.`8888.     .8'   `8. `88888.   8 8888         
-`8b.  ;8.`8888  8 8888    8888     ,88',8'       `8        `8.`8888.   .888888888. `88888.  8 8888         
- `Y8888P ,88P'  8 8888     `8888888P' ,8'         `         `8.`8888. .8'       `8. `88888. 8 8888         
+
+                                                .         .
+   d888888o.    8 8888     ,o888888o.          ,8.       ,8.                   .8.          8 8888888888
+ .`8888:' `88.  8 8888    8888     `88.       ,888.     ,888.                 .888.         8 8888
+ 8.`8888.   Y8  8 8888 ,8 8888       `8.     .`8888.   .`8888.               :88888.        8 8888
+ `8.`8888.      8 8888 88 8888              ,8.`8888. ,8.`8888.             . `88888.       8 8888
+  `8.`8888.     8 8888 88 8888             ,8'8.`8888,8^8.`8888.           .8. `88888.      8 888888888888
+   `8.`8888.    8 8888 88 8888            ,8' `8.`8888' `8.`8888.         .8`8. `88888.     8 8888
+    `8.`8888.   8 8888 88 8888   8888888 ,8'   `8.`88'   `8.`8888.       .8' `8. `88888.    8 8888
+8b   `8.`8888.  8 8888 `8 8888       .8',8'     `8.`'     `8.`8888.     .8'   `8. `88888.   8 8888
+`8b.  ;8.`8888  8 8888    8888     ,88',8'       `8        `8.`8888.   .888888888. `88888.  8 8888
+ `Y8888P ,88P'  8 8888     `8888888P' ,8'         `         `8.`8888. .8'       `8. `88888. 8 8888
 
 ----------------------------------------------------------------------------------------------------------
->> 
+>>
 
 ```
+
 > WARNING:
 > If you have problems with this installation you can modify the file `home/.bashrc` and insert the below to the end of it.
+>
 > ```
 > ## SigmaF
 > VERSION=v1.0
 > export PATH=/usr/local/lib/sigmaf/sigmaf-$VERSION:$PATH
 > ```
+
 ## Install via Interpreter of Python
 
-It has been implemented only in REPL for the moment , but you can execute a file with the ' *.sf* ' extension inside of it.
+It has been implemented only in REPL for the moment , but you can execute a file with the ' _.sf_ ' extension inside of it.
 
-### For install the REPL you must: 
+### For install the REPL you must:
 
 1. Clone the repository in your machine.
 
 2. Create a virtual enviroment.
 
-``` shell
+```shell
 python3 -m venv venv
 ```
 
 3. Run the virtual enviroment
 
-* Linux or Mac
+- Linux or Mac
 
-``` shell
+```shell
 cd sigmaF
 source venv/bin/activate
 ```
 
-* Windows
+- Windows
 
-``` shell
+```shell
 cd sigmaF
 source /venv/Scripts/activate
 ```
 
 4. Install requirements
 
-``` shell
+```shell
 pip install -r requirements.txt
 ```
+
 ---
 
 ## How use the REPL?
 
 You can execute code lines inside of the REPL using:
 
-``` shell
+```shell
 python3.8 main.py
 ```
+
 Or
-``` shell
+
+```shell
 sigmaf
 ```
+
 This depends on how you installed SigmaF.
 
 Also, you can create a script with your code and use it inside of any statement. For this you can use:
 
-``` shell
+```shell
 python3.8 main.py <file.sf>
 
 sigmaf <file.sf>
@@ -121,21 +136,25 @@ It should show something like this:
 3. `-version`: This display the version of SigmaF installed.
 
 ### Commands to REPL
+
 1. `exit()`: This it allow you exit of the REPL.
 2. `load()`: Whith this commands you can load a `file.sf`. For this, you must add like parameter a valid path. (version 1.1)
 3. `update()`: This command reloads the path previously loaded. (version 1.1)
 
 ---
+
 ## Tutorial SigmaF
 
 Before to start, it's necessary to know this.
 
-``` SigmaF
+```Haskell
 printLn("Hello, World!")
 ```
+
 ### Comments
 
 If you want to comment your code, you can use:
+
 ```sql
 
 -- This is a single line comment
@@ -151,25 +170,25 @@ This language doesn't use variables. Instead of variables, you can only declare 
 
 For daclaring a value, you must use `let` and give it a value. For example:
 
-``` sql
+```Haskell
 let a = 1        -- Interger
 let b = 1.0      -- Float
 let c = "string" -- String
 let d = true     -- Boolean
 let e = [1,2,3]  -- List
 let f = (1,2)    -- Tuple
-...             
+...
 ```
 
 SigmaF allows data type as Integer, Float, Boolean, and String.
 
-### Lists 
+### Lists
 
 The List allows to all the data types before, lists and functions.
 
 Also, it allows to get an item through the next notation:
 
-``` sql
+```Haskell
 let value_list = [1,2,3,4,5,6,7,8,9]
 value_list[0]       -- Output: 1
 value_list[0, 4]    -- Output: [1,2,3,4]
@@ -178,23 +197,27 @@ value_list[0, 8, 2] -- Output: [1, 3, 5, 7]
 
 > The struct of **List CAll** is `example_list[<Start>, <End>, <Jump>]`
 
-### Tuples 
+### Tuples
 
 The tuples are data structs of length greater than 1 that allow others operation different to lists like:
-``` sql
+
+```Haskell
 (1,2) + (3,4)      -- Output: (4,6)
 (4,6,8) - (3,4,5)  -- Output: (1,2,3)
 (0,1) == (0,1)     -- Output: true
 (0,1) != (1,3)     -- Output: true
 ```
+
 To obtain the values of a tuple must use the same notation of the list, but this data structure not allow ranges as the lists (only you can get one position of a tuple).
 
-E.g. 
-``` sql
+E.g.
+
+```Haskell
 let t = (1,2,3,4,5,6)
 t[1] -- Output: 2
 t[5] -- Output: 6
 ```
+
 And so on.
 
 ### Operators
@@ -202,22 +225,22 @@ And so on.
 > **Warning**: SigmaF have **Static Typing**, so does not allow the operation between different data types.
 
 These are operators:
-| Operator             | Symbol |
+| Operator | Symbol |
 |----------------------|--------|
-| Plus                 |    +   |
-| Minus                |    -   |
-| Multiplication       |    *   |
-| Division             |    /   |
-| Modulus              |    %   |
-| Exponential          |   **   |
-| Equal                |   ==   |
-| Not Equal            |   !=   |
-| Less than            |    <   |
-| Greater than         |    >   |
-| Less or equal than   |   <=   |
-| Greater or equal than |   >=   |
-| And                  |   &&   |
-| Or                   |  \|\|  |
+| Plus | + |
+| Minus | - |
+| Multiplication | \* |
+| Division | / |
+| Modulus | % |
+| Exponential | \*\* |
+| Equal | == |
+| Not Equal | != |
+| Less than | < |
+| Greater than | > |
+| Less or equal than | <= |
+| Greater or equal than | >= |
+| And | && |
+| Or | \|\| |
 <br/>
 
 > The operator of negation for Boolean was not included. For this, you can use the `not()` function
@@ -226,17 +249,17 @@ These are operators:
 
 For declaring a function, you need to use the next syntax:
 
-``` Python
+```Haskell
 let example_function = fn <Name Argument>::<Argument Type> -> <Output Type> {
     => <Return Value>
-}  
+}
 ```
 
 > (For return, you must use the => symbol)
 
 For example:
 
-``` sql
+```Haskell
 let is_prime_number = fn x::int, i::int -> bool {
     if x <= 1 then {=> false;}
     if x == i then {=> true;}
@@ -251,7 +274,7 @@ printLn(is_prime_number(11, 2)) -- Output: true
 
 Regarding the conditionals, the syntax structure is:
 
-``` Python
+```Haskell
 if <Condition> then {
     <Consequence>
 }
@@ -262,7 +285,7 @@ else{
 
 For example:
 
-``` Python
+```Haskell
 if x <= 1 || x % i == 0 then {
     false;
 }
@@ -275,7 +298,8 @@ else {
 ```
 
 ## Some Examples
-``` sql
+
+```Haskell
 -- Quick Sort
 let qsort = fn l::list -> list {
 
@@ -283,7 +307,7 @@ let qsort = fn l::list -> list {
 	else {
 		let p = l[0];
 		let xs = tail(l);
-		
+
 		let c_lesser = fn q::int -> bool {=> (q < p)}
 		let c_greater = fn q::int -> bool {=> (q >= p)}
 
@@ -293,7 +317,7 @@ let qsort = fn l::list -> list {
 
 -- Filter
 let filter = fn c::function, l::list -> list {
-	if (l == []) then {=> [];} 
+	if (l == []) then {=> [];}
 
     => if (c(l[0])) then {[l[0]]} else {[]} +  filter(c, tail(l));
 }
@@ -301,7 +325,7 @@ let filter = fn c::function, l::list -> list {
 -- Map
 let map = fn f::function, l::list -> list {
 	if (l==[]) then {=> [];}
-	
+
 	=> [f(l[0])] + map(f, tail(l));
 }
 
@@ -311,7 +335,35 @@ let map = fn f::function, l::list -> list {
 For know other examples of the implementations you can go to [e.g.](egs)
 
 ---
-## Feedback
+
+# Feedback
+
 Feedback is very appreciated, reach out to me on [Twitter](https://twitter.com/fabianmativeal) or submit a new issue.
-## Contribute
-This is an **opensource** project, so everybody can contribute and be part of the community of [**SigmaF**](https://twitter.com/fabianmativeal/status/1385762245246922752).
+
+# Contribute
+
+This is an **opensource** project, so everybody can contribute and be part of the community of **SigmaF**.
+
+## Why be part of the SigmaF community?
+
+### A simple and understanble code
+
+The source code of the interpreter is made with Python 3.8, a language easy to learn, also good practices are a priority from start this project.
+
+### A great potencial
+
+This project has a great potential to be the next programming languages of the functional paradigm, to development the AI, and to development new metaheuristics.
+
+### Scalable development
+
+One of the mains approaches of this project is the implementation of TDD from start and in the development of new features, what allows scalable development.
+
+### Simple and potency
+
+One of the main worth to this programming language is build a functional language easy to learn, that at the same time, be a power language, capable to process great data quantities of way secure, that also allow concurrency and parallelism.
+
+### Respect for diversity
+
+Everybody is welcome, without matter your genre, experience or nationality, anybody with enthusiasm can participate in this project, anybody from the most expert to the that is beginning to learn about programming, marketing, design, or any career.
+
+## How start to contribute?
