@@ -346,24 +346,34 @@ This is an **opensource** project, so everybody can contribute and be part of th
 
 ## Why be part of the SigmaF community?
 
-### A simple and understanble code
+### 1. A simple and understanble code
 
 The source code of the interpreter is made with Python 3.8, a language easy to learn, also good practices are a priority from start this project.
 
-### A great potencial
+### 2. A great potencial
 
 This project has a great potential to be the next programming languages of the functional paradigm, to development the AI, and to development new metaheuristics.
 
-### Scalable development
+### 3. Scalable development
 
 One of the mains approaches of this project is the implementation of TDD from start and in the development of new features, what allows scalable development.
 
-### Simple and potency
+### 4. Simple and potency
 
-One of the main worth to this programming language is build a functional language easy to learn, that at the same time, be a power language, capable to process great data quantities of way secure, that also allow concurrency and parallelism.
+One of the main worth to this programming language is build a functional language easy to learn, that at the same time, be a powerful language, capable to process great data quantities of way secure, that also allow concurrency and parallelism.
 
-### Respect for diversity
+### 5. Respect for diversity
 
 Everybody is welcome, without matter your genre, experience or nationality, anybody with enthusiasm can participate in this project, anybody from the most expert to the that is beginning to learn about programming, marketing, design, or any career.
 
 ## How start to contribute?
+
+There is a multiply ways to contribute, since sharing this project, improving the brand of SigmaF, helping to solve the bugs or developing new features and make improves to the source code.
+
+- **Share this project**: You can put your start in the repository, or talk about this project, or use the hashtag #SigmaF in Twitter, LinkedIn or any social network.
+  
+- **Improve the brand of SigmaF**: If you are a marketer, designer, or you would like help with writing, you can help to improve the brand of the project, also can contact me on Twitter like @fabianmativeal if you are interested in it.
+  
+- **Help to solve the bugs**: if you find one bug notify me, in issue, of this way all can improve this language.
+  
+- **Developing new features**: If you want development new features or make improves to the project, you can do a folk the branch `dev` (here are the ultimate develops) and work there, and later do a [`pull request`](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) to `dev` branch, of this way will be part of next update the **SigmaF**.
