@@ -2,31 +2,31 @@
 
 The SigmaF project seeks to create a new programming language open source in the functional paradigm inspired by languages like Haskell, Python, JavaScript, and Rust.
 
-It is an interpreted language fully built using Python 3.8.
+SigmaF is an interpreted language fully built using Python 3.8.
 
 ---
 ## Install via binary archive on Linux
 
-1. Download the version that you prefreir  in `release`.
-2. Unzip the binary archive.
+1. Download the version that you prefer  in `release`.
+2. Unzip the binary archive:
 ``` console
 VERSION=v1.1
 sudo mkdir -p /usr/local/lib/sigmaf
 sudo tar -xJvf sigmaf-$VERSION.tar.xz -C /usr/local/lib/sigmaf
 ```
-3. Set the environment variable ~/.profile, add below to the end.
+3. Set the environment variable ~/.profile:
 ``` console
 VERSION=v1.1
 export PATH=/usr/local/lib/sigmaf/sigmaf-$VERSION:$PATH
 ```
-4. Refresh profile
+4. Refresh profile:
 ``` console
 . ~/.profile
 ```
-5. Test installation using.
+5. Test installation using the command showed below:
 ``` 
 ➜ sigmaf
-Welcome to SigmaF, the Program Language of the future for the Programming Functional and a lot more
+Welcome to SigmaF, the Program Language of the future for the Functional Programming and a lot more
 
  
                                                 .         .                                                
@@ -46,7 +46,7 @@ Welcome to SigmaF, the Program Language of the future for the Programming Functi
 
 ```
 > WARNING:
-> If you have problems with this installation you can modify the file `home/.bashrc` and insert the below to the end of it.
+> If you have problems with this installation you can modify the file `home/.bashrc` by going to the end and inserting the following:
 > ```
 > ## SigmaF
 > VERSION=v1.1
@@ -54,19 +54,19 @@ Welcome to SigmaF, the Program Language of the future for the Programming Functi
 > ```
 ## Install via Interpreter of Python
 
-It has been implemented only in REPL for the moment , but you can execute a file with the ' *.sf* ' extension inside of it.
+It has been implemented only in REPL for the moment, but you can execute a file with the ' *.sf* ' extension on it.
 
-### For install the REPL you must: 
+### To install the REPL you have to do the following steps: 
 
 1. Clone the repository in your machine.
 
-2. Create a virtual enviroment.
+2. Create a virtual enviroment:
 
 ``` shell
 python3 -m venv venv
 ```
 
-3. Run the virtual enviroment
+3. Run the virtual enviroment:
 
 * Linux or Mac
 
@@ -82,16 +82,16 @@ cd sigmaF
 source /venv/Scripts/activate
 ```
 
-4. Install requirements
+4. Install requirements:
 
 ``` shell
 pip install -r requirements.txt
 ```
 ---
 
-## How use the REPL?
+## How to use the REPL?
 
-You can execute code lines inside of the REPL using:
+You can execute the code lines inside of the REPL using:
 
 ``` shell
 python3.8 main.py
@@ -100,9 +100,9 @@ Or
 ``` shell
 sigmaf
 ```
-This depends on how you installed SigmaF.
+This depends on how you have installed SigmaF.
 
-Also, you can create a script with your code and use it inside of any statement. For this you can use:
+Also, you can create a script with your code and use it inside of any statement, doing the following:
 
 ``` shell
 python3.8 main.py <file.sf>
@@ -116,19 +116,19 @@ It should show something like this:
 
 ### Options of command line (SigmaF v1.1)
 
-1. `-ncover`: This allows that the cover page to be not displayed.
+1. `-ncover`: This does not allow the cover page to be displayed.
 2. `-cover`: This allows the cover page to be displayed.
-3. `-version`: This display the version of SigmaF installed.
+3. `-version`: This displays the version of SigmaF installed.
 
 ### Commands to REPL
 1. `exit()`: This it allow you exit of the REPL.
-2. `load()`: Whith this commands you can load a `file.sf`. For this, you must add like parameter a valid path. (version 1.1)
+2. `load()`: With this you can load a `file.sf`. For proper use of this command, you must add parameter as a valid path. (version 1.1)
 3. `update()`: This command reloads the path previously loaded. (version 1.1)
 
 ---
 ## Tutorial SigmaF
 
-Before to start, it's necessary to know this.
+Before starting, it is necessary to know this.
 
 ``` SigmaF
 printLn("Hello, World!")
@@ -147,9 +147,9 @@ If you want to comment your code, you can use:
 
 ### Let Statements
 
-This language doesn't use variables. Instead of variables, you can only declare static values.
+This language does not use variables. Instead of variables, you can only declare static values.
 
-For daclaring a value, you must use `let` and give it a value. For example:
+For declaring a value, you must use `let` and give it a value. For example:
 
 ``` sql
 let a = 1        -- Interger
@@ -165,9 +165,9 @@ SigmaF allows data type as Integer, Float, Boolean, and String.
 
 ### Lists 
 
-The List allows to all the data types before, lists and functions.
+The Lists allow to use all the data types before mentioned, as well as lists and functions.
 
-Also, it allows to get an item through the next notation:
+Also, they allow to get an item through the next notation:
 
 ``` sql
 let value_list = [1,2,3,4,5,6,7,8,9]
@@ -180,14 +180,14 @@ value_list[0, 8, 2] -- Output: [1, 3, 5, 7]
 
 ### Tuples 
 
-The tuples are data structs of length greater than 1 that allow others operation different to lists like:
+The tuples are data structs of length greater than 1. Unlike lists, they allow the following operations:
 ``` sql
 (1,2) + (3,4)      -- Output: (4,6)
 (4,6,8) - (3,4,5)  -- Output: (1,2,3)
 (0,1) == (0,1)     -- Output: true
 (0,1) != (1,3)     -- Output: true
 ```
-To obtain the values of a tuple must use the same notation of the list, but this data structure not allow ranges as the lists (only you can get one position of a tuple).
+To obtain the values of a tuple, you must use the same notation of the list. But this data structure does not allow ranges like the lists (only you can get one position of a tuple).
 
 E.g. 
 ``` sql
@@ -199,7 +199,7 @@ And so on.
 
 ### Operators
 
-> **Warning**: SigmaF have **Static Typing**, so does not allow the operation between different data types.
+> **Warning**: SigmaF have **Static Typing**, so it does not allow the operation between different data types.
 
 These are operators:
 | Operator             | Symbol |
@@ -220,11 +220,11 @@ These are operators:
 | Or                   |  \|\|  |
 <br/>
 
-> The operator of negation for Boolean was not included. For this, you can use the `not()` function
+> The operator of negation for Boolean was not included. You can use the `not()` function in order to do this.
 
 ### Functions
 
-For declaring a function, you need to use the next syntax:
+For declaring a function, you have to use the next syntax:
 
 ``` Python
 let example_function = fn <Name Argument>::<Argument Type> -> <Output Type> {
@@ -232,7 +232,7 @@ let example_function = fn <Name Argument>::<Argument Type> -> <Output Type> {
 }  
 ```
 
-> (For return, you must use the => symbol)
+> (For return, you have to use the => symbol)
 
 For example:
 
@@ -308,10 +308,10 @@ let map = fn f::function, l::list -> list {
 
 ```
 
-For know other examples of the implementations you can go to [e.g.](egs)
+To know other examples of the implementations, you can go to [e.g.](egs)
 
 ---
 ## Feedback
-Feedback is very appreciated, reach out to me on [Twitter](https://twitter.com/fabianmativeal) or submit a new issue.
+I would really appreciatte your feedback. You can submit a new issue, or reach out me on [Twitter](https://twitter.com/fabianmativeal).
 ## Contribute
 This is an **opensource** project, so everybody can contribute and be part of the community of [**SigmaF**](https://twitter.com/fabianmativeal/status/1385762245246922752).
