@@ -14,6 +14,7 @@ from sigmaF.object import (
     Object,
     String,
 )
+from sigmaF.evaluator import NULL, FALSE, TRUE
 
 _WRONG_NUMBER_OF_ARGS = "Incorrect Number of arguments for length, it was received {} arguments, and is needed only {}"
 _UNSUPPORTED_ARGUMENT_TYPE = "Argument to {} without support, it was received a {}"
@@ -48,7 +49,7 @@ def println(*args: Object) -> Object:
         ] = None
         if type_arg == Error:
             return args[0]
-        
+
         elif type_arg == String:
             argument = cast(String, args[0])
             string = argument.inspect().replace("\\n", "\n").replace("\\t", "\t")
@@ -83,7 +84,7 @@ def println(*args: Object) -> Object:
                 _UNSUPPORTED_ARGUMENT_TYPE.format("printLn", args[0].type().name)
             )
 
-        return Null()
+        return NULL
 
 
 def negation_bolean(*args: Object) -> Object:
@@ -95,7 +96,7 @@ def negation_bolean(*args: Object) -> Object:
 
         if type_arg == Boolean:
             argument = cast(Boolean, args[0])
-            return Boolean(not argument.value)
+            return FALSE if argument.value else TRUE
         else:
             return Error(_UNSUPPORTED_ARGUMENT_TYPE.format("not", args[0].type().name))
 
@@ -166,6 +167,12 @@ def parse(*args: Object) -> Object:
             elif type_parse == "str":
                 arg = cast(Float, args[0])
                 return String(str(arg.value))
+        elif type_arg == ValueList and type_parse == "tuple":
+            arg = cast(ValueList, args[0])
+            return ValueTuple(arg.values)
+        elif type_arg == ValueTuple and type_parse == "list":
+            arg = cast(ValueTuple, args[0])
+            return ValueList(arg.values)
         elif type_arg == String and type_parse == "list":
             arg = cast(String, args[0])
             return ValueList([String(value_list) for value_list in list(arg.value)])
@@ -178,5 +185,5 @@ BUILTIN: Dict[str, Builtin] = {
     "printLn": Builtin(fn=println, io_type="builtin fn (any) -> null"),
     "not": Builtin(fn=negation_bolean, io_type="builtin fn (bool) -> bool"),
     "pow": Builtin(fn=pow_impure, io_type="builtin fn (int|float, int|float) -> null"),
-    "parse": Builtin(fn=parse, io_type="builtin fn (int|str,str) -> null"),
+    "parse": Builtin(fn=parse, io_type="builtin fn (int|float|str|list|tuple,str) -> null"),
 }
