@@ -46,7 +46,10 @@ def println(*args: Object) -> Object:
         argument: Optional[
             Union[String, Integer, Float, Boolean, ValueList, Function]
         ] = None
-        if type_arg == String:
+        if type_arg == Error:
+            return args[0]
+        
+        elif type_arg == String:
             argument = cast(String, args[0])
             string = argument.inspect().replace("\\n", "\n").replace("\\t", "\t")
             print(string)
@@ -160,6 +163,9 @@ def parse(*args: Object) -> Object:
             if type_parse == "int":
                 arg = cast(Float, args[0])
                 return Integer(int(arg.value))
+            elif type_parse == "str":
+                arg = cast(Float, args[0])
+                return String(str(arg.value))
         elif type_arg == String and type_parse == "list":
             arg = cast(String, args[0])
             return ValueList([String(value_list) for value_list in list(arg.value)])

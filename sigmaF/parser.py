@@ -47,21 +47,28 @@ class Precedence(IntEnum):
 
 PRECEDENCE: Dict[TokenType, Precedence] = {
     TokenType.AND: Precedence.AND,
-    TokenType.EXPONENTIATION: Precedence.POW,
+    TokenType.OR: Precedence.AND,
+
     TokenType.EQ: Precedence.EQUALS,
     TokenType.NOT_EQ: Precedence.EQUALS,
+
     TokenType.LT: Precedence.LESSGREATER,
     TokenType.GT: Precedence.LESSGREATER,
     TokenType.L_OR_EQ_T: Precedence.LESSGREATER,
     TokenType.G_OR_EQ_T: Precedence.LESSGREATER,
+
     TokenType.PLUS: Precedence.SUM,
     TokenType.MINUS: Precedence.SUM,
+
     TokenType.DIVISION: Precedence.PRODUCT,
     TokenType.MODULUS: Precedence.PRODUCT,
     TokenType.MULTIPLICATION: Precedence.PRODUCT,
+
+    TokenType.EXPONENTIATION: Precedence.POW,
+
     TokenType.LPAREN: Precedence.CALL,
     TokenType.LBRAKET: Precedence.CALL,
-    TokenType.OR: Precedence.AND,
+
 }
 
 
@@ -210,7 +217,8 @@ class Parser:
         assert self._current_token is not None
         expression_statement = ExpressionStatement(token=self._current_token)
 
-        expression_statement.expression = self._parse_expression(Precedence.LOWEST)
+        expression_statement.expression = self._parse_expression(
+            Precedence.LOWEST)
 
         assert self._peek_token is not None
         if self._peek_token.token_type == TokenType.SEMICOLON:
@@ -245,7 +253,8 @@ class Parser:
 
         self._advance_tokens()
 
-        return_statement.return_value = self._parse_expression(Precedence.LOWEST)
+        return_statement.return_value = self._parse_expression(
+            Precedence.LOWEST)
         assert self._peek_token is not None
         if self._peek_token.token_type == TokenType.SEMICOLON:
             self._advance_tokens()
