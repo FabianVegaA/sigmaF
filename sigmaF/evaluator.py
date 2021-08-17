@@ -13,7 +13,7 @@ from sigmaF.object import (
     Identifier,
     ValueList,
     ValueTuple,
-    Null,
+    Void,
     Return,
     String,
     Object,
@@ -23,7 +23,7 @@ from sigmaF.builtins import BUILTIN
 
 TRUE = Boolean(True)
 FALSE = Boolean(False)
-NULL = Null()
+NULL = Void()
 
 _NOT_A_FUNCTION = "It is not a function: {}"
 _TYPE_MISMATCH = (
@@ -57,7 +57,7 @@ TYPE_REGISTER_LITERAL: Dict[str, ObjectType] = {
     "list": ObjectType.LIST,
     "tuple": ObjectType.TUPLE,
     "function": ObjectType.FUNCTION,
-    "null": ObjectType.INTEGER,
+    "void": ObjectType.VOID,
 }
 TYPE_REGISTER_OBJECT: Dict[ObjectType, str] = {
     ObjectType.INTEGER: "int",
@@ -101,6 +101,11 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
 
         assert node.value is not None
         return _to_boolean_object(node.value)
+    elif node_type == ast.Void:
+        node = cast(ast.Void, node)
+
+        assert node.value is None
+        return _to_void_object(node.value)
 
     elif node_type == ast.String:
         node = cast(ast.String, node)
@@ -193,7 +198,8 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
             return _new_error(
                 _WRONG_ARGS,
                 [
-                    ", ".join([type_param.value for type_param in type_params[0:-1]])
+                    ", ".join(
+                        [type_param.value for type_param in type_params[0:-1]])
                     + f", and {type_params[-1].value}"
                     if len(type_args) > 1
                     else type_params[0].value,
@@ -263,7 +269,8 @@ def _check_type_tuple(items: List[Object]) -> Object:
         if item.type() != type_items:
             return _new_error(
                 _TUPLE_FAIL,
-                [TYPE_REGISTER_OBJECT[type_items], TYPE_REGISTER_OBJECT[item.type()]],
+                [TYPE_REGISTER_OBJECT[type_items],
+                    TYPE_REGISTER_OBJECT[item.type()]],
             )
     return ValueTuple(items)
 
@@ -300,7 +307,8 @@ def _get_values_iter(iterable: Object, ranges: List[Object]) -> Object:
             end = cast(Integer, ranges[0]).value + 1
 
             try:
-                range_list = iterable.values.__getitem__(slice(start, end, index_jump))
+                range_list = iterable.values.__getitem__(
+                    slice(start, end, index_jump))
                 if len(range_list) > 1:
                     return ValueList(range_list)
                 else:
@@ -311,7 +319,8 @@ def _get_values_iter(iterable: Object, ranges: List[Object]) -> Object:
             return _new_error(_WRONG_NUMBER_INDEXES, [len(ranges)])
 
         try:
-            range_list = iterable.values.__getitem__(slice(start, end, index_jump))
+            range_list = iterable.values.__getitem__(
+                slice(start, end, index_jump))
             return ValueList(range_list)
         except IndexError:
             return _new_error(_INDIX_FAILED, ["list", len(iterable.values)])
@@ -765,6 +774,10 @@ def _new_error(message: str, args: List[Any]) -> Error:
 
 def _to_boolean_object(value: bool) -> Boolean:
     return TRUE if value else FALSE
+
+
+def _to_void_object(value: None) -> Void:
+    return NULL
 
 
 def _to_string_object(value: str) -> String:

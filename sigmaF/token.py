@@ -32,6 +32,7 @@ class TokenType(Enum):
     MODULUS = auto()
     MULTIPLICATION = auto()
     NOT_EQ = auto()
+    NULL = auto()
     PLUS = auto()
     RETURN = auto()
     RBRAKET = auto()
@@ -44,6 +45,7 @@ class TokenType(Enum):
     TYPEASSIGN = auto()
     OR = auto()
     OUTPUTFUNTION = auto()
+    VOID = auto()
 
 
 class Token(NamedTuple):
@@ -71,7 +73,8 @@ def lookup_token_type(literal: str) -> TokenType:
         "function": TokenType.CLASSNAME,
         "list": TokenType.CLASSNAME,
         "tuple": TokenType.CLASSNAME,
-        "null": TokenType.CLASSNAME,
+        "void": TokenType.CLASSNAME,
+        "null": TokenType.NULL,
     }
 
     return keywords.get(literal, TokenType.IDENT)

@@ -113,11 +113,14 @@ class LexerTest(TestCase):
             let sum = x::int, y::int -> int {
                 => x + y
             }
+            let print = x::int -> void {
+                => null
+            }
         """
         lexer: Lexer = Lexer(source)
 
         tokens: List[Token] = []
-        for i in range(18):
+        for _ in range(30):
             tokens.append(lexer.next_token())
 
         expected_tokens: List[Token] = [
@@ -138,6 +141,19 @@ class LexerTest(TestCase):
             Token(TokenType.IDENT, "x"),
             Token(TokenType.PLUS, "+"),
             Token(TokenType.IDENT, "y"),
+            Token(TokenType.RBRACE, "}"),
+
+            Token(TokenType.LET, "let"),
+            Token(TokenType.IDENT, "print"),
+            Token(TokenType.ASSIGN, "="),
+            Token(TokenType.IDENT, "x"),
+            Token(TokenType.TYPEASSIGN, "::"),
+            Token(TokenType.CLASSNAME, "int"),
+            Token(TokenType.OUTPUTFUNTION, "->"),
+            Token(TokenType.CLASSNAME, "void"),
+            Token(TokenType.LBRACE, "{"),
+            Token(TokenType.RETURN, "=>"),
+            Token(TokenType.NULL, "null"),
             Token(TokenType.RBRACE, "}"),
         ]
 
@@ -200,7 +216,7 @@ class LexerTest(TestCase):
         lexer: Lexer = Lexer(source)
 
         tokens: List[Token] = []
-        for i in range(21):
+        for _ in range(21):
             tokens.append(lexer.next_token())
 
         expected_tokens: List[Token] = [

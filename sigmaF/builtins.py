@@ -10,11 +10,15 @@ from sigmaF.object import (
     Integer,
     ValueList,
     ValueTuple,
-    Null,
+    Void,
     Object,
     String,
 )
-from sigmaF.evaluator import NULL, FALSE, TRUE
+
+
+TRUE = Boolean(True)
+FALSE = Boolean(False)
+NULL = Void()
 
 _WRONG_NUMBER_OF_ARGS = "Incorrect Number of arguments for length, it was received {} arguments, and is needed only {}"
 _UNSUPPORTED_ARGUMENT_TYPE = "Argument to {} without support, it was received a {}"
@@ -23,7 +27,7 @@ _PARSE_WRONG = "It is not possible to parser since {} to {}"
 
 def length(*args: Object) -> Object:
 
-    argument: Optional[Union[String, ValueList]] = None
+    argument: Optional[Union[String, ValueList, ValueTuple]] = None
     if len(args) != 1:
         return Error(_WRONG_NUMBER_OF_ARGS.format(len(args), 1))
     elif type(args[0]) == String:
@@ -45,7 +49,8 @@ def println(*args: Object) -> Object:
     else:
         type_arg: Type = type(args[0])
         argument: Optional[
-            Union[String, Integer, Float, Boolean, ValueList, Function]
+            Union[String, Integer, Float, Boolean,
+                  ValueList, ValueTuple, Function]
         ] = None
         if type_arg == Error:
             return args[0]
@@ -81,7 +86,8 @@ def println(*args: Object) -> Object:
 
         else:
             return Error(
-                _UNSUPPORTED_ARGUMENT_TYPE.format("printLn", args[0].type().name)
+                _UNSUPPORTED_ARGUMENT_TYPE.format(
+                    "printLn", args[0].type().name)
             )
 
         return NULL
@@ -145,28 +151,27 @@ def parse(*args: Object) -> Object:
     elif not args[0].type() == Object and args[1].type() == String:
         types = [arg.type().name for arg in args]
         return Error(
-            _UNSUPPORTED_ARGUMENT_TYPE.format("pow", f"{types[0]} and {types[1]}")
+            _UNSUPPORTED_ARGUMENT_TYPE.format(
+                "pow", f"{types[0]} and {types[1]}")
         )
 
     else:
-        arg: Optional[Union[Integer, String, Float, ValueList]] = None
+        arg: Optional[Union[Integer, String, Float, ValueList, ValueTuple]] = None
         type_arg: Type = type(args[0])
         type_parse: str = cast(String, args[1]).inspect()
 
-        if type_arg == Integer:
-            if type_parse == "float":
+        if type_arg == Integer and type_parse == "float":
                 arg = cast(Integer, args[0])
                 return Float(float(arg.value))
-            elif type_parse == "str":
-                arg = cast(Integer, args[0])
-                return String(str(arg.value))
-        elif type_arg == Float:
-            if type_parse == "int":
-                arg = cast(Float, args[0])
-                return Integer(int(arg.value))
-            elif type_parse == "str":
-                arg = cast(Float, args[0])
-                return String(str(arg.value))
+        elif type_arg == Integer and type_parse == "str":
+            arg = cast(Integer, args[0])
+            return String(str(arg.value))
+        elif type_arg == Float and type_parse == "int":
+            arg = cast(Float, args[0])
+            return Integer(int(arg.value))
+        elif type_arg == Float and type_parse == "str":
+            arg = cast(Float, args[0])
+            return String(str(arg.value))
         elif type_arg == ValueList and type_parse == "tuple":
             arg = cast(ValueList, args[0])
             return ValueTuple(arg.values)

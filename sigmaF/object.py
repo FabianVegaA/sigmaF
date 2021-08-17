@@ -21,7 +21,7 @@ class ObjectType(Enum):
     ERROR = auto()
     INTEGER = auto()
     LIST = auto()
-    NULL = auto()
+    VOID = auto()
     RETURN = auto()
     STRING = auto()
     TUPLE = auto()
@@ -81,9 +81,12 @@ class Boolean(Object):
         return "true" if self.value else "false"
 
 
-class Null(Object):
+class Void(Object):
+    def __init__(self) -> None:
+        self.value = None
+    
     def type(self) -> ObjectType:
-        return ObjectType.INTEGER
+        return ObjectType.VOID
 
     def inspect(self) -> str:
         return "null"

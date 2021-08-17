@@ -1,5 +1,7 @@
-from typing import Any, cast, List, Tuple, Union
 from unittest import TestCase
+
+from typing import Any, cast, List, Tuple, Union
+
 
 from sigmaF.ast import Program
 from sigmaF.evaluator import evaluate, NULL
@@ -20,6 +22,7 @@ from sigmaF.object import (
 
 
 class EvaluatorTest(TestCase):
+
     def test_boolean_evaluation(self) -> None:
         tests: List[Tuple[str, bool]] = [
             ("true", True),
@@ -256,12 +259,28 @@ class EvaluatorTest(TestCase):
              """,
                 30,
             ),
-            ("fn x::int -> int { x }(5);", 5),
+            ("fn x::int -> int {=> x}(5);", 5),
         ]
 
         for source, expected in tests:
             evaluated = self._evaluate_tests(source)
             self._test_integer_object(evaluated, expected)
+
+    def test_function_call_void(self) -> None:
+        tests: List[str] = [
+            """
+             let nullable = fn i::int -> void {=> null;}
+             nullable(5);           
+             """,
+            """
+             let nullable = fn n::void -> void {=> n;}
+             nullable(null);           
+             """,
+        ]
+
+        for source in tests:
+            evaluated = self._evaluate_tests(source)
+            self._test_null_object(evaluated)
 
     def test_function_call_error(self) -> None:
         tests: List[Tuple[str, str]] = [

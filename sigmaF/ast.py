@@ -155,6 +155,15 @@ class Boolean(Expression):
         return self.token_literal()
 
 
+class Void(Expression):
+    def __init__(self, token: Token) -> None:
+        super().__init__(token)
+        self.value = None
+
+    def __str__(self):
+        return self.token_literal()
+
+
 class Block(Statement):
     def __init__(self, token: Token, statements: List[Statement]) -> None:
         super().__init__(token)

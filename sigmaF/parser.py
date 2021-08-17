@@ -16,6 +16,7 @@ from sigmaF.ast import (
     Float,
     LetStatement,
     ListValues,
+    Void,
     TupleValues,
     Prefix,
     Infix,
@@ -212,6 +213,11 @@ class Parser:
             token=self._current_token,
             value=self._current_token.token_type == TokenType.TRUE,
         )
+
+    def _parse_null(self) -> Void:
+        assert self._current_token is not None
+
+        return Void(token=self._current_token)
 
     def _parse_expression_statements(self) -> Optional[ExpressionStatement]:
         assert self._current_token is not None
@@ -449,7 +455,7 @@ class Parser:
         if not self._expected_token(TokenType.OUTPUTFUNTION):
             return ([], [], None)
 
-        assert self._peek_token.token_type is TokenType.CLASSNAME
+        assert self._peek_token.token_type is TokenType.CLASSNAME 
         self._advance_tokens()
         type_output: Identifier = Identifier(
             self._current_token, self._current_token.literal
@@ -459,7 +465,7 @@ class Parser:
 
     def _parse_grouped_expression(self) -> Optional[Expression]:
         expression = self._parse_expression(Precedence.LOWEST)
-        if self._peek_token.token_type is TokenType.COMMA:
+        if self._peek_token is not None and self._peek_token.token_type is TokenType.COMMA:
             return self._parse_tuple(expression)
         if not self._expected_token(TokenType.RPAREN):
             return None
@@ -609,5 +615,6 @@ class Parser:
             TokenType.INT: self._parse_interger,
             TokenType.FLOAT: self._parse_float,
             TokenType.STRING: self._parse_string,
+            TokenType.NULL: self._parse_null,
             TokenType.MINUS: self._parse_prefix_expression,
         }

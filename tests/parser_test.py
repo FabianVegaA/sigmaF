@@ -21,6 +21,7 @@ from sigmaF.ast import (
     Program,
     LetStatement,
     ListValues,
+    Void,
     TupleValues,
     ReturnStatement,
     ExpressionStatement,
@@ -192,6 +193,27 @@ class ParserTest(TestCase):
                 expression_statement.expression, expected_value
             )
 
+    def test_void_expression(self) -> None:
+        source: str = """
+            null;
+        """
+        lexer = Lexer(source)
+        parser: Parser = Parser(lexer)
+
+        program: Program = parser.parse_program()
+
+        self._test_program_statements(parser, program)
+
+        expected_values: List[None] = [None]
+
+        for statement, expected_value in zip(program.statements, expected_values):
+            expression_statement = cast(ExpressionStatement, statement)
+
+            assert expression_statement.expression is not None
+            self._test_literal_expression(
+                expression_statement.expression, expected_value
+            )
+
     def test_operator_precedence(self) -> None:
         test_sources: List[Tuple[str, str, int]] = [
             ("-a * b;", "((-a) * b)", 1),
@@ -222,8 +244,6 @@ class ParserTest(TestCase):
             ),
             ("4 % 2 == 0 && 2 > 0;", "(((4 % 2) == 0) && (2 > 0))", 1),
             ("-4 + 2 == 0 || 2 > 0;", "((((-4) + 2) == 0) || (2 > 0))", 1)
-            # ('-function(-something, other_thing ** 23) ** (-34 % 90);',
-            #  '((-function((-something), (other_thing ** 23))) ** ((-34) % 90))', 1),
         ]
 
         for source, expected_result, expected_statement_count in test_sources:
@@ -468,31 +488,30 @@ class ParserTest(TestCase):
         self._test_literal_expression(call_list.range[0], 1)
         self._test_infix_expression(call_list.range[1], 2, "*", 3)
 
-    def test_algebraic_list(self) -> None:
-        tests: List[Tuples[str, List[str]]] = [
-            ("[];", [""]),
-            ("[int];", ["int"]),
-            ("[float];", ["float"]),
-            ("[(int, str)];", [("int", "str")]),
-        ]
-        
-        for source, expected in tests:
-            lexer: Lexer = Lexer(source)
-            parser: Parser = Parser(lexer)
+    # TODO: Implement this test algebraic list type
+    # def test_algebraic_list(self) -> None:
+    #     tests: List[Tuples[str, List[str]]] = [
+    #         ("[];", [""]),
+    #         ("[int];", ["int"]),
+    #         ("[float];", ["float"]),
+    #         ("[(int, str)];", [("int", "str")]),
+    #     ]
 
-            program: Program = parser.parse_program()
+    #     for source, expected in tests:
+    #         lexer: Lexer = Lexer(source)
+    #         parser: Parser = Parser(lexer)
 
-            list_values = cast(
-                ListValues, cast(ExpressionStatement,
-                                 program.statements[0]).expression
-            )
+    #         program: Program = parser.parse_program()
 
-            self.assertIsNotNone(list_values)
-            for item, expect in zip(list_values.values, expected):
-                self._test_literal_expression(item.value, expect)
-            
-        
-    
+    #         list_values = cast(
+    #             ListValues, cast(ExpressionStatement,
+    #                              program.statements[0]).expression
+    #         )
+
+    #         self.assertIsNotNone(list_values)
+    #         for item, expect in zip(list_values.values, expected):
+    #             self._test_literal_expression(item.value, expect)
+
     def _test_infix_expression(
         self,
         expression: Expression,
@@ -570,6 +589,8 @@ class ParserTest(TestCase):
             self._test_interger(expression, expected_value)
         elif value_type == bool:
             self._test_boolean(expression, expected_value)
+        elif value_type == type(None):
+            self._test_void(expression, expected_value)
         else:
             self.fail(f"Unhandle type of expression. Got={value_type}")
 
@@ -580,6 +601,13 @@ class ParserTest(TestCase):
         self.assertEquals(boolean.value, expected_value)
         self.assertEquals(boolean.token.literal,
                           "true" if expected_value else "false")
+
+    def _test_void(self, expression: Expression, expected_value: Any) -> None:
+        self.assertIsInstance(expression, Void)
+
+        void = cast(Void, expression)
+        self.assertEquals(void.value, expected_value)
+        self.assertEquals(void.token.literal, "null")
 
     def _test_identifier(self, expression: Expression, expected_value: Any) -> None:
         self.assertIsInstance(expression, Identifier)
