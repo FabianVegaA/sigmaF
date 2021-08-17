@@ -1,0 +1,128 @@
+let _snone_ = fn s::str -> str {=> s;} -- This does nothing
+
+let to_float = fn i::int -> float {=> parse(i, "float");}
+
+let to_int = fn f::float -> int {=> parse(f, "int");}
+
+let int_to_str = fn i::int -> str {=> parse(i, "str");}
+
+let tail = fn l::list -> list {=> l[1,length(l)];}
+
+let init = fn l::list -> list {=> l[0,length(l)-1];}
+
+let last = fn l::list -> list {=> [l[length(l)-1]];}
+
+let head = fn l::list -> list {=> [l[0]];}
+
+let take = fn l::list, i::int -> list {=> l[0,i];}
+
+let rtake = fn l::list, i::int -> list {=> l[i,length(l)];}
+
+let sfoldl = fn f::function, s::str, l::list -> str {
+        if length(l) == 1 then {
+                => s + f(l[0]);
+        }
+        => sfoldl(f, s + f(l[0]), tail(l));
+}
+
+let irank = fn i::int, f::int -> list {
+	if i + 1  == f then {=> [i];}
+	=> [i] + irank(i+1, f);
+}
+
+let sconcat = fn l::list -> str {
+	=> sfoldl(_snone_, "", l);
+}
+
+let sconcat_by = fn l::list, s::str -> str {
+        if length(l) <= 0 then {=> "";}
+        if length(l) == 1 then {=> l[0];}
+        if length(l) == 2 then {=> l[0] + s + l[1];}
+        => l[0] + s + sconcat_by(tail(l), s);
+}
+
+let sconcat_map = fn l::list, f::function -> list {
+	=> sfoldl(f, "", l);
+}
+
+let srepeat = fn s::str, n::int -> list {
+	if n <= 0 then {=> [];}
+	if n == 1 then {=> [s];}
+	=> [s] + srepeat(s, n-1);
+}
+
+let map = fn f::function, l::list -> list {
+	if (l==[]) then {=> [];}
+	
+	=> [f(l[0])] + map(f, tail(l));
+}
+
+let filter = fn c::function, l::list -> list {
+	if (l == []) then {=> [];} 
+
+        => if (c(l[0])) then {[l[0]]} else {[]} +  filter(c, tail(l));
+}
+
+let reverse = fn l::list -> list {
+	if l == [] then {=> [];}
+	=> last(l) + reverse(init(l));
+}
+
+let split = fn l::list, i::int -> list {
+	=> [take(l,i), rtake(l,i)]
+}
+
+------------
+
+
+let pascal_triangle = fn i::int -> list {
+        
+        if i == 0 then {=> [];}
+        if i == 1 then {=> [[1]];} 
+        if i == 2 then {=> [[1],[1,1]];}
+        
+        let result = pascal_triangle(i-1);
+        let last_row = last(result)[0];
+        let new_row = fn i::int -> int {
+                => (last_row[i] + last_row[i+1]);
+        }
+        
+        => result + [[1] + map(new_row, irank(0, length(last_row)-1)) + [1]];
+}
+
+let str_triangle = fn t::list -> str {
+        
+        let func = fn t::list, i::int -> str {
+                
+                if length(t) <= 0 || i <= 0 then {=> "";}
+                
+                => sconcat(srepeat(" ", i))
+                        + sconcat_by(t[0], " ") 
+                        + "\n"
+                        + func(tail(t), i - 1);
+        }
+        => func(t, length(last(t)[0])-1);      
+}
+
+
+let main = fn i::int -> int {
+        
+       
+
+        printLn(
+                str_triangle(
+                        map(
+                                fn l::list -> list {
+                                        if l == [] then {=> [];}
+                                        => map(fn i::int -> str {
+                                                if i % 2 == 0 then {=> " ";} else {=> "*"}}, l
+                                        )
+                                }, 
+                                pascal_triangle(i)
+                        )
+                )
+        );
+
+        => 0;
+} (50);
+
