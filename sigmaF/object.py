@@ -161,10 +161,9 @@ class Function(Object):
             ]
         )
 
-        return f"fn ({params_and_types}) -> {self.type_output}{ {str(self.body)} }"
+        return f"fn ({params_and_types}) -> {self.type_output}"
 
-    def __str__(self) -> str:
-        return self.inspect().replace("'", "")
+    
 
 
 class BuiltinFunction(Protocol):
