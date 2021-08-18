@@ -264,82 +264,82 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
 
 
 def _check_type_tuple(items: List[Object]) -> Object:
-    type_items = items[0].type()
     for item in items:
         if item.type() == ObjectType.ERROR:
             return item
-        if item.type() != type_items:
-            return _new_error(
-                _TUPLE_FAIL,
-                [TYPE_REGISTER_OBJECT[type_items], TYPE_REGISTER_OBJECT[item.type()]],
-            )
     return ValueTuple(items)
 
 
 def _get_values_iter(iterable: Object, ranges: List[Object]) -> Object:
     if type(iterable) == ValueList:
-        iterable = cast(ValueList, iterable)
-
-        start: int = 0
-        end: int = len(iterable.values)
-        index_jump: Optional[int] = None
-
-        if len(ranges) == 3:
-            assert (
-                ranges[0].type() == ObjectType.INTEGER
-                and ranges[1].type() == ObjectType.INTEGER
-                and ranges[2].type() == ObjectType.INTEGER
-            )
-            start = cast(Integer, ranges[0]).value
-            end = cast(Integer, ranges[1]).value
-            index_jump = cast(Integer, ranges[2]).value
-        elif len(ranges) == 2:
-            assert not (
-                ranges[0].type() == ObjectType.INTEGER
-                and type(ranges[1]) == ObjectType.INTEGER
-            )
-            start = cast(Integer, ranges[0]).value
-            end = cast(Integer, ranges[1]).value
-            if end > len(iterable.values):
-                return NULL
-        elif len(ranges) == 1:
-            assert ranges[0].type() == ObjectType.INTEGER
-            start = cast(Integer, ranges[0]).value
-            end = cast(Integer, ranges[0]).value + 1
-
-            try:
-                range_list = iterable.values.__getitem__(slice(start, end, index_jump))
-                if len(range_list) > 1:
-                    return ValueList(range_list)
-                else:
-                    return range_list[0]
-            except IndexError:
-                return _new_error(_INDIX_FAILED, ["list", len(iterable.values)])
-        else:
-            return _new_error(_WRONG_NUMBER_INDEXES, [len(ranges)])
-
-        try:
-            range_list = iterable.values.__getitem__(slice(start, end, index_jump))
-            return ValueList(range_list)
-        except IndexError:
-            return _new_error(_INDIX_FAILED, ["list", len(iterable.values)])
+        return _get_values_list(cast(ValueList, iterable), ranges)
 
     elif type(iterable) == ValueTuple:
-        iterable = cast(ValueTuple, iterable)
+        return _get_values_tuple(cast(ValueTuple, iterable), ranges)
 
-        if len(ranges) == 1:
-            assert ranges[0].type() == ObjectType.INTEGER
-            index = cast(Integer, ranges[0]).value
-            try:
-                return iterable.values.__getitem__(index)
-            except Exception:
-                return _new_error(_INDIX_FAILED, ["tuple", len(iterable.values)])
-        else:
-            return _new_error(_WRONG_NUMBER_OF_INDEXES_TUPLE, [len(ranges)])
     else:
         if iterable.type() is ObjectType.ERROR:
             return iterable
         return _new_error(_NOT_AN_ITERABLE, [TYPE_REGISTER_OBJECT[iterable.type()]])
+
+
+def _get_values_tuple(iterable: ValueTuple, ranges: List[Object]) -> Object:
+    if len(ranges) == 1:
+        assert ranges[0].type() == ObjectType.INTEGER
+        index = cast(Integer, ranges[0]).value
+        try:
+            return iterable.values.__getitem__(index)
+        except Exception:
+            return _new_error(_INDIX_FAILED, ["tuple", len(iterable.values)])
+    else:
+        return _new_error(_WRONG_NUMBER_OF_INDEXES_TUPLE, [len(ranges)])
+
+
+def _get_values_list(iterable: ValueList, ranges: List[Object]) -> Object:
+
+    start: int = 0
+    end: int = len(iterable.values)
+    index_jump: Optional[int] = None
+
+    if len(ranges) == 3:
+        assert (
+            ranges[0].type() == ObjectType.INTEGER
+            and ranges[1].type() == ObjectType.INTEGER
+            and ranges[2].type() == ObjectType.INTEGER
+        )
+        start = cast(Integer, ranges[0]).value
+        end = cast(Integer, ranges[1]).value
+        index_jump = cast(Integer, ranges[2]).value
+    elif len(ranges) == 2:
+        assert not (
+            ranges[0].type() == ObjectType.INTEGER
+            and type(ranges[1]) == ObjectType.INTEGER
+        )
+        start = cast(Integer, ranges[0]).value
+        end = cast(Integer, ranges[1]).value
+        if end > len(iterable.values):
+            return NULL
+    elif len(ranges) == 1:
+        assert ranges[0].type() == ObjectType.INTEGER
+        start = cast(Integer, ranges[0]).value
+        end = cast(Integer, ranges[0]).value + 1
+
+        try:
+            range_list = iterable.values.__getitem__(slice(start, end, index_jump))
+            if len(range_list) > 1:
+                return ValueList(range_list)
+            else:
+                return range_list[0]
+        except IndexError:
+            return _new_error(_INDIX_FAILED, ["list", len(iterable.values)])
+    else:
+        return _new_error(_WRONG_NUMBER_INDEXES, [len(ranges)])
+
+    try:
+        range_list = iterable.values.__getitem__(slice(start, end, index_jump))
+        return ValueList(range_list)
+    except IndexError:
+        return _new_error(_INDIX_FAILED, ["list", len(iterable.values)])
 
 
 def _check_type_args_function(fn: Object, args: List[Object]) -> Union[bool, Object]:
@@ -743,6 +743,8 @@ def _evaluate_function_infix_expression(
         # fn left_parameters::left_types -> right_types {
         #       => right_fn(left_fn(left_parameters));
         # }
+        # TODO: implement multi-parameter function
+        # TODO: check output and input types
         new_function: Optional[Object] = evaluate(
             ast.Function(
                 token=Token(TokenType.FUNCTION, "fn"),
