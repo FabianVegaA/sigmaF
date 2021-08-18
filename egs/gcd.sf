@@ -1,0 +1,11 @@
+
+let gcd = fn a::int, b::int -> int {
+    if b == 0 then {
+        return a;
+    }
+    return gcd(b, a % b);
+}
+
+let lcd = fn a::int, b::int -> int {
+    return a * b / gcd(a, b);
+}

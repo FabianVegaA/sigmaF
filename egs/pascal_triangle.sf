@@ -110,18 +110,17 @@ let main = fn i::int -> int {
        
 
         printLn(
-                str_triangle(
-                        map(
-                                fn l::list -> list {
-                                        if l == [] then {=> [];}
-                                        => map(fn i::int -> str {
-                                                if i % 2 == 0 then {=> " ";} else {=> "*"}}, l
-                                        )
-                                }, 
-                                pascal_triangle(i)
-                        )
+        str_triangle(
+                map(
+                        fn l::list -> list {
+                                if l == [] then {=> [];}
+                                => map(fn i::int -> str {
+                                        if i % 2 == 0 then {=> " ";} else {=> "*"}}, l
+                                )
+                        }, 
+                        pascal_triangle(i)
                 )
-        );
+        ));
 
         => 0;
 } (50);
