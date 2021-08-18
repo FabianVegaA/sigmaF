@@ -10,7 +10,7 @@ class LexerTest(TestCase):
         lexer: Lexer = Lexer(source)
 
         tokens: List[Token] = []
-        for i in range(len(source)):
+        for _ in range(len(source)):
             tokens.append(lexer.next_token())
 
         expected_token: List[Token] = [
@@ -22,11 +22,11 @@ class LexerTest(TestCase):
         self.assertEqual(tokens, expected_token)
 
     def test_one_character_operator(self) -> None:
-        source: str = "=+-/*<>%"
+        source: str = "=+-/*<>%."
         lexer: Lexer = Lexer(source)
 
         tokens: List[Token] = []
-        for i in range(len(source)):
+        for _ in range(len(source)):
             tokens.append(lexer.next_token())
 
         expected_tokens: List[Token] = [
@@ -38,6 +38,7 @@ class LexerTest(TestCase):
             Token(TokenType.LT, "<"),
             Token(TokenType.GT, ">"),
             Token(TokenType.MODULUS, "%"),
+            Token(TokenType.COMPOSITION, "."),
         ]
 
         self.assertEquals(tokens, expected_tokens)
@@ -47,7 +48,7 @@ class LexerTest(TestCase):
         lexer: Lexer = Lexer(source)
 
         tokens: List[Token] = []
-        for i in range(len(source) + 1):
+        for _ in range(len(source) + 1):
             tokens.append(lexer.next_token())
 
         expected_tokens: List[Token] = [
@@ -62,7 +63,7 @@ class LexerTest(TestCase):
         lexer: Lexer = Lexer(source)
 
         tokens: List[Token] = []
-        for i in range(len(source)):
+        for _ in range(len(source)):
             tokens.append(lexer.next_token())
 
         expected_tokens: List[Token] = [
@@ -86,7 +87,7 @@ class LexerTest(TestCase):
         lexer: Lexer = Lexer(source)
 
         tokens: List[Token] = []
-        for i in range(15):
+        for _ in range(15):
             tokens.append(lexer.next_token())
 
         expected_tokens: List[Token] = [
@@ -142,7 +143,6 @@ class LexerTest(TestCase):
             Token(TokenType.PLUS, "+"),
             Token(TokenType.IDENT, "y"),
             Token(TokenType.RBRACE, "}"),
-
             Token(TokenType.LET, "let"),
             Token(TokenType.IDENT, "print"),
             Token(TokenType.ASSIGN, "="),
@@ -164,7 +164,7 @@ class LexerTest(TestCase):
         lexer: Lexer = Lexer(source)
 
         tokens: List[Token] = []
-        for i in range(9):
+        for _ in range(9):
             tokens.append(lexer.next_token())
 
         expected_tokens: List[Token] = [
@@ -187,7 +187,7 @@ class LexerTest(TestCase):
         lexer: Lexer = Lexer(source)
 
         tokens: List[Token] = []
-        for i in range(8):
+        for _ in range(8):
             tokens.append(lexer.next_token())
 
         expected_tokens: List[Token] = [

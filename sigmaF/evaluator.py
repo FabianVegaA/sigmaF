@@ -1,6 +1,6 @@
 from typing import Any, cast, Dict, List, Optional, Type, Union
 
-
+from sigmaF.token import Token, TokenType
 import sigmaF.ast as ast
 from sigmaF.object import (
     Boolean,
@@ -72,7 +72,6 @@ TYPE_REGISTER_OBJECT: Dict[ObjectType, str] = {
 
 def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
     node_type: Type = type(node)
-
     if node_type == ast.Program:
         node = cast(ast.Program, node)
 
@@ -198,8 +197,7 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
             return _new_error(
                 _WRONG_ARGS,
                 [
-                    ", ".join(
-                        [type_param.value for type_param in type_params[0:-1]])
+                    ", ".join([type_param.value for type_param in type_params[0:-1]])
                     + f", and {type_params[-1].value}"
                     if len(type_args) > 1
                     else type_params[0].value,
@@ -212,14 +210,18 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
         return_fn = _apply_function(function, args)
 
         if type(function) == Builtin:
+
             return return_fn
         elif type(function) == Function and _check_type_out_function(
             function, return_fn
         ):
+
             return return_fn
         elif type(function) == Error:
+
             return return_fn
         else:
+
             function = cast(Function, function)
 
             if return_fn.type() is ObjectType.ERROR:
@@ -269,8 +271,7 @@ def _check_type_tuple(items: List[Object]) -> Object:
         if item.type() != type_items:
             return _new_error(
                 _TUPLE_FAIL,
-                [TYPE_REGISTER_OBJECT[type_items],
-                    TYPE_REGISTER_OBJECT[item.type()]],
+                [TYPE_REGISTER_OBJECT[type_items], TYPE_REGISTER_OBJECT[item.type()]],
             )
     return ValueTuple(items)
 
@@ -307,8 +308,7 @@ def _get_values_iter(iterable: Object, ranges: List[Object]) -> Object:
             end = cast(Integer, ranges[0]).value + 1
 
             try:
-                range_list = iterable.values.__getitem__(
-                    slice(start, end, index_jump))
+                range_list = iterable.values.__getitem__(slice(start, end, index_jump))
                 if len(range_list) > 1:
                     return ValueList(range_list)
                 else:
@@ -319,8 +319,7 @@ def _get_values_iter(iterable: Object, ranges: List[Object]) -> Object:
             return _new_error(_WRONG_NUMBER_INDEXES, [len(ranges)])
 
         try:
-            range_list = iterable.values.__getitem__(
-                slice(start, end, index_jump))
+            range_list = iterable.values.__getitem__(slice(start, end, index_jump))
             return ValueList(range_list)
         except IndexError:
             return _new_error(_INDIX_FAILED, ["list", len(iterable.values)])
@@ -368,13 +367,16 @@ def _check_type_out_function(fn: Object, out: Object) -> bool:
 
 
 def _apply_function(function, args: List[Object]) -> Object:
+
     if type(function) == Function:
         function = cast(Function, function)
 
         extended_environment = _extend_function_enviroment(function, args)
+
         evaluated = evaluate(function.body, extended_environment)
 
         assert evaluated is not None
+
         return _unwrap_return_value(evaluated)
 
     elif type(function) == Builtin:
@@ -474,7 +476,6 @@ def _evaluate_block_statement(block: ast.Block, env: Environment) -> Optional[Ob
 
     for statement in block.statements:
         result = evaluate(statement, env)
-
         if result is not None and (
             result.type() == ObjectType.RETURN or result.type() == ObjectType.ERROR
         ):
@@ -484,7 +485,11 @@ def _evaluate_block_statement(block: ast.Block, env: Environment) -> Optional[Ob
 
 def _evaluate_infix_expression(operator: str, left: Object, right: Object) -> Object:
 
-    if left.type() == ObjectType.INTEGER and right.type() == ObjectType.INTEGER:
+    if left.type() is ObjectType.ERROR:
+        return left
+    elif right.type() is ObjectType.ERROR:
+        return right
+    elif left.type() == ObjectType.INTEGER and right.type() == ObjectType.INTEGER:
 
         if left.inspect() == "null" or right.inspect() == "null":
             return NULL
@@ -500,18 +505,13 @@ def _evaluate_infix_expression(operator: str, left: Object, right: Object) -> Ob
         return _evaluate_list_infix_expression(operator, left, right)
     elif left.type() == ObjectType.TUPLE and right.type() == ObjectType.TUPLE:
         return _evaluate_tuple_infix_expression(operator, left, right)
+    elif left.type() == ObjectType.FUNCTION and right.type() == ObjectType.FUNCTION:
+
+        return _evaluate_function_infix_expression(operator, left, right)
     elif left.type() != right.type():
-        if left.type() is ObjectType.ERROR:
-            return left
-        elif right.type() is ObjectType.ERROR:
-            return right
         return _new_error(
             _TYPE_MISMATCH, [operator, left.type().name, right.type().name]
         )
-    elif left.type() is ObjectType.ERROR:
-        return left
-    elif right.type() is ObjectType.ERROR:
-        return right
     else:
         return _new_error(_UNKNOW_INFIX_OPERATOR, [operator, right.type().name])
 
@@ -729,6 +729,71 @@ def _evaluate_string_infix_expression(
         return _to_boolean_object(left_value == right_value)
     elif operator == "!=":
         return _to_boolean_object(left_value != right_value)
+    else:
+        return _new_error(_UNKNOW_INFIX_OPERATOR, [operator, right.type().name])
+
+
+def _evaluate_function_infix_expression(
+    operator: str, left: Object, right: Object
+) -> Object:
+    left_value: Function = cast(Function, left)
+    right_value: Function = cast(Function, right)
+    if operator == ".":
+        # right_fn . left_fn =
+        # fn left_parameters::left_types -> right_types {
+        #       => right_fn(left_fn(left_parameters));
+        # }
+        new_function: Optional[Object] = evaluate(
+            ast.Function(
+                token=Token(TokenType.FUNCTION, "fn"),
+                parameters=left_value.parameters,
+                type_parameters=left_value.type_parameters,
+                type_output=right_value.type_output,
+                body=ast.Block(
+                    token=Token(TokenType.LBRACE, "{"),
+                    statements=[
+                        ast.ReturnStatement(
+                            token=Token(TokenType.RETURN, literal="=>"),
+                            return_value=ast.Call(
+                                token=Token(
+                                    TokenType.LPAREN,
+                                    "(",
+                                ),
+                                function=ast.Function(
+                                    token=Token(TokenType.FUNCTION, "fn"),
+                                    parameters=left_value.parameters,
+                                    type_parameters=left_value.type_parameters,
+                                    type_output=left_value.type_output,
+                                    body=left_value.body,
+                                ),
+                                arguments=[
+                                    ast.Call(
+                                        token=Token(
+                                            TokenType.LPAREN,
+                                            "(",
+                                        ),
+                                        function=ast.Function(
+                                            token=Token(TokenType.FUNCTION, "fn"),
+                                            parameters=right_value.parameters,
+                                            type_parameters=right_value.type_parameters,
+                                            type_output=right_value.type_output,
+                                            body=right_value.body,
+                                        ),
+                                        arguments=[
+                                            cast(ast.Expression, ident)
+                                            for ident in left_value.parameters
+                                        ],
+                                    )
+                                ],
+                            ),
+                        )
+                    ],
+                ),
+            ),
+            Environment(),
+        )
+        assert new_function is not None
+        return new_function
     else:
         return _new_error(_UNKNOW_INFIX_OPERATOR, [operator, right.type().name])
 

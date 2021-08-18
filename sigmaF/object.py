@@ -84,7 +84,7 @@ class Boolean(Object):
 class Void(Object):
     def __init__(self) -> None:
         self.value = None
-    
+
     def type(self) -> ObjectType:
         return ObjectType.VOID
 
@@ -161,7 +161,10 @@ class Function(Object):
             ]
         )
 
-        return f"fn ({params_and_types}) -> {self.type_output}"
+        return f"fn ({params_and_types}) -> {self.type_output}{ {str(self.body)} }"
+
+    def __str__(self) -> str:
+        return self.inspect().replace("'", "")
 
 
 class BuiltinFunction(Protocol):

@@ -22,7 +22,6 @@ from sigmaF.object import (
 
 
 class EvaluatorTest(TestCase):
-
     def test_boolean_evaluation(self) -> None:
         tests: List[Tuple[str, bool]] = [
             ("true", True),
@@ -206,7 +205,7 @@ class EvaluatorTest(TestCase):
             self._test_integer_object(evaluated, expected)
 
     def test_function_evaluation(self):
-        source: str = "fn x::int -> int { x + 2;};"
+        source: str = "fn x::int -> int {=> x + 2;}"
 
         evaluated = self._evaluate_tests(source)
 
@@ -218,7 +217,7 @@ class EvaluatorTest(TestCase):
         self.assertEquals(str(evaluated.parameters[0]), "x")
         self.assertEquals(str(evaluated.type_parameters[0]), "int")
         self.assertEquals(str(evaluated.type_output), "int")
-        self.assertEquals(str(evaluated.body), "(x + 2)")
+        self.assertEquals(str(evaluated.body), "=> (x + 2);")
 
     def test_function_call(self) -> None:
         tests: List[Tuple[str, int]] = [
@@ -281,6 +280,44 @@ class EvaluatorTest(TestCase):
         for source in tests:
             evaluated = self._evaluate_tests(source)
             self._test_null_object(evaluated)
+
+    def test_composition_functions(self) -> None:
+        tests: List[Tuple[str, int]] = [
+            (
+                """
+             let two = fn x::int -> int {=> x * 2;}
+             
+             let five = fn i::int -> int {=> i * 5;}
+             
+             let ten = five . two;
+             
+             ten(3);
+             """,
+                30,
+            ),
+            (
+                """
+             (fn x::int -> int {=> x * 2;} . fn x::int -> int {=> x * 5;})(1);
+             """,
+                10,
+            ),
+            (
+                """
+             let two = fn x::int -> int {=> x * 2;}
+             
+             let five = fn i::int -> int {=> i * 5;}
+             
+             let ten = fn i::int -> int {=> i * 10;};
+             
+             (two . five . ten)(3);
+             """,
+                300,
+            ),
+        ]
+
+        for source, expected in tests:
+            evaluated = self._evaluate_tests(source)
+            self._test_integer_object(evaluated, expected)
 
     def test_function_call_error(self) -> None:
         tests: List[Tuple[str, str]] = [

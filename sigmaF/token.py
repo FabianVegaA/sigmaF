@@ -7,6 +7,7 @@ class TokenType(Enum):
     AND = auto()
     ASSIGN = auto()
     COMMA = auto()
+    COMPOSITION = auto()
     CLASSNAME = auto()
     DIVISION = auto()
     ELSE = auto()

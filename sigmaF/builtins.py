@@ -49,8 +49,7 @@ def println(*args: Object) -> Object:
     else:
         type_arg: Type = type(args[0])
         argument: Optional[
-            Union[String, Integer, Float, Boolean,
-                  ValueList, ValueTuple, Function]
+            Union[String, Integer, Float, Boolean, ValueList, ValueTuple, Function]
         ] = None
         if type_arg == Error:
             return args[0]
@@ -86,8 +85,7 @@ def println(*args: Object) -> Object:
 
         else:
             return Error(
-                _UNSUPPORTED_ARGUMENT_TYPE.format(
-                    "printLn", args[0].type().name)
+                _UNSUPPORTED_ARGUMENT_TYPE.format("printLn", args[0].type().name)
             )
 
         return NULL
@@ -151,8 +149,7 @@ def parse(*args: Object) -> Object:
     elif not args[0].type() == Object and args[1].type() == String:
         types = [arg.type().name for arg in args]
         return Error(
-            _UNSUPPORTED_ARGUMENT_TYPE.format(
-                "pow", f"{types[0]} and {types[1]}")
+            _UNSUPPORTED_ARGUMENT_TYPE.format("pow", f"{types[0]} and {types[1]}")
         )
 
     else:
@@ -161,8 +158,8 @@ def parse(*args: Object) -> Object:
         type_parse: str = cast(String, args[1]).inspect()
 
         if type_arg == Integer and type_parse == "float":
-                arg = cast(Integer, args[0])
-                return Float(float(arg.value))
+            arg = cast(Integer, args[0])
+            return Float(float(arg.value))
         elif type_arg == Integer and type_parse == "str":
             arg = cast(Integer, args[0])
             return String(str(arg.value))
@@ -190,5 +187,7 @@ BUILTIN: Dict[str, Builtin] = {
     "printLn": Builtin(fn=println, io_type="builtin fn (any) -> null"),
     "not": Builtin(fn=negation_bolean, io_type="builtin fn (bool) -> bool"),
     "pow": Builtin(fn=pow_impure, io_type="builtin fn (int|float, int|float) -> null"),
-    "parse": Builtin(fn=parse, io_type="builtin fn (int|float|str|list|tuple,str) -> null"),
+    "parse": Builtin(
+        fn=parse, io_type="builtin fn (int|float|str|list|tuple,str) -> null"
+    ),
 }

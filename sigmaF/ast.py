@@ -170,8 +170,7 @@ class Block(Statement):
         self.statements = statements
 
     def __str__(self) -> str:
-        out: List[str] = [str(statement) for statement in self.statements]
-
+        out: List[str] = list(map(str, self.statements))
         return " ".join(out)
 
 

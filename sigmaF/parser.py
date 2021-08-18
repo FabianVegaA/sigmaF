@@ -49,27 +49,21 @@ class Precedence(IntEnum):
 PRECEDENCE: Dict[TokenType, Precedence] = {
     TokenType.AND: Precedence.AND,
     TokenType.OR: Precedence.AND,
-
     TokenType.EQ: Precedence.EQUALS,
     TokenType.NOT_EQ: Precedence.EQUALS,
-
     TokenType.LT: Precedence.LESSGREATER,
     TokenType.GT: Precedence.LESSGREATER,
     TokenType.L_OR_EQ_T: Precedence.LESSGREATER,
     TokenType.G_OR_EQ_T: Precedence.LESSGREATER,
-
     TokenType.PLUS: Precedence.SUM,
     TokenType.MINUS: Precedence.SUM,
-
     TokenType.DIVISION: Precedence.PRODUCT,
     TokenType.MODULUS: Precedence.PRODUCT,
     TokenType.MULTIPLICATION: Precedence.PRODUCT,
-
     TokenType.EXPONENTIATION: Precedence.POW,
-
+    TokenType.COMPOSITION: Precedence.CALL,
     TokenType.LPAREN: Precedence.CALL,
     TokenType.LBRAKET: Precedence.CALL,
-
 }
 
 
@@ -223,8 +217,7 @@ class Parser:
         assert self._current_token is not None
         expression_statement = ExpressionStatement(token=self._current_token)
 
-        expression_statement.expression = self._parse_expression(
-            Precedence.LOWEST)
+        expression_statement.expression = self._parse_expression(Precedence.LOWEST)
 
         assert self._peek_token is not None
         if self._peek_token.token_type == TokenType.SEMICOLON:
@@ -259,8 +252,7 @@ class Parser:
 
         self._advance_tokens()
 
-        return_statement.return_value = self._parse_expression(
-            Precedence.LOWEST)
+        return_statement.return_value = self._parse_expression(Precedence.LOWEST)
         assert self._peek_token is not None
         if self._peek_token.token_type == TokenType.SEMICOLON:
             self._advance_tokens()
@@ -455,7 +447,7 @@ class Parser:
         if not self._expected_token(TokenType.OUTPUTFUNTION):
             return ([], [], None)
 
-        assert self._peek_token.token_type is TokenType.CLASSNAME 
+        assert self._peek_token.token_type is TokenType.CLASSNAME
         self._advance_tokens()
         type_output: Identifier = Identifier(
             self._current_token, self._current_token.literal
@@ -465,7 +457,10 @@ class Parser:
 
     def _parse_grouped_expression(self) -> Optional[Expression]:
         expression = self._parse_expression(Precedence.LOWEST)
-        if self._peek_token is not None and self._peek_token.token_type is TokenType.COMMA:
+        if (
+            self._peek_token is not None
+            and self._peek_token.token_type is TokenType.COMMA
+        ):
             return self._parse_tuple(expression)
         if not self._expected_token(TokenType.RPAREN):
             return None
@@ -584,6 +579,7 @@ class Parser:
 
     def _register_infix_fns(self) -> IndixParseFns:
         return {
+            TokenType.COMPOSITION: self._parse_infix_expression,
             TokenType.EXPONENTIATION: self._parse_infix_expression,
             TokenType.PLUS: self._parse_infix_expression,
             TokenType.MINUS: self._parse_infix_expression,

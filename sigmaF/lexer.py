@@ -30,6 +30,8 @@ class Lexer:
                 token = Token(TokenType.ILLEGAL, '"')
         elif match(r"^\+$", self._character):
             token = Token(TokenType.PLUS, self._character)
+        elif match(r"^\.$", self._character):
+            token = Token(TokenType.COMPOSITION, self._character)
         elif match(r"^$", self._character):
             token = Token(TokenType.EOF, self._character)
         elif match(r"^\($", self._character):
