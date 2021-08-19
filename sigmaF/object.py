@@ -163,8 +163,6 @@ class Function(Object):
 
         return f"fn ({params_and_types}) -> {self.type_output}"
 
-    
-
 
 class BuiltinFunction(Protocol):
     def __call__(self, *args: Object) -> Object:

@@ -25,6 +25,10 @@ TRUE = Boolean(True)
 FALSE = Boolean(False)
 NULL = Void()
 
+
+_INCOMPATIBLE_COMPOSITION_FUNCTION = (
+    "Imcompatible Composition: It is not possible the composition of {} and {}"
+)
 _NOT_A_FUNCTION = "It is not a function: {}"
 _TYPE_MISMATCH = (
     "Type Discrepancy: It is not possible to do the operation '{}', for an {} and a {}"
@@ -67,6 +71,7 @@ TYPE_REGISTER_OBJECT: Dict[ObjectType, str] = {
     ObjectType.LIST: "list",
     ObjectType.TUPLE: "tuple",
     ObjectType.FUNCTION: "function",
+    ObjectType.VOID: "void",
 }
 
 
@@ -744,60 +749,81 @@ def _evaluate_function_infix_expression(
         #       => right_fn(left_fn(left_parameters));
         # }
         # TODO: implement multi-parameter function
-        # TODO: check output and input types
-        new_function: Optional[Object] = evaluate(
-            ast.Function(
-                token=Token(TokenType.FUNCTION, "fn"),
-                parameters=left_value.parameters,
-                type_parameters=left_value.type_parameters,
-                type_output=right_value.type_output,
-                body=ast.Block(
-                    token=Token(TokenType.LBRACE, "{"),
-                    statements=[
-                        ast.ReturnStatement(
-                            token=Token(TokenType.RETURN, literal="=>"),
-                            return_value=ast.Call(
+        if _check_compatility_functions(left_value, right_value):
+            new_function: Optional[Object] = evaluate(
+                _build_ast_function(left_value, right_value),
+                Environment(),
+            )
+            assert new_function is not None
+            return new_function
+        else:
+            return _new_error(
+                _INCOMPATIBLE_COMPOSITION_FUNCTION,
+                [left_value.type().name, right_value.type().name],
+            )
+    else:
+        return _new_error(_UNKNOW_INFIX_OPERATOR, [operator, right.type().name])
+
+
+def _check_compatility_functions(left_fn: Function, right_fn: Function) -> bool:
+    right_types: Optional[Identifier] = right_fn.type_output
+    left_types: List[Identifier] = left_fn.type_parameters
+
+    print(left_types[0], right_types)
+    if len(left_types) > 1:
+        # TODO: implement multi-parameter function
+        return False
+    else:
+        return str(right_types) == str(left_types[0])
+
+
+def _build_ast_function(left_value: Function, right_value: Function) -> ast.Function:
+    return ast.Function(
+        token=Token(TokenType.FUNCTION, "fn"),
+        parameters=left_value.parameters,
+        type_parameters=left_value.type_parameters,
+        type_output=right_value.type_output,
+        body=ast.Block(
+            token=Token(TokenType.LBRACE, "{"),
+            statements=[
+                ast.ReturnStatement(
+                    token=Token(TokenType.RETURN, literal="=>"),
+                    return_value=ast.Call(
+                        token=Token(
+                            TokenType.LPAREN,
+                            "(",
+                        ),
+                        function=ast.Function(
+                            token=Token(TokenType.FUNCTION, "fn"),
+                            parameters=left_value.parameters,
+                            type_parameters=left_value.type_parameters,
+                            type_output=left_value.type_output,
+                            body=left_value.body,
+                        ),
+                        arguments=[
+                            ast.Call(
                                 token=Token(
                                     TokenType.LPAREN,
                                     "(",
                                 ),
                                 function=ast.Function(
                                     token=Token(TokenType.FUNCTION, "fn"),
-                                    parameters=left_value.parameters,
-                                    type_parameters=left_value.type_parameters,
-                                    type_output=left_value.type_output,
-                                    body=left_value.body,
+                                    parameters=right_value.parameters,
+                                    type_parameters=right_value.type_parameters,
+                                    type_output=right_value.type_output,
+                                    body=right_value.body,
                                 ),
                                 arguments=[
-                                    ast.Call(
-                                        token=Token(
-                                            TokenType.LPAREN,
-                                            "(",
-                                        ),
-                                        function=ast.Function(
-                                            token=Token(TokenType.FUNCTION, "fn"),
-                                            parameters=right_value.parameters,
-                                            type_parameters=right_value.type_parameters,
-                                            type_output=right_value.type_output,
-                                            body=right_value.body,
-                                        ),
-                                        arguments=[
-                                            cast(ast.Expression, ident)
-                                            for ident in left_value.parameters
-                                        ],
-                                    )
+                                    cast(ast.Expression, ident)
+                                    for ident in left_value.parameters
                                 ],
-                            ),
-                        )
-                    ],
-                ),
-            ),
-            Environment(),
-        )
-        assert new_function is not None
-        return new_function
-    else:
-        return _new_error(_UNKNOW_INFIX_OPERATOR, [operator, right.type().name])
+                            )
+                        ],
+                    ),
+                )
+            ],
+        ),
+    )
 
 
 def _evaluate_minus_operator_expression(right: Object) -> Object:
