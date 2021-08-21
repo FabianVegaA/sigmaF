@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional
 
 from typing_extensions import Protocol
 
-from sigmaF.ast import Block, Identifier
+from sigmaF.ast import Block, Identifier, TypeValue
 
 
 class ObjectType(Enum):
@@ -139,8 +139,8 @@ class Function(Object):
     def __init__(
         self,
         parameters: List[Identifier],
-        type_parameters: List[Identifier],
-        type_output: Optional[Identifier],
+        type_parameters: List[TypeValue],
+        type_output: Optional[TypeValue],
         body: Block,
         env: Environment,
     ) -> None:

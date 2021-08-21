@@ -5,6 +5,7 @@ from typing import (
     Tuple,
     cast,
     List,
+    Union,
 )
 from sigmaF.ast import (
     Block,
@@ -23,6 +24,7 @@ from sigmaF.ast import (
     ListValues,
     Void,
     TupleValues,
+    TypeValue,
     ReturnStatement,
     ExpressionStatement,
 )
@@ -380,13 +382,14 @@ class ParserTest(TestCase):
                 Function, cast(ExpressionStatement, program.statements[0]).expression
             )
 
+            self.assertIsNotNone(function)
             self.assertEquals(len(function.parameters), len(test["expected_params"]))
 
             for idx, param in enumerate(test["expected_params"]):
                 self._test_literal_expression(function.parameters[idx], param)
 
             for idx, type_param in enumerate(test["expected_type_params"]):
-                self._test_literal_expression(function.type_parameters[idx], type_param)
+                self._test_type_literal(function.type_parameters[idx], type_param)
 
             assert function.type_output is not None
             self.assertEquals(function.type_output.value, test["expected_type_output"])
@@ -478,29 +481,58 @@ class ParserTest(TestCase):
         self._test_literal_expression(call_list.range[0], 1)
         self._test_infix_expression(call_list.range[1], 2, "*", 3)
 
-    # TODO: Implement this test algebraic list type
-    # def test_algebraic_list(self) -> None:
-    #     tests: List[Tuples[str, List[str]]] = [
-    #         ("[];", [""]),
-    #         ("[int];", ["int"]),
-    #         ("[float];", ["float"]),
-    #         ("[(int, str)];", [("int", "str")]),
-    #     ]
+    def test_let_statement_algebraic_list(self) -> None:
+        tests: List[Tuple[str, str]] = [
+            ("let a::[int] = [1];", "[int]"),
+            ('let b::[(float, str)] = [(1.1, "b")];', "[(float,str)]"),
+            ('let c::([str], int) = (["1"], 1);', "([str],int)"),
+            (
+                "let d::[(int, [(float, bool)])] = [true];",
+                "[(int,[(float,bool)])]",
+            ),
+        ]
+       
+        for source, expected in tests:
+            lexer: Lexer = Lexer(source)
+            parser: Parser = Parser(lexer)
 
-    #     for source, expected in tests:
-    #         lexer: Lexer = Lexer(source)
-    #         parser: Parser = Parser(lexer)
+            program: Program = parser.parse_program()
 
-    #         program: Program = parser.parse_program()
+            statement = cast(LetStatement, program.statements[0])
+            assert statement.name is not None
+            assert statement.name.type_value is not None
 
-    #         list_values = cast(
-    #             ListValues, cast(ExpressionStatement,
-    #                              program.statements[0]).expression
-    #         )
+            self.assertEquals(statement.name.type_value.value, expected)
 
-    #         self.assertIsNotNone(list_values)
-    #         for item, expect in zip(list_values.values, expected):
-    #             self._test_literal_expression(item.value, expect)
+    def test_algebraic_function(self) -> None:
+        tests: List[Tuple[str, List[str], str]] = [
+            ("fn x::[int] -> [int] {=>1;}", ["[int]"], "[int]"),
+            ("fn x::[int], y::[str] -> [int] {=>1;}", ["[int]", "[str]"], "[int]"),
+            (
+                "fn x::[int], y::[str], z::[float] -> [int] {=>1;}",
+                ["[int]", "[str]", "[float]"],
+                "[int]",
+            ),
+        ]
+
+        for source, expected_input, expexted_output in tests:
+            lexer: Lexer = Lexer(source)
+            parser: Parser = Parser(lexer)
+
+            program: Program = parser.parse_program()
+
+            function = cast(
+                Function, cast(ExpressionStatement, program.statements[0]).expression
+            )
+
+            type_inputs = [cast(TypeValue,type_).value for type_ in function.type_parameters]
+
+            type_output = cast(TypeValue, function.type_output).value
+
+            for expect, actual in zip(expected_input, type_inputs):
+                self.assertEquals(expect, actual)
+
+            self.assertEquals(type_output, expexted_output)
 
     def _test_infix_expression(
         self,
@@ -564,6 +596,29 @@ class ParserTest(TestCase):
 
         self.assertEquals(len(program.statements), expected_statement_count)
         self.assertIsInstance(program.statements[0], ExpressionStatement)
+
+    def _test_data_class(
+        self, expression: Expression, expected_type: List[str]
+    ) -> None:
+        if type(expression) == Identifier:
+            identifier = cast(Identifier, expression)
+            self.assertEquals(str(identifier), expected_type[0])
+        elif type(expression) == ListValues:
+            list_values = cast(ListValues, expression)
+            for i in range(len(list_values.values)):
+                item = cast(Identifier, list_values.values[i])
+                self.assertEquals(str(item.value), expected_type[0])
+        elif type(expression) == TupleValues:
+            tuple_values = cast(TupleValues, expression)
+            for i in range(len(tuple_values.values)):
+                item = cast(Identifier, tuple_values.values[i])
+                self.assertEquals(str(item.value), expected_type[0])
+        else:
+            assert False
+
+    def _test_type_literal(self, expression: Expression, expected_type: str) -> None:
+        type_ = cast(TypeValue, expression)
+        self.assertEqual(type_.value, expected_type)
 
     def _test_literal_expression(
         self, expression: Expression, expected_value: Any

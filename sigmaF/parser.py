@@ -18,6 +18,7 @@ from sigmaF.ast import (
     ListValues,
     Void,
     TupleValues,
+    TypeValue,
     Prefix,
     Infix,
     Program,
@@ -233,7 +234,20 @@ class Parser:
             return None
 
         let_statement.name = self._parse_identifier()
+
+        if (
+            self._peek_token is not None
+            and self._peek_token.token_type is TokenType.TYPEASSIGN
+        ):
+
+            self._advance_tokens()
+            self._advance_tokens()
+            let_statement.name.type_value = self._parse_type_expression()
+
+            print("==> ", self._current_token, let_statement.name.type_value)
+
         if not self._expected_token(TokenType.ASSIGN):
+            print(":p")
             return None
 
         self._advance_tokens()
@@ -386,6 +400,7 @@ class Parser:
 
     def _parse_function(self) -> Optional[Function]:
         assert self._current_token is not None
+        print("--->", self._current_token)
         function = Function(token=self._current_token)
 
         if not self._expected_token(TokenType.IDENT):
@@ -397,18 +412,19 @@ class Parser:
             function.type_output,
         ) = self._parse_function_parameters()
 
-        if not self._expected_token(TokenType.LBRACE):
+        if self._expected_token(TokenType.LBRACE):
+            print("--->>", self._current_token)
             return None
 
         function.body = self._parse_block()
-
+        print("_parse_function ", function)
         return function
 
     def _parse_function_parameters(
         self,
-    ) -> Tuple[List[Identifier], List[Identifier], Optional[Identifier]]:
+    ) -> Tuple[List[Identifier], List[TypeValue], Optional[TypeValue]]:
         params: List[Identifier] = []
-        type_params: List[Identifier] = []
+        type_params: List[TypeValue] = []
 
         assert self._current_token is not None
         identifier = Identifier(
@@ -420,10 +436,9 @@ class Parser:
         assert self._peek_token.token_type is TokenType.TYPEASSIGN
         self._advance_tokens()
         self._advance_tokens()
-        identifier = Identifier(
-            token=self._current_token, value=self._current_token.literal
-        )
-        type_params.append(identifier)
+        type_param = self._parse_type_expression()
+        assert type_param is not None
+        type_params.append(type_param)
 
         while self._peek_token.token_type == TokenType.COMMA:
             self._advance_tokens()
@@ -438,20 +453,18 @@ class Parser:
             assert self._peek_token.token_type is TokenType.TYPEASSIGN
             self._advance_tokens()
             self._advance_tokens()
-            assert self._peek_token.token_type is not TokenType.CLASSNAME
-            identifier = Identifier(
-                token=self._current_token, value=self._current_token.literal
-            )
-            type_params.append(identifier)
+            type_param = self._parse_type_expression()
+            assert type_param is not None
+            type_params.append(type_param)
 
         if not self._expected_token(TokenType.OUTPUTFUNTION):
             return ([], [], None)
 
-        assert self._peek_token.token_type is TokenType.CLASSNAME
         self._advance_tokens()
-        type_output: Identifier = Identifier(
-            self._current_token, self._current_token.literal
-        )
+        type_output = self._parse_type_expression()
+        print(type_output)
+        assert type_output is not None
+        self._advance_tokens()
 
         return params, type_params, type_output
 
@@ -496,6 +509,89 @@ class Parser:
         self._advance_tokens()
 
         return self._parse_grouped_expression()
+
+    def _parse_type_expression(self) -> Optional[TypeValue]:
+        assert self._current_token is not None
+
+        if self._current_token.token_type is TokenType.CLASSNAME:
+            return TypeValue(
+                tokens=[self._current_token], value=self._current_token.literal
+            )
+
+        elif (
+            self._current_token.token_type is TokenType.LBRAKET
+            or self._current_token.token_type is TokenType.LPAREN
+        ):
+            stack = [self._current_token.token_type]
+
+            type_value = TypeValue(
+                tokens=[self._current_token], value=self._current_token.literal
+            )
+
+            self._advance_tokens()
+            assert (
+                self._current_token.token_type is not TokenType.RBRAKET
+                or self._current_token.token_type is not TokenType.RPAREN
+            )
+
+            while len(stack) > 0:
+                if (
+                    self._current_token.token_type is TokenType.LBRAKET
+                    or self._current_token.token_type is TokenType.LPAREN
+                ):
+                    stack.append(self._current_token.token_type)
+                    type_value.tokens.append(self._current_token)
+                    type_value.value += self._current_token.literal
+
+                elif (
+                    stack[-1] is TokenType.LBRAKET
+                    and self._current_token.token_type is TokenType.RBRAKET
+                ) or (
+                    stack[-1] is TokenType.LPAREN
+                    and self._current_token.token_type is TokenType.RPAREN
+                ):
+                    stack.pop()
+                    type_value.tokens.append(self._current_token)
+                    type_value.value += self._current_token.literal
+
+                    if len(stack) == 0:
+                        break
+                elif self._current_token.token_type is TokenType.CLASSNAME:
+                    type_value.tokens.append(self._current_token)
+                    type_value.value += self._current_token.literal
+                    if (
+                        stack[-1] is TokenType.LPAREN
+                        and self._peek_token.token_type is TokenType.COMMA
+                    ):
+                        self._advance_tokens()
+                        type_value.tokens.append(self._current_token)
+                        type_value.value += self._current_token.literal
+                        assert (
+                            self._current_token.token_type is not TokenType.RBRAKET
+                            or self._current_token.token_type is not TokenType.RPAREN
+                        )
+                elif (
+                    stack[-1] is TokenType.LPAREN
+                    and self._current_token.token_type is TokenType.COMMA
+                ):
+                    type_value.tokens.append(self._current_token)
+                    type_value.value += self._current_token.literal
+
+                    assert self._peek_token is not None and (
+                        self._peek_token.token_type is not TokenType.RBRAKET
+                        or self._peek_token.token_type is not TokenType.RPAREN
+                    )
+
+                else:
+                    print(type_value.value)
+                    return None
+
+                self._advance_tokens()
+
+            print("--->", self._current_token)
+            return type_value
+        else:
+            return None
 
     def _parse_list(self) -> Optional[ListValues]:
         assert self._current_token is not None

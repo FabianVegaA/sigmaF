@@ -2,7 +2,7 @@ from abc import (
     ABC,
     abstractmethod,
 )
-from typing import Any, Optional, List
+from typing import Any, Optional, List, Union
 from sigmaF.token import Token
 
 
@@ -31,6 +31,9 @@ class Expression(ASTNode):
     def token_literal(self) -> str:
         return self.token.literal
 
+    def __str__(self) -> str:
+        return self.token.literal
+
 
 class Program(ASTNode):
     def __init__(self, statements: List[Statement]) -> None:
@@ -50,10 +53,25 @@ class Program(ASTNode):
         return "".join(out)
 
 
+class TypeValue(Expression):
+    def __init__(self, tokens: List[Token], value: str) -> None:
+        self.tokens = tokens
+        self.value = value
+
+    def token_literals(self) -> str:
+        return " ".join([token.literal for token in self.tokens])
+
+    def __str__(self) -> str:
+        return self.value
+
+
 class Identifier(Expression):
-    def __init__(self, token: Token, value: str) -> None:
+    def __init__(
+        self, token: Token, value: str, type_value: Optional[TypeValue] = None
+    ) -> None:
         super().__init__(token)
         self.value = value
+        self.type_value = type_value
 
     def __str__(self) -> str:
         return self.value
@@ -201,8 +219,8 @@ class Function(Expression):
         self,
         token: Token,
         parameters: List[Identifier] = [],
-        type_parameters: List[Identifier] = [],
-        type_output: Optional[Identifier] = None,
+        type_parameters: List[TypeValue] = [],
+        type_output: Optional[TypeValue] = None,
         body: Optional[Block] = None,
     ) -> None:
         super().__init__(token)
