@@ -309,7 +309,7 @@ class EvaluatorTest(TestCase):
              
              let ten = fn i::int -> int {=> i * 10;};
              
-             (two . five . ten)(3);
+             two . five . ten (3);
              """,
                 300,
             ),

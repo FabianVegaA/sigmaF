@@ -155,6 +155,7 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
     elif node_type == ast.LetStatement:
         node = cast(ast.LetStatement, node)
 
+        print(node)
         assert node.value is not None
         value = evaluate(node.value, env)
 
@@ -367,7 +368,7 @@ def _check_type_out_function(fn: Object, out: Object) -> bool:
     fn = cast(Function, fn)
 
     type_param = fn.type_output
-    type_param = cast(Identifier, type_param)
+    type_param = cast(ast.TypeValue, type_param)
     return bool(out.type() is TYPE_REGISTER_LITERAL[type_param.value])
 
 
@@ -766,8 +767,8 @@ def _evaluate_function_infix_expression(
 
 
 def _check_compatility_functions(left_fn: Function, right_fn: Function) -> bool:
-    right_types: Optional[Identifier] = right_fn.type_output
-    left_types: List[Identifier] = left_fn.type_parameters
+    right_types: Optional[ast.TypeValue] = right_fn.type_output
+    left_types: List[ast.TypeValue] = left_fn.type_parameters
 
     print(left_types[0], right_types)
     if len(left_types) > 1:
