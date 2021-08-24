@@ -25,6 +25,7 @@ class ObjectType(Enum):
     RETURN = auto()
     STRING = auto()
     TUPLE = auto()
+    TYPE = auto()
 
 
 class Object(ABC):
