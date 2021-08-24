@@ -491,7 +491,7 @@ class ParserTest(TestCase):
                 "[(int,[(float,bool)])]",
             ),
         ]
-       
+
         for source, expected in tests:
             lexer: Lexer = Lexer(source)
             parser: Parser = Parser(lexer)
@@ -507,12 +507,14 @@ class ParserTest(TestCase):
     def test_algebraic_function(self) -> None:
         tests: List[Tuple[str, List[str], str]] = [
             ("fn x::[int] -> [int] {=>1;}", ["[int]"], "[int]"),
+            ("fn x::[int] -> int {=>1;}", ["[int]"], "int"),
             ("fn x::[int], y::[str] -> [int] {=>1;}", ["[int]", "[str]"], "[int]"),
             (
                 "fn x::[int], y::[str], z::[float] -> [int] {=>1;}",
                 ["[int]", "[str]", "[float]"],
                 "[int]",
             ),
+            ("fn l::[int] -> int { return length(l); }", ["[int]"], "int"),
         ]
 
         for source, expected_input, expexted_output in tests:
@@ -525,7 +527,9 @@ class ParserTest(TestCase):
                 Function, cast(ExpressionStatement, program.statements[0]).expression
             )
 
-            type_inputs = [cast(TypeValue,type_).value for type_ in function.type_parameters]
+            type_inputs = [
+                cast(TypeValue, type_).value for type_ in function.type_parameters
+            ]
 
             type_output = cast(TypeValue, function.type_output).value
 
