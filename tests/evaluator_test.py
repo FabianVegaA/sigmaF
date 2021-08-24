@@ -259,6 +259,18 @@ class EvaluatorTest(TestCase):
                 30,
             ),
             ("fn x::int -> int {=> x}(5);", 5),
+            ("fn x::[int] -> int {=> length(x);}([1,2,3,4,5]);", 5),
+            (
+                """
+            let sum = fn x::[int] -> int {
+                if length(x) == 0 then {return 0;}
+                return x[0] + sum(x[1, length(x)]); 
+            }
+            sum([1,2,3,4,5])
+             
+             """,
+                15,
+            ),
         ]
 
         for source, expected in tests:
@@ -312,6 +324,20 @@ class EvaluatorTest(TestCase):
              two . five . ten (3);
              """,
                 300,
+            ),
+            (
+                """
+            let tail = fn l::[int] -> [int] { return l[1,length(l)]; }
+
+            let sum = fn xs::[int] -> int {
+                printLn(xs);
+                if length(xs) == 1 then { return xs[0]; }
+                return xs[0] + sum . tail(xs);
+            }
+             
+            sum([1,2,3,4,5]);
+             """,
+                15,
             ),
         ]
 
