@@ -130,38 +130,31 @@ def process(lexer: Lexer, env: Environment):
         print("\n[Error] " + _EVALUATIONERROR.format("") + "\n")
 
 
-def _pop_push_stack(left_compiled, right_compiled, stack, source):
-    if left_matchs := re.findall(left_compiled, source):
-        for left_match in left_matchs:
-            stack.append(left_match)
-    if (right_matchs := re.findall(right_compiled, source)) and len(stack) > 0:
-
-        for right_match in right_matchs:
-
-            if (
-                (stack[-1] == "{" and right_match == "}")
-                or (stack[-1] == "[" and right_match == "]")
-                or (stack[-1] == "(" and right_match == ")")
-            ):
+def _stack_groupers(
+    source: str, stack: list, left_groupers: str = "([{", right_groupers: str = ")]}"
+) -> list:
+    for char in source:
+        if char in left_groupers:
+            stack.append(char)
+        for l_grouper, r_grouper in zip(left_groupers, right_groupers):
+            if len(stack) > 0 and (stack[-1] == l_grouper and char == r_grouper):
                 stack.pop()
+
     return stack
 
 
 def read_sublines(source):
-    left_compiled = re.compile(r"[\[\(\{]")
-    right_compiled = re.compile(r"[\]\)\}]")
 
     stack = []
     sub_lines = []
 
-    stack = _pop_push_stack(left_compiled, right_compiled, stack, source)
+    stack = _stack_groupers(source, stack)
 
-    while len(stack) != 0 and (sub_line := input(".. ")) != ";":
+    while len(stack) > 0 and (sub_line := input(".. ")) != ";":
 
         if sub_line != "":
             sub_lines.append(sub_line)
-
-            stack = _pop_push_stack(left_compiled, right_compiled, stack, sub_line)
+            stack = _stack_groupers(sub_line, stack)
 
     return "\n".join(sub_lines)
 
@@ -174,7 +167,7 @@ def start_repl(source: str = "", _path: Optional[str] = None) -> None:
 
     lexer: Lexer = Lexer(" ".join(scanned))
 
-    _ = process(lexer, env)
+    process(lexer, env)
 
     _pattern_path = re.compile(r"load\(([\w\.-_\/]+)\)")
 
@@ -195,7 +188,7 @@ def start_repl(source: str = "", _path: Optional[str] = None) -> None:
 
             lexer = Lexer(" ".join(scanned))
 
-            _ = process(lexer, env)
+            process(lexer, env)
 
         while (token := lexer.next_token()) != EOF_TOKEN:
             print(token)
