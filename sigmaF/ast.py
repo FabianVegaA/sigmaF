@@ -218,14 +218,14 @@ class Function(Expression):
     def __init__(
         self,
         token: Token,
-        parameters: List[Identifier] = [],
-        type_parameters: List[TypeValue] = [],
+        parameters: Optional[List[Identifier]] = None,
+        type_parameters: Optional[List[TypeValue]] = None,
         type_output: Optional[TypeValue] = None,
         body: Optional[Block] = None,
     ) -> None:
         super().__init__(token)
-        self.parameters = parameters
-        self.type_parameters = type_parameters
+        self.parameters = parameters if parameters is not None else []
+        self.type_parameters = type_parameters if type_parameters is not None else []
         self.type_output = type_output
         self.body = body
 
@@ -260,18 +260,18 @@ class Call(Expression):
 
 
 class ListValues(Expression):
-    def __init__(self, token: Token, values: List[Any] = []) -> None:
+    def __init__(self, token: Token, values: Optional[List[Any]] = None) -> None:
         super().__init__(token)
-        self.values = values
+        self.values = values if values is not None else []
 
     def __str__(self) -> str:
         return str([str(value) for value in self.values])
 
 
 class TupleValues(Expression):
-    def __init__(self, token: Token, values: List[Any] = []) -> None:
+    def __init__(self, token: Token, values: Optional[List[Any]] = None) -> None:
         super().__init__(token)
-        self.values = values
+        self.values = values if values is not None else []
 
     def __str__(self) -> str:
         return str(tuple([str(value) for value in self.values]))
