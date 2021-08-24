@@ -183,8 +183,8 @@ class Builtin(Object):
 
 
 class ValueList(Object):
-    def __init__(self, values: List[Object] = []) -> None:
-        self.values = values
+    def __init__(self, values: Optional[List[Object]] = None) -> None:
+        self.values = values if values is not None else []
 
     def type(self) -> ObjectType:
         return ObjectType.LIST
@@ -199,8 +199,8 @@ class ValueList(Object):
 
 
 class ValueTuple(Object):
-    def __init__(self, values: List[Object] = []) -> None:
-        self.values = values
+    def __init__(self, values: Optional[List[Object]] = None) -> None:
+        self.values = values if values is not None else []
 
     def type(self) -> ObjectType:
         return ObjectType.TUPLE
