@@ -1,0 +1,14 @@
+let tail = fn l::[int] -> [int] { return l[1,length(l)]; }
+
+let sum = fn xs::[int] -> int {
+    if length(xs) == 1 then { return xs[0]; }
+    return xs[0] + sum . tail(xs);
+}
+
+let zip = fn xs::[int], ys::[str] -> [(int, str)] {
+    if length(xs) == 0 || length(ys) == 0 then {
+        return [];
+    }
+    return [(xs[0], ys[0])] + zip(xs[1, length(xs)], ys[1, length(xs)]);
+}
+
