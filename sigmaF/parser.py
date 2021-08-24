@@ -244,10 +244,7 @@ class Parser:
             self._advance_tokens()
             let_statement.name.type_value = self._parse_type_expression()
 
-            print("==> ", self._current_token, let_statement.name.type_value)
-
         if not self._expected_token(TokenType.ASSIGN):
-            print(":p")
             return None
 
         self._advance_tokens()
@@ -400,7 +397,6 @@ class Parser:
 
     def _parse_function(self) -> Optional[Function]:
         assert self._current_token is not None
-        print("--->", self._current_token)
         function = Function(token=self._current_token)
 
         if not self._expected_token(TokenType.IDENT):
@@ -412,12 +408,10 @@ class Parser:
             function.type_output,
         ) = self._parse_function_parameters()
 
-        if self._expected_token(TokenType.LBRACE):
-            print("--->>", self._current_token)
+        if self._current_token.token_type is not TokenType.LBRACE:
             return None
 
         function.body = self._parse_block()
-        print("_parse_function ", function)
         return function
 
     def _parse_function_parameters(
@@ -462,7 +456,6 @@ class Parser:
 
         self._advance_tokens()
         type_output = self._parse_type_expression()
-        print(type_output)
         assert type_output is not None
         self._advance_tokens()
 
@@ -583,12 +576,10 @@ class Parser:
                     )
 
                 else:
-                    print(type_value.value)
                     return None
 
                 self._advance_tokens()
 
-            print("--->", self._current_token)
             return type_value
         else:
             return None
