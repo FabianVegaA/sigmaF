@@ -1,4 +1,4 @@
-from typing import Any, cast, Dict, List, Optional, Type, Union
+from typing import Any, cast, Dict, List, Optional, Type, Union, Tuple
 
 from sigmaF.token import Token, TokenType
 import sigmaF.ast as ast
@@ -72,6 +72,7 @@ TYPE_REGISTER_OBJECT: Dict[ObjectType, str] = {
     ObjectType.TUPLE: "tuple",
     ObjectType.FUNCTION: "function",
     ObjectType.VOID: "void",
+    ObjectType.ERROR: "error",
 }
 
 
@@ -135,7 +136,7 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
         right = evaluate(node.right, env)
 
         assert right is not None and left is not None
-        return _evaluate_infix_expression(node.operator, left, right)
+        return _evaluate_infix_expression(node.operator, left, right, env)
     elif node_type == ast.Block:
         node = cast(ast.Block, node)
 
@@ -155,7 +156,6 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
     elif node_type == ast.LetStatement:
         node = cast(ast.LetStatement, node)
 
-        print(node)
         assert node.value is not None
         value = evaluate(node.value, env)
 
@@ -354,13 +354,60 @@ def _check_type_args_function(fn: Object, args: List[Object]) -> Union[bool, Obj
         for idx, arg in enumerate(args):
             if arg.type() is ObjectType.ERROR:
                 return arg
-            type_param = fn.type_parameters[idx]
-            if not arg.type() == TYPE_REGISTER_LITERAL[type_param.value]:
+            type_param = fn.type_parameters[idx].value
+            type_args = _to_str_type(_get_types(arg))
+
+            if not type_args == type_param:
+                if (
+                    type_args == "list"
+                    and type_param[0] == "["
+                    and type_param[-1] == "]"
+                ):
+                    continue
                 return False
         return True
 
     else:
         return True
+
+
+def _get_types(
+    data: Object,
+) -> Tuple[ObjectType, Optional[List[Tuple[ObjectType, Any]]]]:
+    if data.type() is ObjectType.LIST:
+        list_value = cast(ValueList, data)
+        if len(list_value.values) == 0:
+            return (ObjectType.LIST, None)
+        return (
+            ObjectType.LIST,
+            [_get_types(list_value.values[0])],
+        )
+    elif data.type() is ObjectType.TUPLE:
+        tuple_value = cast(ValueTuple, data)
+        return (
+            ObjectType.TUPLE,
+            [_get_types(item) for item in tuple_value.values],
+        )
+    else:
+        return (data.type(), None)
+
+
+def _to_str_type(
+    types_: Tuple[ObjectType, Optional[List[Tuple[ObjectType, Any]]]]
+) -> str:
+    if types_[0] is ObjectType.LIST:
+        if types_[1] is None:
+            return "list"
+        else:
+            return f"[{_to_str_type(types_[1][0])}]"
+    elif types_[0] is ObjectType.TUPLE:
+        if types_[1] is None:
+            return "tuple"
+        else:
+            return "({})".format(",".join([_to_str_type(item) for item in types_[1]]))
+
+    else:
+        return TYPE_REGISTER_OBJECT[types_[0]]
 
 
 def _check_type_out_function(fn: Object, out: Object) -> bool:
@@ -369,7 +416,13 @@ def _check_type_out_function(fn: Object, out: Object) -> bool:
 
     type_param = fn.type_output
     type_param = cast(ast.TypeValue, type_param)
-    return bool(out.type() is TYPE_REGISTER_LITERAL[type_param.value])
+    type_out = _to_str_type(_get_types(out))
+
+    return type_out == type_param.value or (
+        type_out == "list"
+        and type_param.value[0] == "["
+        and type_param.value[-1] == "]"
+    )
 
 
 def _apply_function(function, args: List[Object]) -> Object:
@@ -489,17 +542,17 @@ def _evaluate_block_statement(block: ast.Block, env: Environment) -> Optional[Ob
     return result
 
 
-def _evaluate_infix_expression(operator: str, left: Object, right: Object) -> Object:
+def _evaluate_infix_expression(
+    operator: str, left: Object, right: Object, env: Environment
+) -> Object:
 
     if left.type() is ObjectType.ERROR:
         return left
     elif right.type() is ObjectType.ERROR:
         return right
     elif left.type() == ObjectType.INTEGER and right.type() == ObjectType.INTEGER:
-
         if left.inspect() == "null" or right.inspect() == "null":
             return NULL
-
         return _evaluate_interger_infix_expression(operator, left, right)
     elif left.type() == ObjectType.FLOAT and right.type() == ObjectType.FLOAT:
         return _evaluate_float_infix_expression(operator, left, right)
@@ -512,8 +565,7 @@ def _evaluate_infix_expression(operator: str, left: Object, right: Object) -> Ob
     elif left.type() == ObjectType.TUPLE and right.type() == ObjectType.TUPLE:
         return _evaluate_tuple_infix_expression(operator, left, right)
     elif left.type() == ObjectType.FUNCTION and right.type() == ObjectType.FUNCTION:
-
-        return _evaluate_function_infix_expression(operator, left, right)
+        return _evaluate_function_infix_expression(operator, left, right, env)
     elif left.type() != right.type():
         return _new_error(
             _TYPE_MISMATCH, [operator, left.type().name, right.type().name]
@@ -578,7 +630,7 @@ def _evaluate_tuple_infix_expression(
         ):
 
             values = [
-                _evaluate_infix_expression("+", l1, l2)
+                _evaluate_infix_expression("+", l1, l2, Environment())
                 for l1, l2 in zip(left_tuple, right_tuple)
             ]
 
@@ -598,7 +650,7 @@ def _evaluate_tuple_infix_expression(
         ):
 
             values = [
-                _evaluate_infix_expression("-", l1, l2)
+                _evaluate_infix_expression("-", l1, l2, Environment())
                 for l1, l2 in zip(left_tuple, right_tuple)
             ]
 
@@ -740,7 +792,7 @@ def _evaluate_string_infix_expression(
 
 
 def _evaluate_function_infix_expression(
-    operator: str, left: Object, right: Object
+    operator: str, left: Object, right: Object, env: Environment
 ) -> Object:
     left_value: Function = cast(Function, left)
     right_value: Function = cast(Function, right)
@@ -753,7 +805,7 @@ def _evaluate_function_infix_expression(
         if _check_compatility_functions(left_value, right_value):
             new_function: Optional[Object] = evaluate(
                 _build_ast_function(left_value, right_value),
-                Environment(),
+                env,
             )
             assert new_function is not None
             return new_function
@@ -770,7 +822,6 @@ def _check_compatility_functions(left_fn: Function, right_fn: Function) -> bool:
     right_types: Optional[ast.TypeValue] = right_fn.type_output
     left_types: List[ast.TypeValue] = left_fn.type_parameters
 
-    print(left_types[0], right_types)
     if len(left_types) > 1:
         # TODO: implement multi-parameter function
         return False
@@ -782,8 +833,8 @@ def _build_ast_function(left_value: Function, right_value: Function) -> ast.Func
     return ast.Function(
         token=Token(TokenType.FUNCTION, "fn"),
         parameters=left_value.parameters,
-        type_parameters=left_value.type_parameters,
-        type_output=right_value.type_output,
+        type_parameters=right_value.type_parameters,
+        type_output=left_value.type_output,
         body=ast.Block(
             token=Token(TokenType.LBRACE, "{"),
             statements=[
