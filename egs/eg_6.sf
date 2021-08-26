@@ -9,5 +9,5 @@ let zip = fn xs::[int], ys::[str] -> [(int, str)] {
     if length(xs) == 0 || length(ys) == 0 then {
         return [];
     }
-    return [(xs[0], ys[0])] + zip(xs[1, length(xs)], ys[1, length(xs)]);
+    return [(xs[0], ys[0])] + zip(tail(xs), tail(ys));
 }

@@ -21,59 +21,32 @@ from sigmaF.object import (
 )
 from sigmaF.builtins import BUILTIN
 
-TRUE = Boolean(True)
-FALSE = Boolean(False)
-NULL = Void()
-
-
-_INCOMPATIBLE_COMPOSITION_FUNCTION = (
-    "Imcompatible Composition: It is not possible the composition of {} and {}"
+from sigmaF.untils import (
+    _INCOMPATIBLE_COMPOSITION_FUNCTION,
+    _NOT_A_FUNCTION,
+    _TYPE_MISMATCH,
+    _UNKNOW_PREFIX_OPERATOR,
+    _UNKNOW_INFIX_OPERATOR,
+    _DIVISION_BY_ZERO,
+    _UNKNOW_IDENTIFIER,
+    _NON_MODIFIABLE_VALUE,
+    _WRONG_NUMBER_INDEXES,
+    _INDIX_FAILED,
+    _TUPLE_FAIL,
+    _NOT_AN_ITERABLE,
+    _WRONG_ARGS,
+    _WRONG_OUTPUT,
+    _INCOMPATIBLE_LIST_OPTERATION,
+    _WRONG_NUMBER_OF_INDEXES_TUPLE,
+    _INCOMPATIBLE_TUPLE_OPTERATION,
+    _INCOMPATIBLE_NULL_OPTERATION,
+    TRUE,
+    FALSE,
+    NULL,
+    TYPE_REGISTER_OBJECT,
+    _to_str_type,
+    _get_types,
 )
-_NOT_A_FUNCTION = "It is not a function: {}"
-_TYPE_MISMATCH = (
-    "Type Discrepancy: It is not possible to do the operation '{}', for an {} and a {}"
-)
-_UNKNOW_PREFIX_OPERATOR = "Unknown Operator: The operator '{}' is unknown for {}"
-_UNKNOW_INFIX_OPERATOR = "Unknown Operator: The operator '{}' is unknown between {}"
-_DIVISION_BY_ZERO = "Division by zero: It is not possible to divide by zero {}"
-_UNKNOW_IDENTIFIER = "Identifier not found: {}"
-_NON_MODIFIABLE_VALUE = "Non-modifiable Value: The value of {} is not modifiable"
-_WRONG_NUMBER_INDEXES = "Wrong number of indexes: {} indexes were delivered and between 1 and 3 are required"
-_INDIX_FAILED = "Out range: The length of the {} is {}"
-_TUPLE_FAIL = "Tuple with more of one type: The tuple have {} type and {} type"
-_NOT_AN_ITERABLE = (
-    "Not a iterable: The object delivered is not a iterable type is of type {}"
-)
-_WRONG_ARGS = (
-    "Arguments wrongs: The function expected to receive types {} and receives {}"
-)
-_WRONG_OUTPUT = "Output wrongs: The function expected to return type {} and return {}"
-_INCOMPATIBLE_LIST_OPTERATION = "Incompatible list operation: It is not possible to do the operation {} between a {} List and a {} List"
-_WRONG_NUMBER_OF_INDEXES_TUPLE = "Wrong number of indexes: The tuple only required an index, and it was delivered {} indexes"
-_INCOMPATIBLE_TUPLE_OPTERATION = "Incompatible tuple operation: It is not possible to do the operation {} between a {} Tuple and a {} Tuple"
-_INCOMPATIBLE_NULL_OPTERATION = "Incompatible null operation: It is not possible to do the operation {} between a {} and {}"
-
-TYPE_REGISTER_LITERAL: Dict[str, ObjectType] = {
-    "int": ObjectType.INTEGER,
-    "str": ObjectType.STRING,
-    "bool": ObjectType.BOOLEAN,
-    "float": ObjectType.FLOAT,
-    "list": ObjectType.LIST,
-    "tuple": ObjectType.TUPLE,
-    "function": ObjectType.FUNCTION,
-    "void": ObjectType.VOID,
-}
-TYPE_REGISTER_OBJECT: Dict[ObjectType, str] = {
-    ObjectType.INTEGER: "int",
-    ObjectType.STRING: "str",
-    ObjectType.BOOLEAN: "bool",
-    ObjectType.FLOAT: "float",
-    ObjectType.LIST: "list",
-    ObjectType.TUPLE: "tuple",
-    ObjectType.FUNCTION: "function",
-    ObjectType.VOID: "void",
-    ObjectType.ERROR: "error",
-}
 
 
 def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
@@ -159,7 +132,10 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
         assert node.value is not None
         value = evaluate(node.value, env)
 
-        assert node.name is not None
+        assert node.name is not None and value is not None
+        node.name.type_value = ast.TypeValue(
+            tokens=[], value=_to_str_type(_get_types(value))
+        )
 
         if not node.name.value in env._store:
             env[node.name.value] = value
@@ -377,45 +353,6 @@ def _check_type_args_function(fn: Object, args: List[Object]) -> Union[bool, Obj
         return True
 
 
-def _get_types(
-    data: Object,
-) -> Tuple[ObjectType, Optional[List[Tuple[ObjectType, Any]]]]:
-    if data.type() is ObjectType.LIST:
-        list_value = cast(ValueList, data)
-        if len(list_value.values) == 0:
-            return (ObjectType.LIST, None)
-        return (
-            ObjectType.LIST,
-            [_get_types(list_value.values[0])],
-        )
-    elif data.type() is ObjectType.TUPLE:
-        tuple_value = cast(ValueTuple, data)
-        return (
-            ObjectType.TUPLE,
-            [_get_types(item) for item in tuple_value.values],
-        )
-    else:
-        return (data.type(), None)
-
-
-def _to_str_type(
-    types_: Tuple[ObjectType, Optional[List[Tuple[ObjectType, Any]]]]
-) -> str:
-    if types_[0] is ObjectType.LIST:
-        if types_[1] is None:
-            return "list"
-        else:
-            return f"[{_to_str_type(types_[1][0])}]"
-    elif types_[0] is ObjectType.TUPLE:
-        if types_[1] is None:
-            return "tuple"
-        else:
-            return "({})".format(",".join([_to_str_type(item) for item in types_[1]]))
-
-    else:
-        return TYPE_REGISTER_OBJECT[types_[0]]
-
-
 def _check_type_out_function(fn: Object, out: Object) -> bool:
     assert type(fn) == Function
     fn = cast(Function, fn)
@@ -438,11 +375,6 @@ def _check_unpacked_args(fn: Object, args: List[Object]) -> bool:
 
 
 def _apply_function(function, args: List[Object]) -> Object:
-    # if len(args) == 1 and args[0].type() is ObjectType.TUPLE:
-    #     unpacked_args = cast(ValueTuple, args[0]).values
-
-    #     if type(function) == Function and _check_unpacked_args(function, unpacked_args):
-    #         args = unpacked_args
 
     if type(function) == Function:
         function = cast(Function, function)

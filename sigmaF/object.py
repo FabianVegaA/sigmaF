@@ -28,6 +28,12 @@ class ObjectType(Enum):
     TYPE = auto()
 
 
+class FunctionType(Enum):
+    PURE = auto()
+    IMPURE = auto()
+    STOCHASTIC = auto()
+
+
 class Object(ABC):
     @abstractmethod
     def type(self) -> ObjectType:
@@ -37,6 +43,15 @@ class Object(ABC):
     def inspect(self) -> str:
         pass
 
+class ValueType(Object):
+    def __init__(self, value: TypeValue) -> None:
+        self.value = value
+    
+    def type(self) -> ObjectType:
+        return ObjectType.TYPE
+    
+    def inspect(self) -> str:
+        return str(self.value)
 
 class Integer(Object):
     def __init__(self, value: int) -> None:
@@ -144,12 +159,14 @@ class Function(Object):
         type_output: Optional[TypeValue],
         body: Block,
         env: Environment,
+        func_type: Optional[FunctionType] = None,
     ) -> None:
         self.parameters = parameters
         self.type_parameters = type_parameters
         self.type_output = type_output
         self.body = body
         self.env = env
+        self.func_type = func_type if func_type is not None else FunctionType.PURE
 
     def type(self) -> ObjectType:
         return ObjectType.FUNCTION
@@ -212,6 +229,3 @@ class ValueTuple(Object):
             return '("' + '", "'.join(values_list) + '")'
 
         return "(" + ", ".join(values_list) + ")"
-
-
-# TODO To create the nullable class, this will be able to evaluate for example 'int?' or 'bool?'

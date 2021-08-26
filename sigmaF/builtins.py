@@ -15,14 +15,17 @@ from sigmaF.object import (
     String,
 )
 
-
-TRUE = Boolean(True)
-FALSE = Boolean(False)
-NULL = Void()
-
-_WRONG_NUMBER_OF_ARGS = "Incorrect Number of arguments for length, it was received {} arguments, and is needed only {}"
-_UNSUPPORTED_ARGUMENT_TYPE = "Argument to {} without support, it was received a {}"
-_PARSE_WRONG = "It is not possible to parser since {} to {}"
+from sigmaF.untils import (
+    _to_str_type,
+    _get_types,
+    _WRONG_NUMBER_OF_ARGS,
+    _UNSUPPORTED_ARGUMENT_TYPE,
+    _PARSE_WRONG,
+    _WRONG_TYPE_APPEND,
+    TRUE,
+    FALSE,
+    NULL,
+)
 
 
 def length(*args: Object) -> Object:
@@ -182,12 +185,37 @@ def parse(*args: Object) -> Object:
             return Error(_PARSE_WRONG.format(args[0].type().name, args[1].inspect()))
 
 
+def append(*args: Object) -> Object:
+    if len(args) == 2:
+        list_, item = args
+
+        list_ = cast(ValueList, list_)
+
+        if len(list_.values) > 0 and type(item) is not type(list_.values[0]):
+            return Error(_WRONG_TYPE_APPEND.format(item.type(), list_.values[0].type()))
+
+        list_.values.append(item)
+
+        return list_
+    else:
+        return Error(_WRONG_NUMBER_OF_ARGS.format(len(args), 2))
+
+
+def get_type(*args: Object) -> Object:
+    if len(args) != 1:
+        return Error(_WRONG_NUMBER_OF_ARGS.format(len(args), 1))
+
+    return String(value=_to_str_type(_get_types(args[0])))
+
+
 BUILTIN: Dict[str, Builtin] = {
     "length": Builtin(fn=length, io_type="builtin fn (list|tuple|str) -> int"),
     "printLn": Builtin(fn=println, io_type="builtin fn (any) -> null"),
     "not": Builtin(fn=negation_bolean, io_type="builtin fn (bool) -> bool"),
     "pow": Builtin(fn=pow_impure, io_type="builtin fn (int|float, int|float) -> null"),
     "parse": Builtin(
-        fn=parse, io_type="builtin fn (int|float|str|list|tuple,str) -> null"
+        fn=parse, io_type="builtin fn (int|float|str|list|tuple, str) -> null"
     ),
+    "append": Builtin(fn=append, io_type="builtin fn (list, any) -> list"),
+    "type": Builtin(fn=get_type, io_type="builtin fn (any) -> str"),
 }

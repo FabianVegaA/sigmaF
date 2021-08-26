@@ -52,7 +52,7 @@ class Program(ASTNode):
 
         return "".join(out)
 
-
+# TODO: Implemet type values 
 class TypeValue(Expression):
     def __init__(self, tokens: List[Token], value: str) -> None:
         self.tokens = tokens
