@@ -189,6 +189,11 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
         assert node.arguments is not None
         args = _evaluate_expression(node.arguments, env)
 
+        if len(args) == 1 and args[0].type() is ObjectType.TUPLE:
+            unpacked_args = cast(ValueTuple, args[0]).values
+            if _check_unpacked_args(function, unpacked_args):
+                args = unpacked_args
+
         if not _check_type_args_function(function, args):
             function = cast(Function, function)
 
@@ -223,6 +228,7 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
         ):
 
             return return_fn
+
         elif type(function) == Error:
 
             return return_fn
@@ -425,7 +431,18 @@ def _check_type_out_function(fn: Object, out: Object) -> bool:
     )
 
 
+def _check_unpacked_args(fn: Object, args: List[Object]) -> bool:
+    function = cast(Function, fn)
+
+    return len(function.type_parameters) == len(args)
+
+
 def _apply_function(function, args: List[Object]) -> Object:
+    # if len(args) == 1 and args[0].type() is ObjectType.TUPLE:
+    #     unpacked_args = cast(ValueTuple, args[0]).values
+
+    #     if type(function) == Function and _check_unpacked_args(function, unpacked_args):
+    #         args = unpacked_args
 
     if type(function) == Function:
         function = cast(Function, function)
@@ -449,6 +466,7 @@ def _apply_function(function, args: List[Object]) -> Object:
 
 def _extend_function_enviroment(fn: Function, args: List[Object]) -> Environment:
     env: Environment = Environment(outer=fn.env)
+
     for idx, param in enumerate(fn.parameters):
         env[param.value] = args[idx]
 
@@ -797,14 +815,9 @@ def _evaluate_function_infix_expression(
     left_value: Function = cast(Function, left)
     right_value: Function = cast(Function, right)
     if operator == ".":
-        # right_fn . left_fn =
-        # fn left_parameters::left_types -> right_types {
-        #       => right_fn(left_fn(left_parameters));
-        # }
-        # TODO: implement multi-parameter function
         if _check_compatility_functions(left_value, right_value):
             new_function: Optional[Object] = evaluate(
-                _build_ast_function(left_value, right_value),
+                _build_ast_function(left_value, right_value, env),
                 env,
             )
             assert new_function is not None
@@ -823,16 +836,19 @@ def _check_compatility_functions(left_fn: Function, right_fn: Function) -> bool:
     left_types: List[ast.TypeValue] = left_fn.type_parameters
 
     if len(left_types) > 1:
-        # TODO: implement multi-parameter function
-        return False
+        type_packed_in = "({})".format(",".join(map(str, left_types)))
+        type_out = str(right_types)
+        return type_out == type_packed_in
     else:
         return str(right_types) == str(left_types[0])
 
 
-def _build_ast_function(left_value: Function, right_value: Function) -> ast.Function:
+def _build_ast_function(
+    left_value: Function, right_value: Function, env: Environment
+) -> ast.Function:
     return ast.Function(
         token=Token(TokenType.FUNCTION, "fn"),
-        parameters=left_value.parameters,
+        parameters=right_value.parameters,
         type_parameters=right_value.type_parameters,
         type_output=left_value.type_output,
         body=ast.Block(
@@ -867,7 +883,7 @@ def _build_ast_function(left_value: Function, right_value: Function) -> ast.Func
                                 ),
                                 arguments=[
                                     cast(ast.Expression, ident)
-                                    for ident in left_value.parameters
+                                    for ident in right_value.parameters
                                 ],
                             )
                         ],

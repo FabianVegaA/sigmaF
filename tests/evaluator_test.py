@@ -298,11 +298,8 @@ class EvaluatorTest(TestCase):
             (
                 """
              let two = fn x::int -> int {=> x * 2;}
-             
              let five = fn i::int -> int {=> i * 5;}
-             
              let ten = five . two;
-             
              ten(3);
              """,
                 30,
@@ -316,11 +313,8 @@ class EvaluatorTest(TestCase):
             (
                 """
              let two = fn x::int -> int {=> x * 2;}
-             
              let five = fn i::int -> int {=> i * 5;}
-             
              let ten = fn i::int -> int {=> i * 10;};
-             
              two . five . ten (3);
              """,
                 300,
@@ -328,16 +322,25 @@ class EvaluatorTest(TestCase):
             (
                 """
             let tail = fn l::[int] -> [int] { return l[1,length(l)]; }
-
             let sum = fn xs::[int] -> int {
-                printLn(xs);
                 if length(xs) == 1 then { return xs[0]; }
                 return xs[0] + sum . tail(xs);
             }
-             
             sum([1,2,3,4,5]);
              """,
                 15,
+            ),
+            (
+                """
+            let sum_tuple = fn x::int, y::int -> int { return x + y; }
+            let by_two = fn x::str -> (int, int) { 
+                let len = length(x);
+                return (len, len * 2); 
+            }
+            
+            sum_tuple . by_two ("a");
+            """,
+                3,
             ),
         ]
 

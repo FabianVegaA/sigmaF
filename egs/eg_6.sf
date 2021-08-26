@@ -11,4 +11,3 @@ let zip = fn xs::[int], ys::[str] -> [(int, str)] {
     }
     return [(xs[0], ys[0])] + zip(xs[1, length(xs)], ys[1, length(xs)]);
 }
-
