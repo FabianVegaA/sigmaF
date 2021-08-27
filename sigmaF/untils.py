@@ -18,10 +18,13 @@ from sigmaF.object import (
     ObjectType,
 )
 
+from sigmaF.token import Token, TokenType
 
 TRUE = Boolean(True)
 FALSE = Boolean(False)
 NULL = Void()
+
+EOF_TOKEN: Token = Token(TokenType.EOF, "")
 
 
 _INCOMPATIBLE_COMPOSITION_FUNCTION = (
@@ -31,6 +34,7 @@ _NOT_A_FUNCTION = "It is not a function: {}"
 _TYPE_MISMATCH = (
     "Type Discrepancy: It is not possible to do the operation '{}', for an {} and a {}"
 )
+_TYPE_ASSING = "Type Discrepancy: It is not possible to assign a type {} to {} type"
 _UNKNOW_PREFIX_OPERATOR = "Unknown Operator: The operator '{}' is unknown for {}"
 _UNKNOW_INFIX_OPERATOR = "Unknown Operator: The operator '{}' is unknown between {}"
 _DIVISION_BY_ZERO = "Division by zero: It is not possible to divide by zero {}"
@@ -58,6 +62,11 @@ _PARSE_WRONG = "It is not possible to parser since {} to {}"
 _WRONG_TYPE_APPEND = "It is not possible to append a {} to a list of {}"
 
 
+_FILENOTFOUNT = "File not fount on {}"
+_MAXIMUMRECURSIONDEPTH = "Maximum recursion depth exceeded while being evaluated {}"
+_EVALUATIONERROR = "There was an error in the evaluation process {}"
+
+
 TYPE_REGISTER_OBJECT: Dict[ObjectType, str] = {
     ObjectType.INTEGER: "int",
     ObjectType.STRING: "str",
@@ -69,6 +78,10 @@ TYPE_REGISTER_OBJECT: Dict[ObjectType, str] = {
     ObjectType.VOID: "void",
     ObjectType.ERROR: "error",
 }
+
+
+def _new_error(message: str, args: List[Any], location: Optional[int] = None) -> Error:
+    return Error(message.format(*args), location=location)
 
 
 def _to_str_type(

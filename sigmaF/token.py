@@ -1,5 +1,5 @@
 from enum import auto, Enum, unique
-from typing import Dict, NamedTuple
+from typing import Dict, NamedTuple, Optional
 
 
 @unique
@@ -52,6 +52,7 @@ class TokenType(Enum):
 class Token(NamedTuple):
     token_type: TokenType
     literal: str
+    num_line: Optional[int] = None
 
     def __str__(self) -> str:
         return f"Type: {self.token_type}, Literal: {self.literal}"

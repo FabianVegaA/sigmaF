@@ -17,27 +17,18 @@ from sigmaF.token import (
 )
 from sigmaF.evaluator import evaluate
 
+from sigmaF.untils import (
+    EOF_TOKEN,
+    _FILENOTFOUNT,
+    _MAXIMUMRECURSIONDEPTH,
+    _EVALUATIONERROR,
+)
 
-EOF_TOKEN: Token = Token(TokenType.EOF, "")
-
-_FILENOTFOUNT = "File not fount on {}"
-_MAXIMUMRECURSIONDEPTH = "Maximum recursion depth exceeded while being evaluated {}"
-_EVALUATIONERROR = "There was an error in the evaluation process {}"
-
-
-def _print_parse_errors(errors: List[str]):
-    for error in errors:
-        print(error)
-
-
-def _clean_comments(source: str) -> str:
-    pattern_single_line_comment = re.compile(r"\-\-.*(\n|\b)")
-    pattern_multiline_comment = re.compile(r"\/\*(\s|.)*?\*\/")
-
-    source = re.sub(pattern_multiline_comment, "", source)
-    source = re.sub(pattern_single_line_comment, "", source)
-
-    return source
+from sigmaF.executor import (
+    _clean_comments,
+    _print_parse_errors,
+    read_module,
+)
 
 
 def _check_errors(source: str, enviroment: Environment) -> str:
@@ -65,17 +56,6 @@ def _check_errors(source: str, enviroment: Environment) -> str:
         print("\n[Error] " + _EVALUATIONERROR.format("") + "\n")
 
     return source
-
-
-def read_module(path):
-    src = None
-    try:
-        with open(path, mode="r", encoding="utf-8") as fin:
-            lines = fin.readlines()
-        src = "\n".join([str(line) for line in lines])
-    except FileNotFoundError:
-        print("\n[Error] " + _FILENOTFOUNT.format(path) + "\n")
-    return src
 
 
 def clear():
@@ -189,6 +169,3 @@ def start_repl(source: str = "", _path: Optional[str] = None) -> None:
             lexer = Lexer(" ".join(scanned))
 
             process(lexer, env)
-
-        while (token := lexer.next_token()) != EOF_TOKEN:
-            print(token)
