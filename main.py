@@ -1,11 +1,13 @@
 import sys
 import yaml
 import re
+import argparse
+import os
 
 from typing import Optional, List, cast
 
 from sigmaF.repl import start_repl, read_module
-
+from sigmaF.executor import execute_sigmaf
 
 _SIGMAF_: str = """ 
                                                 .         .                                                
@@ -40,66 +42,67 @@ def get_configs():
         configs = yaml.load(fin, Loader=yaml.FullLoader)
     return dict(configs)
 
-
-def presentation_config(configs, params, exe_file=False):
-    version = configs["version"]
-    if not params is None:
-        if exe_file:
-            if "-cover" in params:
-                show_cover(version)
-                return
-            show_head(version)
-        else:
-            if not "-ncover" in params:
-                show_cover(version)
-                return
-            show_head(version)
-    else:
-        if exe_file:
-            show_head(version)
-        else:
-            show_cover(version)
-
-
-def main(path=None, params=None) -> None:
-    configs = get_configs()
-    if not params is None and "-version" in params:
-        version = configs["version"]
-        print(f"SigmaF v{version}")
+def main(configs, args, input_path):
+    if args.version:
+        version = "SigmaF v{}".format(configs["version"])
+        print(version)
         return
-    if path is None:
-        presentation_config(configs, params, exe_file=False)
-        start_repl()
-    elif not path is None:
-        presentation_config(configs, params, exe_file=True)
+    
+    if input_path is not None and not os.path.isfile(input_path):
+        print(f"The path {input_path} does not exist")
+        sys.exit()
 
-        src = read_module(path)
-        if not src is None:
-            start_repl(src, path)
+    if input_path is not None and not re.match(r"^\S+?\.sf$", input_path):
+        print(f"The path {input_path} is not a SigmaF file")
+        sys.exit()
 
+    if args.cover:
+        show_cover(configs["version"])
 
-def filter_path_params(args):
-    path = list(filter(lambda s: not re.match("(\S+?\.sf$)", s) is None, args))
-    params = list(filter(lambda s: s.startswith("-"), args))
-    if len(path) > 0:
-        path = path[0]
     else:
-        path = None
+        show_head(configs["version"])
 
-    if len(params) == 0:
-        params = None
+    if args.repl:
+        try:
+            if input_path is not None:
+                src = read_module(input_path)
 
-    return path, params
+                start_repl(source=src, _path=input_path)
+            else:
+                start_repl(_path=input_path)
+        except KeyboardInterrupt:
+            print("\n↳ Good bye \n")
+
+    elif input_path is not None:
+        execute_sigmaf(input_path)
+
+    else:
+        start_repl(_path=input_path)
 
 
 if __name__ == "__main__":
-    args: List[str] = sys.argv
+    configs = get_configs()
 
-    if len(args) > 1:
-        path, params = filter_path_params(args)
-    else:
-        path, params = None, None
-    try:
-        main(path, params)
-    except KeyboardInterrupt:
-        print("\n↳ Good bye \n")
+    console_parser = argparse.ArgumentParser(prog="SigmaF")
+
+    console_parser.add_argument(
+        "Path", metavar="path", type=str, nargs="?", help="Path to the SigmaF file"
+    )
+
+    console_parser.add_argument(
+        "-v", "--version", action="store_true", help="Show the version of SigmaF"
+    )
+
+    console_parser.add_argument("-r", "--repl", action="store_true", help="Start the repl")
+
+    cover_parse = console_parser.add_mutually_exclusive_group()
+    cover_parse.add_argument("-c", "--cover", action="store_true", help="Show the cover of SigmaF")
+    cover_parse.add_argument(
+        "-n", "--ncover", action="store_true", help="Don't show the cover of SigmaF"
+    )
+
+    args = console_parser.parse_args()
+    input_path = args.Path
+
+    main(configs, args, input_path)
+    
