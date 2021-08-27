@@ -43,15 +43,17 @@ class Object(ABC):
     def inspect(self) -> str:
         pass
 
+
 class ValueType(Object):
     def __init__(self, value: TypeValue) -> None:
         self.value = value
-    
+
     def type(self) -> ObjectType:
         return ObjectType.TYPE
-    
+
     def inspect(self) -> str:
         return str(self.value)
+
 
 class Integer(Object):
     def __init__(self, value: int) -> None:
@@ -109,14 +111,17 @@ class Void(Object):
 
 
 class Error(Object):
-    def __init__(self, message: str) -> None:
+    def __init__(self, message: str, location: Optional[int] = None) -> None:
         self.message = message
+        self.location = location
 
     def type(self) -> ObjectType:
         return ObjectType.ERROR
 
     def inspect(self) -> str:
-        return f" [Error] {self.message}"
+        if self.location is None:
+            return f" [Error] {self.message}"
+        return f" [Error] line: {str(self.location)} {self.message}"
 
 
 class Return(Object):
