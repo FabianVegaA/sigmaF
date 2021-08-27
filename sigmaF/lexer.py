@@ -3,6 +3,8 @@ from sigmaF.token import lookup_token_type, Token, TokenType
 
 
 class Lexer:
+    _LINE_COUNT = 1
+
     def __init__(self, source: str) -> None:
         self._source: str = source
         self._character: str = ""
@@ -20,96 +22,98 @@ class Lexer:
             elif self._peek_character() == ">":
                 token = self._make_two_character_token(TokenType.RETURN)
             else:
-                token = Token(TokenType.ASSIGN, self._character)
+                token = Token(TokenType.ASSIGN, self._character, self._LINE_COUNT)
         elif match(r"^\"$", self._character):
             if self._peek_ahead_character('"'):
                 token = self._make_a_lot_of_character_token(
                     self._character, TokenType.STRING
                 )
             else:
-                token = Token(TokenType.ILLEGAL, '"')
+                token = Token(TokenType.ILLEGAL, '"', self._LINE_COUNT)
         elif match(r"^\+$", self._character):
-            token = Token(TokenType.PLUS, self._character)
+            token = Token(TokenType.PLUS, self._character, self._LINE_COUNT)
         elif match(r"^\.$", self._character):
-            token = Token(TokenType.COMPOSITION, self._character)
+            token = Token(TokenType.COMPOSITION, self._character, self._LINE_COUNT)
         elif match(r"^$", self._character):
-            token = Token(TokenType.EOF, self._character)
+            token = Token(TokenType.EOF, self._character, self._LINE_COUNT)
         elif match(r"^\($", self._character):
-            token = Token(TokenType.LPAREN, self._character)
+            token = Token(TokenType.LPAREN, self._character, self._LINE_COUNT)
         elif match(r"^\)$", self._character):
-            token = Token(TokenType.RPAREN, self._character)
+            token = Token(TokenType.RPAREN, self._character, self._LINE_COUNT)
         elif match(r"^\{$", self._character):
-            token = Token(TokenType.LBRACE, self._character)
+            token = Token(TokenType.LBRACE, self._character, self._LINE_COUNT)
         elif match(r"^\}$", self._character):
-            token = Token(TokenType.RBRACE, self._character)
+            token = Token(TokenType.RBRACE, self._character, self._LINE_COUNT)
         elif match(r"^\[$", self._character):
-            token = Token(TokenType.LBRAKET, self._character)
+            token = Token(TokenType.LBRAKET, self._character, self._LINE_COUNT)
         elif match(r"^\]$", self._character):
-            token = Token(TokenType.RBRAKET, self._character)
+            token = Token(TokenType.RBRAKET, self._character, self._LINE_COUNT)
         elif match(r"^\,$", self._character):
-            token = Token(TokenType.COMMA, self._character)
+            token = Token(TokenType.COMMA, self._character, self._LINE_COUNT)
         elif match(r"^;$", self._character):
-            token = Token(TokenType.SEMICOLON, self._character)
+            token = Token(TokenType.SEMICOLON, self._character, self._LINE_COUNT)
         elif match(r"^<$", self._character):
             if self._peek_character() == "=":
                 token = self._make_two_character_token(TokenType.L_OR_EQ_T)
             else:
-                token = Token(TokenType.LT, self._character)
+                token = Token(TokenType.LT, self._character, self._LINE_COUNT)
         elif match(r"^>$", self._character):
             if self._peek_character() == "=":
                 token = self._make_two_character_token(TokenType.G_OR_EQ_T)
             else:
-                token = Token(TokenType.GT, self._character)
+                token = Token(TokenType.GT, self._character, self._LINE_COUNT)
         elif match(r"^-$", self._character):
             if self._peek_character() == ">":
                 token = self._make_two_character_token(TokenType.OUTPUTFUNTION)
             else:
-                token = Token(TokenType.MINUS, self._character)
+                token = Token(TokenType.MINUS, self._character, self._LINE_COUNT)
         elif match(r"^:$", self._character):
             if self._peek_character() == ":":
                 token = self._make_two_character_token(TokenType.TYPEASSIGN)
             else:
-                token = Token(TokenType.ILLEGAL, self._character)
+                token = Token(TokenType.ILLEGAL, self._character, self._LINE_COUNT)
         elif match(r"^\|$", self._character):
             if self._peek_character() == "|":
                 token = self._make_two_character_token(TokenType.OR)
             else:
-                token = Token(TokenType.ILLEGAL, self._character)
+                token = Token(TokenType.ILLEGAL, self._character, self._LINE_COUNT)
         elif match(r"^&$", self._character):
             if self._peek_character() == "&":
                 token = self._make_two_character_token(TokenType.AND)
             else:
-                token = Token(TokenType.ILLEGAL, self._character)
+                token = Token(TokenType.ILLEGAL, self._character, self._LINE_COUNT)
         elif match(r"^/$", self._character):
-            token = Token(TokenType.DIVISION, self._character)
+            token = Token(TokenType.DIVISION, self._character, self._LINE_COUNT)
         elif match(r"^\*$", self._character):
             if self._peek_character() == "*":
                 token = self._make_two_character_token(TokenType.EXPONENTIATION)
             else:
-                token = Token(TokenType.MULTIPLICATION, self._character)
+                token = Token(
+                    TokenType.MULTIPLICATION, self._character, self._LINE_COUNT
+                )
         elif match(r"^%$", self._character):
-            token = Token(TokenType.MODULUS, self._character)
+            token = Token(TokenType.MODULUS, self._character, self._LINE_COUNT)
         elif match(r"^!$", self._character):
             if self._peek_character() == "=":
                 token = self._make_two_character_token(TokenType.NOT_EQ)
             else:
-                token = Token(TokenType.ILLEGAL, self._character)
+                token = Token(TokenType.ILLEGAL, self._character, self._LINE_COUNT)
         elif self._is_letter(self._character):
             literal = self._read_identifier()
             token_type = lookup_token_type(literal)
 
-            return Token(token_type, literal)
+            return Token(token_type, literal, self._LINE_COUNT)
         elif self._is_number(self._character):
             literal = self._read_number()
 
             if self._character == ".":
                 self._read_character()
                 sufix = self._read_number()
-                return Token(TokenType.FLOAT, f"{literal}.{sufix}")
+                return Token(TokenType.FLOAT, f"{literal}.{sufix}", self._LINE_COUNT)
 
-            return Token(TokenType.INT, literal)
+            return Token(TokenType.INT, literal, self._LINE_COUNT)
         else:
-            token = Token(TokenType.ILLEGAL, self._character)
+            token = Token(TokenType.ILLEGAL, self._character, self._LINE_COUNT)
 
         self._read_character()
 
@@ -126,7 +130,7 @@ class Lexer:
         self._read_character()
         suffix = self._character
 
-        return Token(token_type, f"{prefix}{suffix}")
+        return Token(token_type, f"{prefix}{suffix}", self._LINE_COUNT)
 
     def _make_a_lot_of_character_token(
         self, character: str, token_type: TokenType
@@ -139,7 +143,9 @@ class Lexer:
             self._read_character()
 
         return Token(
-            token_type, self._source[initial_position - 1 : self._read_position]
+            token_type,
+            self._source[initial_position - 1 : self._read_position],
+            self._LINE_COUNT,
         )
 
     def _peek_character(self) -> str:
@@ -189,4 +195,6 @@ class Lexer:
 
     def _skip_whitespace(self) -> None:
         while match(r"^\s$", self._character):
+            if match(r"^\n$", self._character):
+                self._LINE_COUNT += 1
             self._read_character()
