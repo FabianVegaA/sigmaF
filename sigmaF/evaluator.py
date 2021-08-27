@@ -44,12 +44,17 @@ from sigmaF.untils import (
     FALSE,
     NULL,
     TYPE_REGISTER_OBJECT,
+    _TYPE_ASSING,
     _to_str_type,
     _get_types,
+    _new_error,
 )
+import sys
+
 
 
 def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
+    
     node_type: Type = type(node)
     if node_type == ast.Program:
         node = cast(ast.Program, node)
@@ -133,14 +138,23 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
         value = evaluate(node.value, env)
 
         assert node.name is not None and value is not None
-        node.name.type_value = ast.TypeValue(
-            tokens=[], value=_to_str_type(_get_types(value))
-        )
+
+        if node.name.type_value is not None:
+            type_value = _to_str_type(_get_types(value))
+
+            if type_value != node.name.type_value:
+                return _new_error(_TYPE_ASSING, [type_value, node.name.type_value])
+        else:
+            node.name.type_value = ast.TypeValue(
+                tokens=[], value=_to_str_type(_get_types(value))
+            )
 
         if not node.name.value in env._store:
             env[node.name.value] = value
         else:
-            return _new_error(_NON_MODIFIABLE_VALUE, [node.name.value])
+            return _new_error(
+                _NON_MODIFIABLE_VALUE, [node.name.value], node.name.token.num_line
+            )
 
     elif node_type == ast.Identifier:
         node = cast(ast.Identifier, node)
@@ -180,7 +194,7 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
                 if arg.type() is ObjectType.ERROR:
                     return arg
                 type_args.append(TYPE_REGISTER_OBJECT[arg.type()])
-
+            
             return _new_error(
                 _WRONG_ARGS,
                 [
@@ -191,7 +205,8 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
                     " ,".join(type_args[0:-1]) + f", and {type_args[-1]}"
                     if len(type_args) > 1
                     else type_args[0],
-                ],
+                ]
+                
             )
 
         return_fn = _apply_function(function, args)
@@ -218,6 +233,7 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
             return _new_error(
                 _WRONG_OUTPUT,
                 [function.type_output, TYPE_REGISTER_OBJECT[return_fn.type()]],
+                location=node.token.num_line,
             )
 
     elif node_type == ast.ListValues:
@@ -333,12 +349,12 @@ def _get_values_list(iterable: ValueList, ranges: List[Object]) -> Object:
 def _check_type_args_function(fn: Object, args: List[Object]) -> Union[bool, Object]:
     if type(fn) == Function:
         fn = cast(Function, fn)
+        
         for idx, arg in enumerate(args):
             if arg.type() is ObjectType.ERROR:
                 return arg
             type_param = fn.type_parameters[idx].value
             type_args = _to_str_type(_get_types(arg))
-
             if not type_args == type_param:
                 if (
                     type_args == "list"
@@ -517,6 +533,7 @@ def _evaluate_infix_expression(
     elif left.type() == ObjectType.FUNCTION and right.type() == ObjectType.FUNCTION:
         return _evaluate_function_infix_expression(operator, left, right, env)
     elif left.type() != right.type():
+        print(left.inspect(), right.inspect())
         return _new_error(
             _TYPE_MISMATCH, [operator, left.type().name, right.type().name]
         )
@@ -789,10 +806,7 @@ def _build_ast_function(
                 ast.ReturnStatement(
                     token=Token(TokenType.RETURN, literal="=>"),
                     return_value=ast.Call(
-                        token=Token(
-                            TokenType.LPAREN,
-                            "(",
-                        ),
+                        token=Token(TokenType.LPAREN, "("),
                         function=ast.Function(
                             token=Token(TokenType.FUNCTION, "fn"),
                             parameters=left_value.parameters,
@@ -802,10 +816,7 @@ def _build_ast_function(
                         ),
                         arguments=[
                             ast.Call(
-                                token=Token(
-                                    TokenType.LPAREN,
-                                    "(",
-                                ),
+                                token=Token(TokenType.LPAREN, "("),
                                 function=ast.Function(
                                     token=Token(TokenType.FUNCTION, "fn"),
                                     parameters=right_value.parameters,
@@ -859,10 +870,6 @@ def _evaluate_program(program: ast.Program, env: Environment) -> Optional[Object
             return result
 
     return result
-
-
-def _new_error(message: str, args: List[Any]) -> Error:
-    return Error(message.format(*args))
 
 
 def _to_boolean_object(value: bool) -> Boolean:
