@@ -22,6 +22,7 @@ from sigmaF.untils import (
     _UNSUPPORTED_ARGUMENT_TYPE,
     _PARSE_WRONG,
     _WRONG_TYPE_APPEND,
+    _WRONG_ARGS,
     TRUE,
     FALSE,
     NULL,
@@ -94,7 +95,7 @@ def println(*args: Object) -> Object:
         return NULL
 
 
-def negation_bolean(*args: Object) -> Object:
+def negation_boolean(*args: Object) -> Object:
     if len(args) != 1:
         return Error(_WRONG_NUMBER_OF_ARGS.format(len(args), 1))
     else:
@@ -187,10 +188,15 @@ def parse(*args: Object) -> Object:
 
 def append(*args: Object) -> Object:
     if len(args) == 2:
+        
         list_, item = args
 
-        list_ = cast(ValueList, list_)
+        if list_.type() is not ValueList:
+            return Error(_UNSUPPORTED_ARGUMENT_TYPE.format(list_.type().name, "ValueList"))
 
+        list_ = cast(ValueList, list_)
+        
+        
         if len(list_.values) > 0 and type(item) is not type(list_.values[0]):
             return Error(_WRONG_TYPE_APPEND.format(item.type(), list_.values[0].type()))
 
@@ -211,7 +217,7 @@ def get_type(*args: Object) -> Object:
 BUILTIN: Dict[str, Builtin] = {
     "length": Builtin(fn=length, io_type="builtin fn (list|tuple|str) -> int"),
     "printLn": Builtin(fn=println, io_type="builtin fn (any) -> null"),
-    "not": Builtin(fn=negation_bolean, io_type="builtin fn (bool) -> bool"),
+    "not": Builtin(fn=negation_boolean, io_type="builtin fn (bool) -> bool"),
     "pow": Builtin(fn=pow_impure, io_type="builtin fn (int|float, int|float) -> null"),
     "parse": Builtin(
         fn=parse, io_type="builtin fn (int|float|str|list|tuple, str) -> null"
