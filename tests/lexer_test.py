@@ -14,9 +14,9 @@ class LexerTest(TestCase):
             tokens.append(lexer.next_token())
 
         expected_token: List[Token] = [
-            Token(TokenType.ILLEGAL, "¡"),
-            Token(TokenType.ILLEGAL, "¿"),
-            Token(TokenType.ILLEGAL, "@"),
+            Token(TokenType.ILLEGAL, "¡", num_line=1),
+            Token(TokenType.ILLEGAL, "¿", num_line=1),
+            Token(TokenType.ILLEGAL, "@", num_line=1),
         ]
 
         self.assertEqual(tokens, expected_token)
@@ -30,15 +30,15 @@ class LexerTest(TestCase):
             tokens.append(lexer.next_token())
 
         expected_tokens: List[Token] = [
-            Token(TokenType.ASSIGN, "="),
-            Token(TokenType.PLUS, "+"),
-            Token(TokenType.MINUS, "-"),
-            Token(TokenType.DIVISION, "/"),
-            Token(TokenType.MULTIPLICATION, "*"),
-            Token(TokenType.LT, "<"),
-            Token(TokenType.GT, ">"),
-            Token(TokenType.MODULUS, "%"),
-            Token(TokenType.COMPOSITION, "."),
+            Token(TokenType.ASSIGN, "=", num_line=1),
+            Token(TokenType.PLUS, "+", num_line=1),
+            Token(TokenType.MINUS, "-", num_line=1),
+            Token(TokenType.DIVISION, "/", num_line=1),
+            Token(TokenType.MULTIPLICATION, "*", num_line=1),
+            Token(TokenType.LT, "<", num_line=1),
+            Token(TokenType.GT, ">", num_line=1),
+            Token(TokenType.MODULUS, "%", num_line=1),
+            Token(TokenType.COMPOSITION, ".", num_line=1),
         ]
 
         self.assertEquals(tokens, expected_tokens)
@@ -52,8 +52,8 @@ class LexerTest(TestCase):
             tokens.append(lexer.next_token())
 
         expected_tokens: List[Token] = [
-            Token(TokenType.PLUS, "+"),
-            Token(TokenType.EOF, ""),
+            Token(TokenType.PLUS, "+", num_line=1),
+            Token(TokenType.EOF, "", num_line=1),
         ]
 
         self.assertEquals(tokens, expected_tokens)
@@ -67,14 +67,14 @@ class LexerTest(TestCase):
             tokens.append(lexer.next_token())
 
         expected_tokens: List[Token] = [
-            Token(TokenType.LPAREN, "("),
-            Token(TokenType.RPAREN, ")"),
-            Token(TokenType.LBRACE, "{"),
-            Token(TokenType.RBRACE, "}"),
-            Token(TokenType.LBRAKET, "["),
-            Token(TokenType.RBRAKET, "]"),
-            Token(TokenType.COMMA, ","),
-            Token(TokenType.SEMICOLON, ";"),
+            Token(TokenType.LPAREN, "(", num_line=1),
+            Token(TokenType.RPAREN, ")", num_line=1),
+            Token(TokenType.LBRACE, "{", num_line=1),
+            Token(TokenType.RBRACE, "}", num_line=1),
+            Token(TokenType.LBRAKET, "[", num_line=1),
+            Token(TokenType.RBRAKET, "]", num_line=1),
+            Token(TokenType.COMMA, ",", num_line=1),
+            Token(TokenType.SEMICOLON, ";", num_line=1),
         ]
         self.assertEquals(tokens, expected_tokens)
 
@@ -91,21 +91,21 @@ class LexerTest(TestCase):
             tokens.append(lexer.next_token())
 
         expected_tokens: List[Token] = [
-            Token(TokenType.LET, "let"),
-            Token(TokenType.IDENT, "x"),
-            Token(TokenType.ASSIGN, "="),
-            Token(TokenType.INT, "5"),
-            Token(TokenType.SEMICOLON, ";"),
-            Token(TokenType.LET, "let"),
-            Token(TokenType.IDENT, "y"),
-            Token(TokenType.ASSIGN, "="),
-            Token(TokenType.STRING, '"cinco"'),
-            Token(TokenType.SEMICOLON, ";"),
-            Token(TokenType.LET, "let"),
-            Token(TokenType.IDENT, "foo"),
-            Token(TokenType.ASSIGN, "="),
-            Token(TokenType.FLOAT, "5.0"),
-            Token(TokenType.SEMICOLON, ";"),
+            Token(TokenType.LET, "let", num_line=2),
+            Token(TokenType.IDENT, "x", num_line=2),
+            Token(TokenType.ASSIGN, "=", num_line=2),
+            Token(TokenType.INT, "5", num_line=2),
+            Token(TokenType.SEMICOLON, ";", num_line=2),
+            Token(TokenType.LET, "let", num_line=3),
+            Token(TokenType.IDENT, "y", num_line=3),
+            Token(TokenType.ASSIGN, "=", num_line=3),
+            Token(TokenType.STRING, '"cinco"', num_line=3),
+            Token(TokenType.SEMICOLON, ";", num_line=3),
+            Token(TokenType.LET, "let", num_line=4),
+            Token(TokenType.IDENT, "foo", num_line=4),
+            Token(TokenType.ASSIGN, "=", num_line=4),
+            Token(TokenType.FLOAT, "5.0", num_line=4),
+            Token(TokenType.SEMICOLON, ";", num_line=4),
         ]
         self.assertEquals(tokens, expected_tokens)
 
@@ -125,36 +125,36 @@ class LexerTest(TestCase):
             tokens.append(lexer.next_token())
 
         expected_tokens: List[Token] = [
-            Token(TokenType.LET, "let"),
-            Token(TokenType.IDENT, "sum"),
-            Token(TokenType.ASSIGN, "="),
-            Token(TokenType.IDENT, "x"),
-            Token(TokenType.TYPEASSIGN, "::"),
-            Token(TokenType.CLASSNAME, "int"),
-            Token(TokenType.COMMA, ","),
-            Token(TokenType.IDENT, "y"),
-            Token(TokenType.TYPEASSIGN, "::"),
-            Token(TokenType.CLASSNAME, "int"),
-            Token(TokenType.OUTPUTFUNTION, "->"),
-            Token(TokenType.CLASSNAME, "int"),
-            Token(TokenType.LBRACE, "{"),
-            Token(TokenType.RETURN, "=>"),
-            Token(TokenType.IDENT, "x"),
-            Token(TokenType.PLUS, "+"),
-            Token(TokenType.IDENT, "y"),
-            Token(TokenType.RBRACE, "}"),
-            Token(TokenType.LET, "let"),
-            Token(TokenType.IDENT, "print"),
-            Token(TokenType.ASSIGN, "="),
-            Token(TokenType.IDENT, "x"),
-            Token(TokenType.TYPEASSIGN, "::"),
-            Token(TokenType.CLASSNAME, "int"),
-            Token(TokenType.OUTPUTFUNTION, "->"),
-            Token(TokenType.CLASSNAME, "void"),
-            Token(TokenType.LBRACE, "{"),
-            Token(TokenType.RETURN, "=>"),
-            Token(TokenType.NULL, "null"),
-            Token(TokenType.RBRACE, "}"),
+            Token(TokenType.LET, "let", num_line=2),
+            Token(TokenType.IDENT, "sum", num_line=2),
+            Token(TokenType.ASSIGN, "=", num_line=2),
+            Token(TokenType.IDENT, "x", num_line=2),
+            Token(TokenType.TYPEASSIGN, "::", num_line=2),
+            Token(TokenType.CLASSNAME, "int", num_line=2),
+            Token(TokenType.COMMA, ",", num_line=2),
+            Token(TokenType.IDENT, "y", num_line=2),
+            Token(TokenType.TYPEASSIGN, "::", num_line=2),
+            Token(TokenType.CLASSNAME, "int", num_line=2),
+            Token(TokenType.OUTPUTFUNTION, "->", num_line=2),
+            Token(TokenType.CLASSNAME, "int", num_line=2),
+            Token(TokenType.LBRACE, "{", num_line=2),
+            Token(TokenType.RETURN, "=>", num_line=3),
+            Token(TokenType.IDENT, "x", num_line=3),
+            Token(TokenType.PLUS, "+", num_line=3),
+            Token(TokenType.IDENT, "y", num_line=3),
+            Token(TokenType.RBRACE, "}", num_line=4),
+            Token(TokenType.LET, "let", num_line=5),
+            Token(TokenType.IDENT, "print", num_line=5),
+            Token(TokenType.ASSIGN, "=", num_line=5),
+            Token(TokenType.IDENT, "x", num_line=5),
+            Token(TokenType.TYPEASSIGN, "::", num_line=5),
+            Token(TokenType.CLASSNAME, "int", num_line=5),
+            Token(TokenType.OUTPUTFUNTION, "->", num_line=5),
+            Token(TokenType.CLASSNAME, "void", num_line=5),
+            Token(TokenType.LBRACE, "{", num_line=5),
+            Token(TokenType.RETURN, "=>", num_line=6),
+            Token(TokenType.NULL, "null", num_line=6),
+            Token(TokenType.RBRACE, "}", num_line=7),
         ]
 
         self.assertEquals(tokens, expected_tokens)
@@ -168,15 +168,15 @@ class LexerTest(TestCase):
             tokens.append(lexer.next_token())
 
         expected_tokens: List[Token] = [
-            Token(TokenType.LET, "let"),
-            Token(TokenType.IDENT, "variable"),
-            Token(TokenType.ASSIGN, "="),
-            Token(TokenType.IDENT, "suma"),
-            Token(TokenType.LPAREN, "("),
-            Token(TokenType.INT, "2"),
-            Token(TokenType.COMMA, ","),
-            Token(TokenType.INT, "3"),
-            Token(TokenType.RPAREN, ")"),
+            Token(TokenType.LET, "let", num_line=1),
+            Token(TokenType.IDENT, "variable", num_line=1),
+            Token(TokenType.ASSIGN, "=", num_line=1),
+            Token(TokenType.IDENT, "suma", num_line=1),
+            Token(TokenType.LPAREN, "(", num_line=1),
+            Token(TokenType.INT, "2", num_line=1),
+            Token(TokenType.COMMA, ",", num_line=1),
+            Token(TokenType.INT, "3", num_line=1),
+            Token(TokenType.RPAREN, ")", num_line=1),
         ]
         self.assertEquals(tokens, expected_tokens)
 
@@ -191,14 +191,14 @@ class LexerTest(TestCase):
             tokens.append(lexer.next_token())
 
         expected_tokens: List[Token] = [
-            Token(TokenType.IF, "if"),
-            Token(TokenType.INT, "5"),
-            Token(TokenType.LT, "<"),
-            Token(TokenType.INT, "10"),
-            Token(TokenType.THEN, "then"),
-            Token(TokenType.TRUE, "true"),
-            Token(TokenType.ELSE, "else"),
-            Token(TokenType.FALSE, "false"),
+            Token(TokenType.IF, "if", num_line=2),
+            Token(TokenType.INT, "5", num_line=2),
+            Token(TokenType.LT, "<", num_line=2),
+            Token(TokenType.INT, "10", num_line=2),
+            Token(TokenType.THEN, "then", num_line=2),
+            Token(TokenType.TRUE, "true", num_line=2),
+            Token(TokenType.ELSE, "else", num_line=2),
+            Token(TokenType.FALSE, "false", num_line=2),
         ]
         self.assertEquals(tokens, expected_tokens)
 
@@ -220,26 +220,26 @@ class LexerTest(TestCase):
             tokens.append(lexer.next_token())
 
         expected_tokens: List[Token] = [
-            Token(TokenType.INT, "10"),
-            Token(TokenType.EQ, "=="),
-            Token(TokenType.INT, "10"),
-            Token(TokenType.INT, "10"),
-            Token(TokenType.NOT_EQ, "!="),
-            Token(TokenType.INT, "10"),
-            Token(TokenType.INT, "10"),
-            Token(TokenType.G_OR_EQ_T, ">="),
-            Token(TokenType.INT, "10"),
-            Token(TokenType.INT, "10"),
-            Token(TokenType.L_OR_EQ_T, "<="),
-            Token(TokenType.INT, "10"),
-            Token(TokenType.INT, "10"),
-            Token(TokenType.EXPONENTIATION, "**"),
-            Token(TokenType.INT, "10"),
-            Token(TokenType.INT, "10"),
-            Token(TokenType.OR, "||"),
-            Token(TokenType.INT, "10"),
-            Token(TokenType.INT, "10"),
-            Token(TokenType.AND, "&&"),
-            Token(TokenType.INT, "10"),
+            Token(TokenType.INT, "10", num_line=2),
+            Token(TokenType.EQ, "==", num_line=2),
+            Token(TokenType.INT, "10", num_line=2),
+            Token(TokenType.INT, "10", num_line=3),
+            Token(TokenType.NOT_EQ, "!=", num_line=3),
+            Token(TokenType.INT, "10", num_line=3),
+            Token(TokenType.INT, "10", num_line=4),
+            Token(TokenType.G_OR_EQ_T, ">=", num_line=4),
+            Token(TokenType.INT, "10", num_line=4),
+            Token(TokenType.INT, "10", num_line=5),
+            Token(TokenType.L_OR_EQ_T, "<=", num_line=5),
+            Token(TokenType.INT, "10", num_line=5),
+            Token(TokenType.INT, "10", num_line=6),
+            Token(TokenType.EXPONENTIATION, "**", num_line=6),
+            Token(TokenType.INT, "10", num_line=6),
+            Token(TokenType.INT, "10", num_line=7),
+            Token(TokenType.OR, "||", num_line=7),
+            Token(TokenType.INT, "10", num_line=7),
+            Token(TokenType.INT, "10", num_line=8),
+            Token(TokenType.AND, "&&", num_line=8),
+            Token(TokenType.INT, "10", num_line=8),
         ]
         self.assertEquals(tokens, expected_tokens)

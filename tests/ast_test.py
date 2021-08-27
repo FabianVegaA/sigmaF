@@ -36,9 +36,10 @@ class ASTTest(TestCase):
         program: Program = Program(
             statements=[
                 ReturnStatement(
-                    token=Token(TokenType.RETURN, literal="=>"),
+                    token=Token(TokenType.RETURN, literal="=>", num_line=None),
                     return_value=Identifier(
-                        token=Token(TokenType.IDENT, literal="my_val"), value="my_val"
+                        token=Token(TokenType.IDENT, literal="my_val", num_line=None),
+                        value="my_val",
                     ),
                 )
             ]
@@ -52,9 +53,9 @@ class ASTTest(TestCase):
         program: Program = Program(
             statements=[
                 ExpressionStatement(
-                    token=Token(TokenType.INT, literal="5"),
+                    token=Token(TokenType.INT, literal="5", num_line=None),
                     expression=Integer(
-                        token=Token(TokenType.INT, literal="5"), value=5
+                        token=Token(TokenType.INT, literal="5", num_line=None), value=5
                     ),
                 ),
             ]
