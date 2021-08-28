@@ -515,6 +515,16 @@ class ParserTest(TestCase):
                 "[int]",
             ),
             ("fn l::[int] -> int { return length(l); }", ["[int]"], "int"),
+            ("fn l::[a] -> a { return l[0]; }", ["[a]"], "a"),
+            (
+                """
+             fn a::[a], b::[b] -> [(a, b)] {
+                 return [(a[0],b[0])]; 
+             }
+             """,
+                ["[a]", "[b]"],
+                "[(a,b)]",
+            ),
         ]
 
         for source, expected_input, expexted_output in tests:
