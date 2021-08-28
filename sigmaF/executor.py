@@ -41,7 +41,7 @@ def read_module(path):
 
 
 def execute_sigmaf(_path: str) -> None:
-   
+
     env: Environment = Environment()
 
     source = _clean_comments(read_module(_path))

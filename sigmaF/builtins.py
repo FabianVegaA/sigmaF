@@ -188,15 +188,16 @@ def parse(*args: Object) -> Object:
 
 def append(*args: Object) -> Object:
     if len(args) == 2:
-        
+
         list_, item = args
 
         if list_.type() is not ValueList:
-            return Error(_UNSUPPORTED_ARGUMENT_TYPE.format(list_.type().name, "ValueList"))
+            return Error(
+                _UNSUPPORTED_ARGUMENT_TYPE.format(list_.type().name, "ValueList")
+            )
 
         list_ = cast(ValueList, list_)
-        
-        
+
         if len(list_.values) > 0 and type(item) is not type(list_.values[0]):
             return Error(_WRONG_TYPE_APPEND.format(item.type(), list_.values[0].type()))
 
