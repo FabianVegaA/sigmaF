@@ -1,4 +1,7 @@
 from typing import Any, cast, Dict, List, Optional, Type, Union, Tuple
+from re import match, findall, sub
+from functools import reduce
+
 
 from sigmaF.token import Token, TokenType
 import sigmaF.ast as ast
@@ -52,9 +55,8 @@ from sigmaF.untils import (
 import sys
 
 
-
 def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
-    
+
     node_type: Type = type(node)
     if node_type == ast.Program:
         node = cast(ast.Program, node)
@@ -189,24 +191,23 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
 
             type_params = function.type_parameters
 
-            type_args = []
+            type_arg = []
             for arg in args:
                 if arg.type() is ObjectType.ERROR:
                     return arg
-                type_args.append(TYPE_REGISTER_OBJECT[arg.type()])
-            
+                type_arg.append(TYPE_REGISTER_OBJECT[arg.type()])
+
             return _new_error(
                 _WRONG_ARGS,
                 [
                     ", ".join([type_param.value for type_param in type_params[0:-1]])
                     + f", and {type_params[-1].value}"
-                    if len(type_args) > 1
+                    if len(type_arg) > 1
                     else type_params[0].value,
-                    " ,".join(type_args[0:-1]) + f", and {type_args[-1]}"
-                    if len(type_args) > 1
-                    else type_args[0],
-                ]
-                
+                    " ,".join(type_arg[0:-1]) + f", and {type_arg[-1]}"
+                    if len(type_arg) > 1
+                    else type_arg[0],
+                ],
             )
 
         return_fn = _apply_function(function, args)
@@ -349,24 +350,35 @@ def _get_values_list(iterable: ValueList, ranges: List[Object]) -> Object:
 def _check_type_args_function(fn: Object, args: List[Object]) -> Union[bool, Object]:
     if type(fn) == Function:
         fn = cast(Function, fn)
-        
+
         for idx, arg in enumerate(args):
             if arg.type() is ObjectType.ERROR:
                 return arg
             type_param = fn.type_parameters[idx].value
-            type_args = _to_str_type(_get_types(arg))
-            if not type_args == type_param:
-                if (
-                    type_args == "list"
-                    and type_param[0] == "["
-                    and type_param[-1] == "]"
-                ):
+            type_arg = _to_str_type(_get_types(arg))
+
+            if type_arg != type_param:
+                if _match_generics(type_param, type_arg):
                     continue
                 return False
         return True
 
     else:
         return True
+
+
+def _match_generics(type_param, type_arg):
+    if type_arg == "list":
+        return bool(match(r"^\[.+\]$", type_param))
+
+    # Get all primitives types
+    primitives_types: List[str] = TYPE_REGISTER_OBJECT.values()
+    # Find all primitive types in the argument
+    primitives_matchs = reduce(sum, findall("|".join(primitives_types), type_arg))
+    # Subtitute all generic type with the corresponding primitive types
+    sub_generics = sub(r"\b[a-z]\b", "{}", type_param).format(primitives_matchs)
+
+    return sub_generics == type_arg
 
 
 def _check_type_out_function(fn: Object, out: Object) -> bool:
@@ -377,11 +389,7 @@ def _check_type_out_function(fn: Object, out: Object) -> bool:
     type_param = cast(ast.TypeValue, type_param)
     type_out = _to_str_type(_get_types(out))
 
-    return type_out == type_param.value or (
-        type_out == "list"
-        and type_param.value[0] == "["
-        and type_param.value[-1] == "]"
-    )
+    return type_out == type_param.value or _match_generics(type_param.value, type_out)
 
 
 def _check_unpacked_args(fn: Object, args: List[Object]) -> bool:
@@ -533,7 +541,6 @@ def _evaluate_infix_expression(
     elif left.type() == ObjectType.FUNCTION and right.type() == ObjectType.FUNCTION:
         return _evaluate_function_infix_expression(operator, left, right, env)
     elif left.type() != right.type():
-        print(left.inspect(), right.inspect())
         return _new_error(
             _TYPE_MISMATCH, [operator, left.type().name, right.type().name]
         )

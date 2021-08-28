@@ -266,10 +266,27 @@ class EvaluatorTest(TestCase):
                 if length(x) == 0 then {return 0;}
                 return x[0] + sum(x[1, length(x)]); 
             }
-            sum([1,2,3,4,5])
-             
+            sum([1,2,3,4,5]);
              """,
                 15,
+            ),
+            (
+                """
+             let init = fn xs::[a] -> a {
+                 return xs[0];
+             }
+             init([1,2,3]);
+             """,
+                1,
+            ),
+            (
+                """
+             let last = fn xs::[a] -> a {
+                 return xs[length(xs)-1];
+             }
+             last([1,2,3]);
+             """,
+                3,
             ),
         ]
 

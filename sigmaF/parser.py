@@ -506,7 +506,9 @@ class Parser:
     def _parse_type_expression(self) -> Optional[TypeValue]:
         assert self._current_token is not None
 
-        if self._current_token.token_type is TokenType.CLASSNAME:
+        if self._current_token.token_type is TokenType.CLASSNAME or (
+            self._current_token.token_type is TokenType.IDENT
+        ):
             return TypeValue(
                 tokens=[self._current_token], value=self._current_token.literal
             )
@@ -549,7 +551,10 @@ class Parser:
 
                     if len(stack) == 0:
                         break
-                elif self._current_token.token_type is TokenType.CLASSNAME:
+                elif (
+                    self._current_token.token_type is TokenType.CLASSNAME
+                    or self._current_token.token_type is TokenType.IDENT
+                ):
                     type_value.tokens.append(self._current_token)
                     type_value.value += self._current_token.literal
                     if (
