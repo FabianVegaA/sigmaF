@@ -9,6 +9,10 @@ from typing import Optional, List, cast
 from sigmaF.repl import start_repl, read_module
 from sigmaF.executor import execute_sigmaf
 
+import sys
+
+sys.setrecursionlimit(10000)
+
 _SIGMAF_: str = """ 
                                                 .         .                                                
    d888888o.    8 8888     ,o888888o.          ,8.       ,8.                   .8.          8 8888888888   

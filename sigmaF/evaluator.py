@@ -1,6 +1,5 @@
 from typing import Any, cast, Dict, List, Optional, Type, Union, Tuple
 from re import match, findall, sub
-from functools import reduce
 
 
 from sigmaF.token import Token, TokenType
@@ -374,9 +373,9 @@ def _match_generics(type_param, type_arg):
     # Get all primitives types
     primitives_types: List[str] = TYPE_REGISTER_OBJECT.values()
     # Find all primitive types in the argument
-    primitives_matchs = reduce(sum, findall("|".join(primitives_types), type_arg))
+    primitives_matchs = findall("|".join(primitives_types), type_arg)
     # Subtitute all generic type with the corresponding primitive types
-    sub_generics = sub(r"\b[a-z]\b", "{}", type_param).format(primitives_matchs)
+    sub_generics = sub(r"\b[a-z]\b", "{}", type_param).format(*primitives_matchs)
 
     return sub_generics == type_arg
 

@@ -11,9 +11,9 @@ from sigmaF.evaluator import evaluate
 
 
 from sigmaF.untils import (
-    _FILENOTFOUNT,
-    _MAXIMUMRECURSIONDEPTH,
-    _EVALUATIONERROR,
+    _FILE_NOT_FOUNT,
+    _MAXIMUM_RECURSION_DEPTH,
+    _EVALUATION_ERROR,
 )
 
 
@@ -57,6 +57,6 @@ def execute_sigmaf(_path: str) -> None:
     try:
         evaluate(program, env)
     except RecursionError:
-        print("[Error] " + _MAXIMUMRECURSIONDEPTH.format(""))
+        print("[Error] " + _MAXIMUM_RECURSION_DEPTH.format(""))
     except AssertionError:
-        print("\n[Error] " + _EVALUATIONERROR.format("") + "\n")
+        print("\n[Error] " + _EVALUATION_ERROR.format("") + "\n")

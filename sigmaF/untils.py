@@ -62,9 +62,9 @@ _PARSE_WRONG = "It is not possible to parser since {} to {}"
 _WRONG_TYPE_APPEND = "It is not possible to append a {} to a list of {}"
 
 
-_FILENOTFOUNT = "File not fount on {}"
-_MAXIMUMRECURSIONDEPTH = "Maximum recursion depth exceeded while being evaluated {}"
-_EVALUATIONERROR = "There was an error in the evaluation process {}"
+_FILE_NOT_FOUNT = "File not fount on {}"
+_MAXIMUM_RECURSION_DEPTH = "Maximum recursion depth exceeded while being evaluated {}"
+_EVALUATION_ERROR = "There was an error in the evaluation process {}"
 
 
 TYPE_REGISTER_OBJECT: Dict[ObjectType, str] = {
