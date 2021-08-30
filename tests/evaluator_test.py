@@ -288,6 +288,26 @@ class EvaluatorTest(TestCase):
              """,
                 3,
             ),
+            (
+                """
+             let sum_tuple = fn t::(a,a) -> int {
+                 return t[0] + t[1];
+             }
+             sum_tuple((1,2));
+             """,
+                3,
+            ),
+            (
+                """
+             let tail = fn l::[a] -> [a] {return l[1,length(l)];}
+             let lsum = fn l::[a] -> a {
+                 if length(l) == 1 then {return l[0];};
+                 return l[0] + lsum(tail(l));
+             }
+             lsum([1,2,3,4,5,6,7,8,9,10]);
+             """,
+                55,
+            ),
         ]
 
         for source, expected in tests:
@@ -631,6 +651,7 @@ class EvaluatorTest(TestCase):
         self.assertEquals(evaluated.value, expected)
 
     def _test_integer_object(self, evaluated: Object, expected: int) -> None:
+        print(evaluated.inspect())
         self.assertIsInstance(evaluated, Integer)
 
         evaluated = cast(Integer, evaluated)
