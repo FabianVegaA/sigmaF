@@ -19,9 +19,9 @@ from sigmaF.evaluator import evaluate
 
 from sigmaF.untils import (
     EOF_TOKEN,
-    _FILENOTFOUNT,
-    _MAXIMUMRECURSIONDEPTH,
-    _EVALUATIONERROR,
+    _FILE_NOT_FOUNT,
+    _MAXIMUM_RECURSION_DEPTH,
+    _EVALUATION_ERROR,
 )
 
 from sigmaF.executor import (
@@ -51,9 +51,9 @@ def _check_errors(source: str, enviroment: Environment) -> str:
             print(evaluated.inspect())
             return ""
     except RecursionError:
-        print("[Error] " + _MAXIMUMRECURSIONDEPTH.format(""))
+        print("[Error] " + _MAXIMUM_RECURSION_DEPTH.format(""))
     except AssertionError:
-        print("\n[Error] " + _EVALUATIONERROR.format("") + "\n")
+        print("\n[Error] " + _EVALUATION_ERROR.format("") + "\n")
 
     return source
 
@@ -86,28 +86,6 @@ def update(_path: Optional[str], env: Environment):
 
         env.__setitem__(key, value)
     return env
-
-
-def process(lexer: Lexer, env: Environment):
-    parser: Parser = Parser(lexer)
-
-    program: Program = parser.parse_program()
-
-    if len(parser.errors) > 0:
-        _print_parse_errors(parser.errors)
-
-    try:
-        evaluated = evaluate(program, env)
-
-        if evaluated is not None and evaluated.type() is not ObjectType.ERROR:
-            print(evaluated.inspect())
-
-        return evaluated
-
-    except RecursionError:
-        print("\n[Error] " + _MAXIMUMRECURSIONDEPTH.format("") + "\n")
-    except AssertionError:
-        print("\n[Error] " + _EVALUATIONERROR.format("") + "\n")
 
 
 def _stack_groupers(
@@ -145,10 +123,6 @@ def start_repl(source: str = "", _path: Optional[str] = None) -> None:
 
     scanned.append(_check_errors(source, env))
 
-    lexer: Lexer = Lexer(" ".join(scanned))
-
-    process(lexer, env)
-
     _pattern_path = re.compile(r"load\(([\w\.-_\/]+)\)")
 
     while (source := input(">> ")) != "exit()":
@@ -165,7 +139,3 @@ def start_repl(source: str = "", _path: Optional[str] = None) -> None:
                 source += read_sublines(source)
 
             scanned.append(_check_errors(source, env))
-
-            lexer = Lexer(" ".join(scanned))
-
-            process(lexer, env)
