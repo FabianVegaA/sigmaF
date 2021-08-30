@@ -1,122 +1,116 @@
-let tail = fn l::list -> list {=> l[1,length(l)];}
+let tail = fn l::[a] -> [a] {return l[1,length(l)];}
 
-let init = fn l::list -> list {=> l[0,length(l)-1];}
+let init = fn l::[a] -> [a] {return l[0,length(l)-1];}
 
-let last = fn l::list -> list {=> [l[length(l)-1]];}
+let last = fn l::[a] -> a {return l[length(l)-1];}
 
-let head = fn l::list -> list {=> [l[0]];}
+let head = fn l::[a] -> a {return l[0];}
 
-let take = fn l::list, i::int -> list {=> l[0,i];}
+let take = fn l::list, i::int -> list {return l[0,i];}
 
-let rtake = fn l::list, i::int -> list {=> l[i,length(l)];}
-
-let com = fn f1::function, f2::function -> function {
-	=> fn any::list -> list {=> [f1(f2(any[0]))];}
-}
+let rtake = fn l::list, i::int -> list {return l[i,length(l)];}
 
 let irank = fn i::int, f::int -> list {
-	if i >= f then {=> [i];}
-	=> [i] + irank(i+1, f);
+	if i >= f then {return [i];}
+	return [i] + irank(i+1, f);
 }
 
 let irank_interval = fn i::int, f::int, j::int -> list {
-	if i >= f then {=> [f];}
-	=> [i] + irank_interval(i+j, f, j);
+	if i >= f then {return [f];}
+	return [i] + irank_interval(i+j, f, j);
 }
 
 let srepeat = fn s::str, n::int -> list {
-	if n <= 0 then {=> [];}
-	if n == 1 then {=> [s];}
-	=> [s] + srepeat(s, n-1);
+	if n <= 0 then {return [];}
+	if n == 1 then {return [s];}
+	return [s] + srepeat(s, n-1);
 }
 
-let _snone_ = fn s::str -> str {=> s;} -- This does nothing
+let _snone_ = fn s::str -> str {return s;} -- This does nothing
 
-let _inone_ = fn i::int -> int {=> i;} -- This does nothing
+let _inone_ = fn i::int -> int {return i;} -- This does nothing
 
 let sconcat = fn l::list -> str {
-	=> sfoldl(_snone_, "", l);
+	return foldl(_snone_, "", l);
 }
 
 let sconcat_map = fn l::list, f::function -> list {
-	=> sfoldl(f, "", l);
+	return foldl(f, "", l);
 }
 
-let map = fn f::function, l::list -> list {
-	if (l==[]) then {=> [];}
+let map = fn f::function, l::[a] -> [b] {
+	if (l==[]) then {return [];}
 	
-	=> [f(l[0])] + map(f, tail(l));
+	return [f(l[0])] + map(f, tail(l));
 }
 
-let filter = fn c::function, l::list -> list {
-	if (l == []) then {=> [];} 
+let filter = fn c::function, l::[a] -> [a] {
+	if (l == []) then {return [];} 
 
-        => if (c(l[0])) then {[l[0]]} else {[]} +  filter(c, tail(l));
+        return if (c(l[0])) then {[l[0]]} else {[]} +  filter(c, tail(l));
 }
 
-let ifoldl = fn f::function, i::int, l::list -> int {
-	if length(l) == 1 then {
-		=> f(l[0]) + i;
-	}
-	=> ifoldl(f, i + f(l[0]), tail(l));
-}
 
-let sfoldl = fn f::function, s::str, l::list -> str {
+let foldl = fn f::function, s::a, l::[a] -> a {
         if length(l) == 1 then {
-                => s + f(l[0]);
+                return s + f(l[0]);
         }
-        => sfoldl(f, s + f(l[0]), tail(l));
+        return foldl(f, s + f(l[0]), tail(l));
 }
 
-let reverse = fn l::list -> list {
-	if l == [] then {=> [];}
-	=> last(l) + reverse(init(l));
+let reverse = fn l::[a] -> [a] {
+	if l == [] then {return [];}
+	return last(l) + reverse(init(l));
 }
 
-let ituplefy_2 = fn i::int, j::int -> tuple {=> (i,j);} 
+let ituplefy_2 = fn i::a, j::b -> (a,b) {return (i,j);} 
 
-let zip = fn l1::list, l2::list -> list {
+let zip = fn l1::[a], l2::[b] -> [(a,b)] {
 	if l1 == last(l1) || l2 == last(l2) then {
-		=> [ituplefy_2(l1[0], l2[0])];
+		return [ituplefy_2(l1[0], l2[0])];
 	}
-	=> [ituplefy_2(l1[0],l2[0])] + zip(tail(l1),tail(l2));
+	return [ituplefy_2(l1[0],l2[0])] + zip(tail(l1),tail(l2));
 }
 
-let split = fn l::list, i::int -> list {
-	=> [take(l,i), rtake(l,i)]
+let split = fn l::[a], i::int -> [a] {
+	return [take(l,i), rtake(l,i)]
 }
 
-let qsort = fn l::list -> list {
+let qsort = fn l::[int] -> [int] {
 
-	if (l == []) then {=> [];}
+	if (l == []) then {return [];}
 	else {
 		let p = l[0];
 		let xs = tail(l);
 		
-		let c_lesser = fn q::int -> bool {=> (q < p)};
-		let c_greater = fn q::int -> bool {=> (q >= p)};
+		let c_lesser = fn q::int -> bool {return (q < p)};
+		let c_greater = fn q::int -> bool {return (q >= p)};
 
-		=> qsort(filter(c_lesser, xs)) 
+		return qsort(filter(c_lesser, xs)) 
 			+ [p] 
 			+ qsort(filter(c_greater, xs));
 	}
 }
 
-let sto_list = fn s::str -> list {
-	=> parse(s, "list")
+let sto_list = fn s::str -> [str] {
+	return parse(s, "list")
 } 
 
 
 let stairs = fn i::int -> str {
 	if i == 1 then {
-		=> "*\n";
+		return "*\n";
 	}
-	=> stairs(i-1) + sconcat(srepeat("*", i)) + "\n";
+	return stairs(i-1) + sconcat . srepeat("*", i) + "\n";
 }
 
-let lsum = fn l::list -> int {
-    if l == [] then {=> 0};
-    => ifoldl(_inone_, 0, l)
+printLn(stairs(10));
+
+let lsum = fn l::[a] -> a {
+    if length(l) == 1 then {return l[0];};
+    return l[0] + lsum(tail(l));
 }
+
+
 
 
