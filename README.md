@@ -1,4 +1,5 @@
 # SigmaF
+[![Gitter](https://badges.gitter.im/sigmaf_community/community.svg)](https://gitter.im/sigmaf_community/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 The SigmaF project seeks to create a new programming language open source in the functional paradigm inspired by languages like Haskell, Python, JavaScript, and Rust.
 
