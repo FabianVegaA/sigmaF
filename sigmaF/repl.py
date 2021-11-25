@@ -183,9 +183,16 @@ def start_repl(source: str = '', _path: Optional[str] = None) -> None:
 
     _pattern_path = re.compile(r'load\(([\w\.-_\/]+)\)')
 
-    while (source := input('>> ')) != 'exit()':
+    while True:
+        try:
+            source = input('>> ')
+        except EOFError:
+            print()
+            break
 
-        if source == "clear()":
+        if source.strip() == 'exit()':
+            break
+        elif source.strip() == "clear()":
             clear()
         elif source == "update()":
             env = update(_path, env)
